@@ -4,20 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Canvas Crawler</title>
-  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script src="js/main.js" defer></script>
+  <title>Spell Checkers</title>
 </head>
-<body>
-  <div id="container">
-    <aside id="top-left"><h2>Slay the ogre</h2></aside>
-    <aside id="top-right"><h2 id="movement"></h2></aside>
-    <main>
-        <canvas id="game"><!-- play it, a game --></canvas>
-    </main>
-    <aside id="btm-left"><h2>100</h2></aside>
-    <aside id="btm-right"><h2 id="status">play the game</h2></aside>
-  </div>
-</body>
+    
+    <body>
+        <canvas id="game"></canvas>
+        
+        <form autocomplete="off">
+            <label for="textInput">Spell...</label>
+            <input type="text" id="textInput" autofocus="true">
+        </form>
+    </body>
+    
 </html>
