@@ -4,7 +4,7 @@ Game Idea:
 
 A dungeon crawler/typing test crossover. You play a Spell Checker mage trapped in an essay dungeon, consisting
 of small (Canvas-sized, even) rooms chained together into a larger dungeon. Each room is locked with a "typo door,"
-a door associated with a word (Like "razzmatazz," as ane example). The player has to type the word correctly to unlock the door,
+a door associated with a word (Like "razzmatazz," as an example). The player has to type the word correctly to unlock the door,
 proceeding to the next room. If they incorrectly type the word three times, they lose. Typing is through keyboard, player movement
 is through the arrow pad.
 
