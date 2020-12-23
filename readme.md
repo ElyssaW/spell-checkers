@@ -21,11 +21,11 @@ is through the arrow pad.
 
 ### MVP Goals
 
-- [ ] 3 room dungeon
-- [ ] Doors to type on and move between rooms
+- [x] 3 room dungeon
+- [x] Doors to type on and move between rooms
 - [x] Form submission, to accept string input from player
 - [x] Compare player input to correct input
-- [ ] 3-point Health bar (Detract from if player input is incorrect)
+- [x] 3-point Health bar (Detract from if player input is incorrect)
 
 ### Stretch Goals
 
