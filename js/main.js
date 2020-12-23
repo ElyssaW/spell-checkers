@@ -1,8 +1,18 @@
 console.log('Hello!')// reference DOM elements
 
-let movementDisplay = movement;
+// Accept input from player
+
+// Compare input string to correct string
+
+// Initial variables
 let ctx = game.getContext('2d')
 let frame = 0
+let playerHealth = 0
+
+// Track whether an arrow key is pressed. This way, when the player starts typing, and their keypress events
+// interrupt the arrow keys' repeating fires, the player will continue to move smoothly
+let keyDown = false
+let keyValue
 
 // Set canvas width/height
 // Set attribute and get computed style make the game more
@@ -11,14 +21,26 @@ let frame = 0
 game.setAttribute('width', getComputedStyle(game)['width'])
 game.setAttribute('height', getComputedStyle(game)['height'])
 
-// draw filled box
-let drawBoxFill = (x, y, size, color) => {
-    ctx.fillStyle = color
-    ctx.fillRect(x, y, size, size)
-}
+// Function to check player text against correct string
+    // Accept player input, string input
+    // Check if correct
+        // If correct, return true
 
-game.addEventListener('click', e => {
-    console.log(e.offsetX, e.offsetY)
+        // If not, deduct health
+        // Return false
+
+// Add event listener for form submission
+document.querySelector('form').addEventListener('submit', (e)=> {
+    
+    // Prevent dafult refresh
+    e.preventDefault()
+    
+    // Grab player input from box
+    let playerInput = textInput.value
+    console.log(playerInput)
+    
+    // Reset text input box to empty
+    textInput.value = ''
 })
 
 // Constructor function creates an empty object and assigns passed
@@ -115,7 +137,7 @@ function wallCheck(obj) {
         obj.y = 0
         obj.ydir = 10
     } else if (obj.y+obj.height > game.height) {
-        obj.y = game.height  - hero.height
+        obj.y = game.height  - obj.height
         obj.ydir = -10
     }
 }
@@ -182,26 +204,52 @@ let detectHit = (obj) => {
 }
 
 let movementHandler = e => {
+    
     // when I press w, the hero moves up
     
     switch(e.key) {
-        case 'w':
+        case 'ArrowUp':
             hero.y -= 10
             break;
-        case 'a':
+        case 'ArrowLeft':
             hero.x -= 10
             break
-        case 's':
+        case 'ArrowDown':
             hero.y += 10
             break
-        case 'd':
+        case 'ArrowRight':
             hero.x += 10
             break
     }
 }
 
- document.addEventListener('keypress', movementHandler)
+ document.addEventListener('keydown', e => {
+     // Prevent default, so that arrow keys do not interrupt typing or move the cursor
+     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
+         {
+             e.preventDefault()
+             keyDown = true
+             keyValue = e
+             
+            // Fire movement handler
+            movementHandler(e)
+             
+         } else if (keyDown) {
+             console.log(keyDown)
+             movementHandler(keyValue)
+         }
+ })
 
-let gameInterval = setInterval(gameLoop, 30)
+// Set keyDown to false when key is released
+ document.addEventListener('keyup', e => {
+     // Prevent default, so that arrow keys do not interrupt typing or move the cursor
+     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
+         {
+             e.preventDefault()
+             keyDown = false;
+         }
+ })
+
+//let gameInterval = setInterval(gameLoop, 30)
 
 
