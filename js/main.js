@@ -2,14 +2,23 @@ console.log('Hello!')
 
 // Initial variables
 let ctx = game.getContext('2d')
+// Curent frame of the game
 let frame = 0
-let playerHealth = 0
+// Current room
 let roomIndex = 0
+// Expected String Input
 let compString
+// Game Loop Interval
 let gameInterval
+// Checks if game is on
 let gameStart = false
+// Checks if player is near a door
 let nearDoor = false
+// Checks if current room's door is unlocked
 let doorUnlocked = false
+// Checks if the player was hit recently, so that they can have
+// iframes between hits
+let playerJustHit = false
 
 // Track whether an arrow key is pressed. This way, when the player starts typing, and their keypress events
 // interrupt the arrow keys' repeating fires, the player will continue to move smoothly
@@ -324,20 +333,21 @@ function wallCheck(obj) {
 // Four corner collision detection
 let detectHit = (obj) => {
         // Check top left corner
-    if (((hero.x > obj.x && hero.x < obj.x+obj.width) &&
-        (hero.y > obj.y && hero.y < obj.y+obj.height)) ||
+    if (((hero.x >= obj.x && hero.x < obj.x+obj.width) &&
+        (hero.y >= obj.y && hero.y < obj.y+obj.height)) ||
         
         // Check top right corner
-        ((hero.x+hero.width > obj.x && hero.x < obj.x) &&
-        (hero.y > obj.y && hero.y < obj.y+obj.height)) ||
+        ((hero.x+hero.width >= obj.x && hero.x < obj.x) &&
+        (hero.y >= obj.y && hero.y < obj.y+obj.height)) ||
         
         // Check bottom right corner
-        ((hero.x < obj.x && hero.x+hero.width > obj.x) &&
-        (hero.y+hero.height > obj.y && hero.y < obj.y)) ||
+        ((hero.x <= obj.x && hero.x+hero.width > obj.x) &&
+        (hero.y+hero.height >= obj.y && hero.y < obj.y)) ||
         
         // Check bottom left corner
-        ((hero.x > obj.x && hero.x < obj.x+obj.width) &&
-        (hero.y < obj.y && hero.y+hero.height > obj.y))) {
+        ((hero.x >= obj.x && hero.x < obj.x+obj.width) &&
+        (hero.y <= obj.y && hero.y+hero.height > obj.y))) {
+            console.log('Hit detected')
             return true
         } else {
             return false
@@ -350,6 +360,12 @@ let detectHit = (obj) => {
 //
 //================================================
 
+// Function to create iframes on the player, so that they
+// are not instantly killed on one hit from an enemy
+function iframes () {
+    console.log('iframes up')
+    playerJustHit = false
+}
 
 // Function to play on player death
 function killPlayer() {
@@ -443,8 +459,13 @@ let gameLoop = () => {
     moveToPlayer(enemy)
     
     if (detectHit(enemy)) {
-        hero.health--
-        console.log('ow')
+        console.log('could be ow')
+        if (!playerJustHit) {
+            hero.health--
+            console.log('ow')
+            playerJustHit = true
+            setTimeout(iframes, 1500)
+        }
     }
     
     // Check if player is going over the border
