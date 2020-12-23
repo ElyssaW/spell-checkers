@@ -100,6 +100,8 @@ function compareString(input, compString) {
         door.color = 'white'
     } else {
         console.log('Booooo')
+        hero.health--
+        console.log(hero.health)
     }
 }
 
@@ -141,6 +143,7 @@ function Constructor(x, y, color, width, height) {
     this.color = color
     this.width = width
     this.height = height
+    this.health = 3
     this.alive = true
     this.xdir = 0
     this.ydir = 0
@@ -149,6 +152,12 @@ function Constructor(x, y, color, width, height) {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
+}
+
+function killPlayer() {
+    
+    console.log('u ded')
+    clearInterval(gameInterval)
 }
 
 // Generates new door + door adjacent objects
@@ -375,6 +384,10 @@ let gameLoop = () => {
     
     // Move player
     movementHandler(keyValue)
+    
+    if (hero.health === 0) {
+        killPlayer()
+    }
     
     if (detectHit(doorMat)) {
         renderDoorText(roomIndex)
