@@ -149,6 +149,9 @@ let gameLoop = () => {
     // Increment frame
     frame++
     
+    // Move player
+    movementHandler(keyValue)
+    
     // Check if player is going over the border
     if (hero.x < 0) {
         hero.x = 0
@@ -205,51 +208,75 @@ let detectHit = (obj) => {
 
 let movementHandler = e => {
     
-    // when I press w, the hero moves up
-    
-    switch(e.key) {
-        case 'ArrowUp':
-            hero.y -= 10
-            break;
-        case 'ArrowLeft':
-            hero.x -= 10
-            break
-        case 'ArrowDown':
-            hero.y += 10
-            break
-        case 'ArrowRight':
-            hero.x += 10
-            break
+    if (keyDown) {
+        switch(keyValue) {
+            case 'ArrowUp':
+                hero.y -= 5
+                break;
+            case 'ArrowLeft':
+                hero.x -= 5
+                break
+            case 'ArrowDown':
+                hero.y += 5
+                break
+            case 'ArrowRight':
+                hero.x += 5
+                break
+        }
     }
 }
 
- document.addEventListener('keydown', e => {
+// document.addEventListener('keydown', e => {
+//     // Prevent default, so that arrow keys do not interrupt typing or move the cursor
+//     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
+//         {
+//             e.preventDefault()
+//             keyDown = true
+//             keyValue = e
+//             
+//            // Fire movement handler
+//            movementHandler(e)
+//             
+//         } else if (keyDown) {
+//             console.log(keyDown)
+//             movementHandler(keyValue)
+//         }
+// })
+//
+// Set keyDown to false when key is released
+// document.addEventListener('keyup', e => {
+//     // Prevent default, so that arrow keys do not interrupt typing or move the cursor
+//     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
+//         {
+//             e.preventDefault()
+//             keyDown = false;
+//         }
+// })
+
+// This duo of functions essentially replicates the keypress events for the arrow keys.
+// THe typical keypress event gets interrupted by typing - meaning, the hero will stop
+// moving when the player types, until the player moves them again. This tracks the arrowkeys
+// by keydown/keyup instead, so that the computer will continue accepting movement input even
+// while the keyboard is being used for typing
+document.addEventListener('keydown', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
      if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
          {
              e.preventDefault()
              keyDown = true
-             keyValue = e
-             
-            // Fire movement handler
-            movementHandler(e)
-             
-         } else if (keyDown) {
-             console.log(keyDown)
-             movementHandler(keyValue)
+             keyValue = e.key
          }
  })
 
-// Set keyDown to false when key is released
  document.addEventListener('keyup', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
      if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
          {
              e.preventDefault()
-             keyDown = false;
+             keyDown = false
          }
  })
 
-//let gameInterval = setInterval(gameLoop, 30)
+let gameInterval = setInterval(gameLoop, 30)
 
 
