@@ -29,6 +29,24 @@ game.setAttribute('height', getComputedStyle(game)['height'])
         // If not, deduct health
         // Return false
 
+//===============================================
+//
+//          Typing Functions
+//
+//===============================================
+
+// Initialize array of potential input words
+
+// Detect collision with the "door mat" object, and write word if true
+
+// If doormat collision is true, listen for submit
+
+// If collision continues to be true, and input is submitted, compare input
+
+// If input matches expected string, unlock door
+
+// If input does not match, deduct health
+
 // Add event listener for form submission
 document.querySelector('form').addEventListener('submit', (e)=> {
     
@@ -43,11 +61,13 @@ document.querySelector('form').addEventListener('submit', (e)=> {
     textInput.value = ''
 })
 
-// Constructor function creates an empty object and assigns passed
-// values to it
-// Does not need a return statement when paired with "new"
-// ogre.render() or similar must be used to make object appear
-function Crawler(x, y, color, width, height) {
+//================================================
+//
+//          Movement/Canvas functions
+//
+//================================================
+
+function Constructor(x, y, color, width, height) {
     this.x = x
     this.y = y
     this.color = color
@@ -63,8 +83,8 @@ function Crawler(x, y, color, width, height) {
     }
 }
 
-let hero = new Crawler(150, 150, 'hotpink', 60, 60)
-let ogre = new Crawler(60, 60, '#bada55', 40, 80)
+let hero = new Constructor(150, 150, 'hotpink', 60, 60)
+let ogre = new Constructor(60, 60, '#bada55', 40, 80)
 
 // Make ogre walk in random direction
 function randomWalk (obj) {
@@ -175,7 +195,6 @@ let gameLoop = () => {
             ogre.alive = false
         }
         
-        
         // Move ogre and check for wall
         objectWalk(ogre)
         wallCheck(ogre)
@@ -188,7 +207,7 @@ let gameLoop = () => {
 let detectHit = (obj) => {
         // Check top left corner
     if (((hero.x > obj.x && hero.x < obj.x+obj.width) &&
-        (hero.y > ogre.y && hero.y < ogre.y+ogre.height)) ||
+        (hero.y > obj.y && hero.y < obj.y+obj.height)) ||
         
         // Check top right corner
         ((hero.x+hero.width > obj.x && hero.x < obj.x) &&
@@ -196,14 +215,13 @@ let detectHit = (obj) => {
         
         // Check bottom right corner
         ((hero.x < obj.x && hero.x+hero.width > obj.x) &&
-        (hero.y+hero.height > ogre.y && hero.y < ogre.y)) ||
+        (hero.y+hero.height > obj.y && hero.y < obj.y)) ||
         
         // Check bottom left corner
         ((hero.x > obj.x && hero.x < obj.x+obj.width) &&
         (hero.y < obj.y && hero.y+hero.height > obj.y))) {
             return true
-        }
-        
+        }     
 }
 
 let movementHandler = e => {
@@ -226,35 +244,8 @@ let movementHandler = e => {
     }
 }
 
-// document.addEventListener('keydown', e => {
-//     // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-//     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
-//         {
-//             e.preventDefault()
-//             keyDown = true
-//             keyValue = e
-//             
-//            // Fire movement handler
-//            movementHandler(e)
-//             
-//         } else if (keyDown) {
-//             console.log(keyDown)
-//             movementHandler(keyValue)
-//         }
-// })
-//
-// Set keyDown to false when key is released
-// document.addEventListener('keyup', e => {
-//     // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-//     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
-//         {
-//             e.preventDefault()
-//             keyDown = false;
-//         }
-// })
-
 // This duo of functions essentially replicates the keypress events for the arrow keys.
-// THe typical keypress event gets interrupted by typing - meaning, the hero will stop
+// The typical keypress event gets interrupted by typing - meaning, the hero will stop
 // moving when the player types, until the player moves them again. This tracks the arrowkeys
 // by keydown/keyup instead, so that the computer will continue accepting movement input even
 // while the keyboard is being used for typing
@@ -263,8 +254,8 @@ document.addEventListener('keydown', e => {
      if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
          {
              e.preventDefault()
-             keyDown = true
              keyValue = e.key
+             keyDown = true
          }
  })
 
