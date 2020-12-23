@@ -44,6 +44,11 @@ function doorOne () {
     } 
 }
 
+function clearText () {
+    document.querySelector('.typeWord').innerText = ''
+    nearDoor = false
+}
+
 // Detect collision with the "door mat" object, and write word if true
 
 // If doormat collision is true, listen for submit
@@ -91,7 +96,9 @@ function Constructor(x, y, color, width, height) {
 }
 
 let door = new Constructor(850, 40, 'red', 60, 60)
-let doorMat = new Constructor(850-((door.width)/2), 40-((door.height)/2), 'blue', 120, 120)
+let doorMat = new Constructor(door.x-((door.width)/2), door.y-((door.height)/2), 'blue', 120, 120)
+let doorMatEdge = new Constructor(door.x-((door.width)/2)-15, door.y-((door.height)/2)-15, 'green', 150, 150)
+
 let hero = new Constructor(150, 150, 'hotpink', 60, 60)
 
 // Make ogre walk in random direction
@@ -182,6 +189,8 @@ let gameLoop = () => {
     
     if (detectHit(doorMat)) {
         doorOne()
+    } else if (detectHit(doorMatEdge)) {
+        clearText()
     }
     
     // Check if player is going over the border
@@ -213,6 +222,7 @@ let gameLoop = () => {
 //    }
     // Render hero
     hero.render()
+    doorMatEdge.render()
     doorMat.render()
     door.render()
 }
