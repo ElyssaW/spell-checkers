@@ -29,6 +29,21 @@ game.setAttribute('height', getComputedStyle(game)['height'])
 //
 //===============================================
 
+// Initialize door counter
+function renderDoorText(roomIndex) {
+    switch(roomIndex) {
+        case 0:
+            doorOne()
+            break;
+        case 1:
+            doorTwo()
+            break;
+        case 2:
+            doorThree()
+            break;
+    }
+}
+
 // Initialize functions to set the door text
 function doorOne () {
     if (nearDoor === false) {
@@ -106,6 +121,7 @@ document.querySelector('form').addEventListener('submit', (e)=> {
 let door
 let doorMat
 let doorMatEdge
+let enemy
 let hero
 
 // Constructor function for new objects
@@ -131,6 +147,11 @@ function generateDoor () {
     door = new Constructor(850, 40, 'red', 60, 60)
     doorMat = new Constructor(door.x-((door.width)/2), door.y-((door.height)/2), 'blue', 120, 120)
     doorMatEdge = new Constructor(door.x-((door.width)/2)-15, door.y-((door.height)/2)-15, 'green', 150, 150)
+}
+
+// Function to generate an enemy
+function generateEnemy () {
+    enemy = new Constructor(100, 100, 'grey', 40, 80)
 }
 
 // Generates new player. Should only run on game start
@@ -239,7 +260,8 @@ function randomWalk (obj) {
     }
 }
 
-// Function to make object move around canvas
+// Function to make object move around canvas. Passes the object to be moved
+// and the pattern to move the object in (Random, set, move to player, etc.)
 function objectWalk(obj) {
     // Every 30 frames, assign the
     // object a new direction
@@ -257,12 +279,26 @@ function objectWalk(obj) {
 }
 
 // Function to move closer to player
-function moveToPlayer () {
-    // Get player's x and y
-    // Check if x is greater
-        // Move +x if yes, -x if no
-    // Check if y is great
-        // Move +y if yes, -y if no
+function moveToPlayer (obj) {
+    
+    // Grabs player's x/y and moves toward it. The initial funky if statements
+    // help smooth the object's movement out - otherwise it jitters a little
+    // trying to get precisely on the same value as the player's x/y
+    if (obj.x <= hero.x + 2 && obj.x >= hero.x - 2) {
+        obj.x = hero.x
+    } else if (obj.x < hero.x) {
+        obj.x += 1
+    } else {
+        obj.x -= 1
+    }
+    
+    if (obj.y <= hero.y + 2 && obj.y >= hero.y - 2) {
+        obj.y = hero.y 
+    } else if (obj.y > hero.y) {
+        obj.y -= 1
+    } else {
+        obj.y += 1
+    }
 }
 
 // Detect collision between any given object and the wall
@@ -404,6 +440,13 @@ let gameLoop = () => {
         
     }
     
+    moveToPlayer(enemy)
+    
+    if (detectHit(enemy)) {
+        hero.health--
+        console.log('ow')
+    }
+    
     // Check if player is going over the border
     if (hero.x < 0) {
         hero.x = 0
@@ -417,35 +460,25 @@ let gameLoop = () => {
         hero.y = game.height  - hero.height
     }
 
-//    // check if Ogre is alive
-//    if (ogre.alive) {
-//        // Render Ogre
-//        ogre.render()
-//        
-//        // Detect hit
-//        if (detectHit(ogre)) {
-//            ogre.alive = false
-//        }
-//        
-//        // Move ogre and check for wall
-//        objectWalk(ogre)
-//        wallCheck(ogre)
-//    }
     // Render hero
     doorMatEdge.render()
     doorMat.render()
     door.render()
     
+    enemy.render()
     hero.render()
 }
 
-function gameStart () {
+function gameBegin() {
     console.log('Hello again')
     generateDoor()
+    generateEnemy()
     generatePlayer()
     gameInterval = setInterval(gameLoop, 30)
     compString = 'Most'
     gameStart = true
+    
+    
 }
 
-gameStart()
+gameBegin()

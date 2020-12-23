@@ -19,6 +19,20 @@ canvas {
   height: 80vh;
 }
 
+div#word-bank {
+    height: 50px;
+    margin: auto;
+    padding: 10px;
+}
+
+div#input-div {
+    padding: 10px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 span#typo {
     color: red;
 }
