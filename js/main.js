@@ -56,6 +56,14 @@ function clearText () {
 // If collision continues to be true, and input is submitted, compare input
 
 // If input matches expected string, unlock door
+function compareString(input) {
+    let string = 'Near the door'
+    if (input == string) {
+        console.log('Hooray, basic gameplay functionality!')
+    } else {
+        console.log('Booooo')
+    }
+}
 
 // If input does not match, deduct health
 
@@ -67,10 +75,13 @@ document.querySelector('form').addEventListener('submit', (e)=> {
     
     // Grab player input from box
     let playerInput = textInput.value
-    console.log(playerInput)
     
     // Reset text input box to empty
     textInput.value = ''
+    
+    if (nearDoor) {
+        compareString(playerInput)
+    }
 })
 
 //================================================
