@@ -8,9 +8,16 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    
+    background-color: aliceblue;
 }
 
 canvas {
-  width: 100%;
+  background-color: white;
+  width: 80%;
   height: 80vh;
+}
+
+p#typo {
+    color: red
 }

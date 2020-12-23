@@ -8,6 +8,7 @@ console.log('Hello!')// reference DOM elements
 let ctx = game.getContext('2d')
 let frame = 0
 let playerHealth = 0
+let nearDoor = false
 
 // Track whether an arrow key is pressed. This way, when the player starts typing, and their keypress events
 // interrupt the arrow keys' repeating fires, the player will continue to move smoothly
@@ -35,7 +36,13 @@ game.setAttribute('height', getComputedStyle(game)['height'])
 //
 //===============================================
 
-// Initialize array of potential input words
+// Initialize functions to set the door text
+function doorOne () {
+    if (nearDoor === false) {
+        document.querySelector('.typeWord').innerText = 'Near the door'
+        nearDoor = true
+    } 
+}
 
 // Detect collision with the "door mat" object, and write word if true
 
@@ -83,8 +90,9 @@ function Constructor(x, y, color, width, height) {
     }
 }
 
+let door = new Constructor(850, 40, 'red', 60, 60)
+let doorMat = new Constructor(850-((door.width)/2), 40-((door.height)/2), 'blue', 120, 120)
 let hero = new Constructor(150, 150, 'hotpink', 60, 60)
-let ogre = new Constructor(60, 60, '#bada55', 40, 80)
 
 // Make ogre walk in random direction
 function randomWalk (obj) {
@@ -172,6 +180,10 @@ let gameLoop = () => {
     // Move player
     movementHandler(keyValue)
     
+    if (detectHit(doorMat)) {
+        doorOne()
+    }
+    
     // Check if player is going over the border
     if (hero.x < 0) {
         hero.x = 0
@@ -185,22 +197,24 @@ let gameLoop = () => {
         hero.y = game.height  - hero.height
     }
 
-    // check if Ogre is alive
-    if (ogre.alive) {
-        // Render Ogre
-        ogre.render()
-        
-        // Detect hit
-        if (detectHit(ogre)) {
-            ogre.alive = false
-        }
-        
-        // Move ogre and check for wall
-        objectWalk(ogre)
-        wallCheck(ogre)
-    }
+//    // check if Ogre is alive
+//    if (ogre.alive) {
+//        // Render Ogre
+//        ogre.render()
+//        
+//        // Detect hit
+//        if (detectHit(ogre)) {
+//            ogre.alive = false
+//        }
+//        
+//        // Move ogre and check for wall
+//        objectWalk(ogre)
+//        wallCheck(ogre)
+//    }
     // Render hero
     hero.render()
+    doorMat.render()
+    door.render()
 }
 
 // Four corner collision detection
@@ -221,7 +235,9 @@ let detectHit = (obj) => {
         ((hero.x > obj.x && hero.x < obj.x+obj.width) &&
         (hero.y < obj.y && hero.y+hero.height > obj.y))) {
             return true
-        }     
+        } else {
+            return false
+        }
 }
 
 let movementHandler = e => {
