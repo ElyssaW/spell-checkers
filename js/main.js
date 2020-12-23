@@ -9,6 +9,7 @@ let ctx = game.getContext('2d')
 let frame = 0
 let playerHealth = 0
 let nearDoor = false
+let doorUnlocked = false
 
 // Track whether an arrow key is pressed. This way, when the player starts typing, and their keypress events
 // interrupt the arrow keys' repeating fires, the player will continue to move smoothly
@@ -39,27 +40,25 @@ game.setAttribute('height', getComputedStyle(game)['height'])
 // Initialize functions to set the door text
 function doorOne () {
     if (nearDoor === false) {
-        document.querySelector('.typeWord').innerText = 'Near the door'
+        document.querySelector('#firstHalf').innerText = 'Her Highness\' Royal And '
+        document.querySelector('#typo').innerText = 'Msot'
+        document.querySelector('#secondHalf').innerText = ' Perfect Essay on The History of Spells'
         nearDoor = true
     } 
 }
 
 function clearText () {
-    document.querySelector('.typeWord').innerText = ''
+    document.querySelector('#firstHalf').innerText = ''
+    document.querySelector('#typo').innerText = ''
+    document.querySelector('#secondHalf').innerText = ''
     nearDoor = false
 }
 
-// Detect collision with the "door mat" object, and write word if true
-
-// If doormat collision is true, listen for submit
-
-// If collision continues to be true, and input is submitted, compare input
-
 // If input matches expected string, unlock door
 function compareString(input) {
-    let string = 'Near the door'
+    let string = 'Most'
     if (input == string) {
-        console.log('Hooray, basic gameplay functionality!')
+        doorUnlocked = true
     } else {
         console.log('Booooo')
     }
@@ -112,7 +111,7 @@ let doorMatEdge = new Constructor(door.x-((door.width)/2)-15, door.y-((door.heig
 
 let hero = new Constructor(150, 150, 'hotpink', 60, 60)
 
-// Make ogre walk in random direction
+// Make object walk in random direction
 function randomWalk (obj) {
     // Pick random direction value - +x, -x, +y, -y
     let randDir = Math.floor(Math.random() * 5)
@@ -202,6 +201,12 @@ let gameLoop = () => {
         doorOne()
     } else if (detectHit(doorMatEdge)) {
         clearText()
+    }
+    
+    if (detectHit(door) && doorUnlocked) {
+        console.log('Move to next room')
+    } else if (detectHit(door)) {
+        
     }
     
     // Check if player is going over the border

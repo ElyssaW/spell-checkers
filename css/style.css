@@ -8,6 +8,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    color: black;
     
     background-color: aliceblue;
 }
@@ -18,6 +19,6 @@ canvas {
   height: 80vh;
 }
 
-p#typo {
-    color: red
+span#typo {
+    color: red;
 }
