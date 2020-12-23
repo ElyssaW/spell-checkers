@@ -1,8 +1,4 @@
-console.log('Hello!')// reference DOM elements
-
-// Accept input from player
-
-// Compare input string to correct string
+console.log('Hello!')
 
 // Initial variables
 let ctx = game.getContext('2d')
@@ -27,34 +23,11 @@ let keyValue
 game.setAttribute('width', getComputedStyle(game)['width'])
 game.setAttribute('height', getComputedStyle(game)['height'])
 
-// Function to check player text against correct string
-    // Accept player input, string input
-    // Check if correct
-        // If correct, return true
-
-        // If not, deduct health
-        // Return false
-
 //===============================================
 //
 //          Typing Functions
 //
 //===============================================
-
-// Initialize door counter
-function renderDoorText(roomIndex) {
-    switch(roomIndex) {
-        case 0:
-            doorOne()
-            break;
-        case 1:
-            doorTwo()
-            break;
-        case 2:
-            doorThree()
-            break;
-    }
-}
 
 // Initialize functions to set the door text
 function doorOne () {
@@ -99,13 +72,12 @@ function compareString(input, compString) {
         doorUnlocked = true
         door.color = 'white'
     } else {
+    // If string input is not correct, deduct health
         console.log('Booooo')
         hero.health--
         console.log(hero.health)
     }
 }
-
-// If input does not match, deduct health
 
 // Add event listener for form submission
 document.querySelector('form').addEventListener('submit', (e)=> {
@@ -126,7 +98,7 @@ document.querySelector('form').addEventListener('submit', (e)=> {
 
 //================================================
 //
-//          Movement/Canvas functions
+//          Constructor Functions
 //
 //================================================
 
@@ -154,12 +126,6 @@ function Constructor(x, y, color, width, height) {
     }
 }
 
-function killPlayer() {
-    
-    console.log('u ded')
-    clearInterval(gameInterval)
-}
-
 // Generates new door + door adjacent objects
 function generateDoor () { 
     door = new Constructor(850, 40, 'red', 60, 60)
@@ -170,6 +136,58 @@ function generateDoor () {
 // Generates new player. Should only run on game start
 function generatePlayer () {
     hero = new Constructor(150, 150, 'hotpink', 60, 60)
+}
+
+//================================================
+//
+//          Placement/Draw Functions
+//
+//================================================
+
+// Function to check which room the player should progress to next, and
+// run all associated functions for it
+function moveToNextRoom (roomIndex) {
+    switch(roomIndex) {
+        case 0:
+            doorOne()
+            break;
+        case 1:
+            drawSecondRoom()
+            doorTwoe()
+            break;
+        case 2:
+            drawThirdRoom()
+            doorThree()
+            break;
+        case 3:
+            console.log('You won!')
+    }
+}
+
+// Create second room
+function drawSecondRoom () {
+    // Place new locked door
+    placeDoorLocked(400, 400)
+    compString = 'amazing'
+    doorUnlocked = false
+    door.color = 'red'
+    
+    // Place player
+    hero.x = 40
+    hero.y = 40
+}
+
+// Create third and final room
+function drawThirdRoom () {
+    // Place new locked door
+    placeDoorLocked(600, 200)
+    compString = 'magnificient'
+    doorUnlocked = false
+    door.color = 'red'
+    
+    // Place player
+    hero.x = 40
+    hero.y = 40
 }
 
 function placeDoorLocked (x, y) { 
@@ -185,6 +203,12 @@ function placeDoorLocked (x, y) {
     // Set door to locked
     door.alive = true
 }
+
+//================================================
+//
+//          Movement functions
+//
+//================================================
 
 // Make object walk in random direction
 function randomWalk (obj) {
@@ -213,13 +237,10 @@ function randomWalk (obj) {
         default:
         
     }
-    
-    console.log(randDir)
-    console.log(obj.xdir)
 }
 
+// Function to make object move around canvas
 function objectWalk(obj) {
-    
     // Every 30 frames, assign the
     // object a new direction
     if (obj.frameIndex === 30) {
@@ -235,6 +256,7 @@ function objectWalk(obj) {
     obj.y += obj.ydir
 }
 
+// Function to move closer to player
 function moveToPlayer () {
     // Get player's x and y
     // Check if x is greater
@@ -243,6 +265,7 @@ function moveToPlayer () {
         // Move +y if yes, -y if no
 }
 
+// Detect collision between any given object and the wall
 function wallCheck(obj) {
     // Check if player is going over the border
     if (obj.x < 0) {
@@ -285,6 +308,20 @@ let detectHit = (obj) => {
         }
 }
 
+//================================================
+//
+//          Player Functions
+//
+//================================================
+
+
+// Function to play on player death
+function killPlayer() {
+    console.log('u ded')
+    clearInterval(gameInterval)
+}
+
+// Checks which direction the player is trying to move in, and moves them there
 let movementHandler = e => {
     
     if (keyDown) {
@@ -304,51 +341,6 @@ let movementHandler = e => {
         }
     }
 }
-
-function moveToNextRoom (roomIndex) {
-    switch(roomIndex) {
-        case 0:
-            
-            break;
-        case 1:
-            drawSecondRoom()
-            break;
-        case 2:
-            drawThirdRoom()
-            break;
-        case 3:
-            console.log('You won!')
-    }
-}
-
-function drawSecondRoom () {
-    // Place new locked door
-    placeDoorLocked(400, 400)
-    compString = 'amazing'
-    doorUnlocked = false
-    door.color = 'red'
-    
-    // Place player
-    hero.x = 40
-    hero.y = 40
-}
-
-function drawThirdRoom () {
-    // Place new locked door
-    placeDoorLocked(600, 200)
-    compString = 'magnificient'
-    doorUnlocked = false
-    door.color = 'red'
-    
-    // Place player
-    hero.x = 40
-    hero.y = 40
-}
-
-// Draw Room 
-// Room number
-    // Draw door back
-    // Draw door forward
 
 // This duo of functions essentially replicates the keypress events for the arrow keys.
 // The typical keypress event gets interrupted by typing - meaning, the hero will stop
@@ -374,6 +366,13 @@ document.addEventListener('keydown', e => {
          }
  })
 
+//================================================
+//
+//          Game Loop
+//
+//================================================
+
+// Where the magic happens
 let gameLoop = () => {
     
     //Clear board
@@ -440,7 +439,7 @@ let gameLoop = () => {
     hero.render()
 }
 
-function roomStart () {
+function gameStart () {
     console.log('Hello again')
     generateDoor()
     generatePlayer()
@@ -449,5 +448,4 @@ function roomStart () {
     gameStart = true
 }
 
-roomStart()
-
+gameStart()
