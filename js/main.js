@@ -54,6 +54,15 @@ function selectRandom (randomArray) {
 //
 //===============================================
 
+// Determine current string to check for comparison
+function setCompString() {
+    if (enemy && enemy.alive) {
+        compString = enemy.names[enemy.nameIndex]
+    } else {
+        renderDoorText(roomIndex)
+    }
+}
+
 // Initialize door counter
 function renderDoorText(roomIndex) {
     switch(roomIndex) {
@@ -428,43 +437,42 @@ function movementHandler () {
 // The typical keypress event gets interrupted by typing - meaning, the hero will stop
 // moving when the player types, until the player moves them again. This tracks the arrowkeys
 // by keydown/keyup instead, so that the computer will continue accepting movement input even
-// while the keyboard is being used for typing. Storing the values in an object allow for
-// diagonal movement.
+// while the keyboard is being used for typing. 
 document.addEventListener('keydown', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-     if (e.key == 'ArrowUp') {
+     if (e.key == 'ArrowUp' || e.key == '8') {
              e.preventDefault()
              moveObject.up = true
          } 
-    if (e.key == 'ArrowDown') {
+    if (e.key == 'ArrowDown' || e.key == '2') {
              e.preventDefault()
              moveObject.down = true
          } 
-    if (e.key == 'ArrowLeft') {
+    if (e.key == 'ArrowLeft' || e.key == '4') {
              e.preventDefault()
              moveObject.left = true
          } 
-    if (e.key == 'ArrowRight') {
+    if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = true
-         } 
+         }
  })
 
  document.addEventListener('keyup', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-     if (e.key == 'ArrowUp') {
+     if (e.key == 'ArrowUp' || e.key == '8') {
              e.preventDefault()
              moveObject.up = false
          } 
-    if (e.key == 'ArrowDown') {
+    if (e.key == 'ArrowDown' || e.key == '2') {
              e.preventDefault()
              moveObject.down = false
          } 
-    if (e.key == 'ArrowLeft') {
+    if (e.key == 'ArrowLeft' || e.key == '4') {
              e.preventDefault()
              moveObject.left = false
          } 
-    if (e.key == 'ArrowRight') {
+    if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = false
          } 
@@ -552,8 +560,6 @@ function gameBegin() {
     gameInterval = setInterval(gameLoop, 30)
     compString = 'Most'
     gameStart = true
-    
-    
 }
 
 gameBegin()
