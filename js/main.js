@@ -19,6 +19,12 @@ let doorUnlocked = false
 // Checks if the player was hit recently, so that they can have
 // iframes between hits
 let playerJustHit = false
+// Initialize movement object to allow continuous/diagonal movement
+let moveObject = {up: false,
+                  down: false,
+                  left: false,
+                  right: false
+                 }
 
 // Track whether an arrow key is pressed. This way, when the player starts typing, and their keypress events
 // interrupt the arrow keys' repeating fires, the player will continue to move smoothly
@@ -186,7 +192,7 @@ let enemyNames = [ 'das', 'sed', 'wras', 'fas',
 
 // Function to generate an enemy
 function generateEnemy () {
-    enemy = new Constructor(100, 100, 'grey', 40, 80)
+    enemy = new Constructor(600, 300, 'grey', 40, 80)
     
     enemy.names = [selectRandom(enemyNames), 
                    selectRandom(enemyNames),
@@ -402,48 +408,66 @@ function killPlayer() {
 }
 
 // Checks which direction the player is trying to move in, and moves them there
-let movementHandler = e => {
+function movementHandler () {
     
-    if (keyDown) {
-        switch(keyValue) {
-            case 'ArrowUp':
-                hero.y -= 5
-                break;
-            case 'ArrowLeft':
-                hero.x -= 5
-                break
-            case 'ArrowDown':
-                hero.y += 5
-                break
-            case 'ArrowRight':
-                hero.x += 5
-                break
-        }
-    }
+    if (moveObject.down === true) {
+             hero.y += 5
+         } 
+    if (moveObject.up === true) {
+             hero.y -= 5
+         } 
+    if (moveObject.right === true) {
+             hero.x += 5
+         } 
+    if (moveObject.left === true) {
+             hero.x -= 5
+         } 
 }
 
 // This duo of functions essentially replicates the keypress events for the arrow keys.
 // The typical keypress event gets interrupted by typing - meaning, the hero will stop
 // moving when the player types, until the player moves them again. This tracks the arrowkeys
 // by keydown/keyup instead, so that the computer will continue accepting movement input even
-// while the keyboard is being used for typing
+// while the keyboard is being used for typing. Storing the values in an object allow for
+// diagonal movement.
 document.addEventListener('keydown', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
-         {
+     if (e.key == 'ArrowUp') {
              e.preventDefault()
-             keyValue = e.key
-             keyDown = true
-         }
+             moveObject.up = true
+         } 
+    if (e.key == 'ArrowDown') {
+             e.preventDefault()
+             moveObject.down = true
+         } 
+    if (e.key == 'ArrowLeft') {
+             e.preventDefault()
+             moveObject.left = true
+         } 
+    if (e.key == 'ArrowRight') {
+             e.preventDefault()
+             moveObject.right = true
+         } 
  })
 
  document.addEventListener('keyup', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-     if (e.key == 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowDown')
-         {
+     if (e.key == 'ArrowUp') {
              e.preventDefault()
-             keyDown = false
-         }
+             moveObject.up = false
+         } 
+    if (e.key == 'ArrowDown') {
+             e.preventDefault()
+             moveObject.down = false
+         } 
+    if (e.key == 'ArrowLeft') {
+             e.preventDefault()
+             moveObject.left = false
+         } 
+    if (e.key == 'ArrowRight') {
+             e.preventDefault()
+             moveObject.right = false
+         } 
  })
 
 //================================================
@@ -522,7 +546,6 @@ let gameLoop = () => {
 }
 
 function gameBegin() {
-    console.log('Hello again')
     generateDoor()
     generateEnemy()
     generatePlayer()
