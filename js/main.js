@@ -34,6 +34,16 @@ game.setAttribute('height', getComputedStyle(game)['height'])
 
 //===============================================
 //
+//              Basic functions
+//
+//===============================================
+
+function selectRandom (randomArray) {
+    return randomArray[Math.floor(Math.random() * randomArray.length)]
+}
+
+//===============================================
+//
 //          Typing Functions
 //
 //===============================================
@@ -158,14 +168,32 @@ function generateDoor () {
     doorMatEdge = new Constructor(door.x-((door.width)/2)-15, door.y-((door.height)/2)-15, 'green', 150, 150)
 }
 
-// Function to generate an enemy
-function generateEnemy () {
-    enemy = new Constructor(100, 100, 'grey', 40, 80)
-}
-
 // Generates new player. Should only run on game start
 function generatePlayer () {
     hero = new Constructor(150, 150, 'hotpink', 60, 60)
+}
+
+//================================================
+//
+//               Enemy functions
+//
+//================================================
+
+// Initialize array of enemy names
+let enemyNames = [ 'das', 'sed', 'wras', 'fas',
+                   'qar', 'xas', 'dax', 'wes',
+]
+
+// Function to generate an enemy
+function generateEnemy () {
+    enemy = new Constructor(100, 100, 'grey', 40, 80)
+    
+    enemy.names = [selectRandom(enemyNames), 
+                   selectRandom(enemyNames),
+                   selectRandom(enemyNames)]
+
+    enemy.nameIndex = 0
+    console.log(enemy.names[1])
 }
 
 //================================================
@@ -436,16 +464,19 @@ let gameLoop = () => {
     // Move player
     movementHandler(keyValue)
     
+    // Check if player's health is at 0
     if (hero.health === 0) {
         killPlayer()
     }
     
+    // Check if player is near a door
     if (detectHit(doorMat)) {
         renderDoorText(roomIndex)
     } else if (detectHit(doorMatEdge)) {
         clearText()
     }
     
+    // Check if player is trying and able to move through door
     if (detectHit(door) && doorUnlocked) {
         console.log('Move to next room')
         door.alive = true
@@ -456,13 +487,13 @@ let gameLoop = () => {
         
     }
     
+    // Move the enemy to the player
     moveToPlayer(enemy)
     
+    // Look to see if the enemy has hit the player
     if (detectHit(enemy)) {
-        console.log('could be ow')
         if (!playerJustHit) {
             hero.health--
-            console.log('ow')
             playerJustHit = true
             setTimeout(iframes, 1500)
         }
