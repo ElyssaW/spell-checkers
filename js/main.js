@@ -63,20 +63,14 @@ function selectRandom (randomArray) {
 // Function to check which room the player should progress to next, and
 // run all associated functions for it
 function moveToNextRoom() {
-    console.log('Moving to next room')
     setCompString()
-    console.log(roomIndex)
+    
     switch(roomIndex) {
-        case 0:
-            doorOne()
-            break;
         case 1:
             drawSecondRoom()
-            doorTwoe()
             break;
         case 2:
             drawThirdRoom()
-            doorThree()
             break;
         case 3:
             console.log('You won!')
@@ -129,15 +123,27 @@ function placeDoorLocked (x, y) {
 //
 //===============================================
 
+// Function to write text above object
+function drawText (string, obj) {
+    ctx.fillStyle = 'red'
+    ctx.font = '20px sans-serif'
+    ctx.fillText(string, obj.x, obj.y-5)
+}
+// Declare function
+    // Accept text input
+    // Accept object
+    // Draw text input above above object height + 10
+
+// Function to clear text
+
 // Determine current string to check for comparison
 function setCompString() {
-    compString = roomArray[roomIndex].doorKey
-//    if (enemy.alive === true) {
-//            compString = enemy.names[enemy.nameIndex]
-//        } else {
-//        }
+    if (enemy.alive === true) {
+            compString = enemy.names[enemy.nameIndex]
+        } else {
+            compString = roomArray[roomIndex].doorKey
+        }
     }
-
 
 // Function to select door text according to current room and set it in the HTML
 function renderDoorText () {
@@ -249,6 +255,12 @@ function generateEnemy () {
                    selectRandom(spellWords)]
 
     enemy.nameIndex = 0
+    
+    enemy.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+        drawText(this.names[this.nameIndex], this)
+    }
 }
 
 //================================================
@@ -302,6 +314,9 @@ function objectWalk(obj) {
     // Add x/y direction to object's x/y
     obj.x += obj.xdir
     obj.y += obj.ydir
+    
+    // Check to make sure the object isn't yeeting off the game map
+    wallCheck(obj)
 }
 
 // Function to move closer to player
@@ -332,18 +347,14 @@ function wallCheck(obj) {
     // Check if player is going over the border
     if (obj.x < 0) {
         obj.x = 0
-        obj.xdir = 10
     } else if (obj.x+obj.width > game.width) {
         obj.x = game.width  - obj.width
-        obj.xdir = -10
     }
     
     if (obj.y < 0) {
         obj.y = 0
-        obj.ydir = 10
     } else if (obj.y+obj.height > game.height) {
         obj.y = game.height  - obj.height
-        obj.ydir = -10
     }
 }
 
@@ -448,7 +459,7 @@ document.addEventListener('keydown', e => {
     if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = false
-         } 
+         }
  })
 
 //================================================
@@ -493,17 +504,22 @@ let gameLoop = () => {
         
     }
     
+    // Check if enemy is alive
+    if (enemy.alive) {
     // Move the enemy to the player
-    //moveToPlayer(enemy)
-    
-    // Look to see if the enemy has hit the player
-//    if (detectHit(enemy)) {
-//        if (!playerJustHit) {
-//            hero.health--
-//            playerJustHit = true
-//            setTimeout(iframes, 1500)
-//        }
-//    }
+        objectWalk(enemy)
+        
+    // Render enemy
+        enemy.render()
+        // Look to see if the enemy has hit the player
+        if (detectHit(enemy)) {
+            if (!playerJustHit) {
+                hero.health--
+                playerJustHit = true
+                setTimeout(iframes, 1500)
+            }
+        }
+    }
     
     // Check if player is going over the border
     if (hero.x < 0) {
@@ -523,13 +539,13 @@ let gameLoop = () => {
     doorMat.render()
     door.render()
     
-    //enemy.render()
     hero.render()
 }
 
 function gameBegin() {
     generateDoor()
-    //generateEnemy()
+    generateEnemy()
+    //enemy.alive = false
     generatePlayer()
     gameInterval = setInterval(gameLoop, 30)
     compString = 'Most'
