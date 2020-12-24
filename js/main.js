@@ -26,6 +26,12 @@ let moveObject = {up: false,
                   right: false
                  }
 
+// Initialize array of objects containing room data
+let roomArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
+                 {doorKey: 'amazing', doorStart: 'And here is the ', doorTypo: 'azginma', doorEnd: ' second sentence'},
+                 {doorKey: 'magnificient', doorStart: 'And lastly, the ', doorTypo: 'mnecitnifiag', doorEnd: ' end of the essay!'}
+                ]
+
 // Track whether an arrow key is pressed. This way, when the player starts typing, and their keypress events
 // interrupt the arrow keys' repeating fires, the player will continue to move smoothly
 let keyDown = false
@@ -48,6 +54,75 @@ function selectRandom (randomArray) {
     return randomArray[Math.floor(Math.random() * randomArray.length)]
 }
 
+//================================================
+//
+//          Placement/Draw Functions
+//
+//================================================
+
+// Function to check which room the player should progress to next, and
+// run all associated functions for it
+function moveToNextRoom() {
+    console.log('Moving to next room')
+    setCompString()
+    console.log(roomIndex)
+    switch(roomIndex) {
+        case 0:
+            doorOne()
+            break;
+        case 1:
+            drawSecondRoom()
+            doorTwoe()
+            break;
+        case 2:
+            drawThirdRoom()
+            doorThree()
+            break;
+        case 3:
+            console.log('You won!')
+    }
+}
+
+// Create second room
+function drawSecondRoom () {
+    console.log('Room 2 drawn')
+
+    // Place player
+    hero.x = 40
+    hero.y = 40
+    
+    // Place new locked door
+    placeDoorLocked(400, 400)
+    doorUnlocked = false
+    door.color = 'red'
+}
+
+// Create third and final room
+function drawThirdRoom () {
+    // Place new locked door
+    placeDoorLocked(600, 200)
+    doorUnlocked = false
+    door.color = 'red'
+    
+    // Place player
+    hero.x = 40
+    hero.y = 40
+}
+
+function placeDoorLocked (x, y) { 
+    // Move door, doormat, and doormat edge to
+    // proper place
+    door.x = x
+    door.y = y
+    doorMat.x = door.x-(door.width/2)
+    doorMat.y = door.y-(door.height/2)
+    doorMatEdge.x = door.x-(door.width/2)-15
+    doorMatEdge.y = door.y-(door.height/2)-15
+    
+    // Set door to locked
+    door.alive = true
+}
+
 //===============================================
 //
 //          Typing Functions
@@ -56,54 +131,20 @@ function selectRandom (randomArray) {
 
 // Determine current string to check for comparison
 function setCompString() {
-    if (enemy && enemy.alive) {
-        compString = enemy.names[enemy.nameIndex]
-    } else {
-        renderDoorText(roomIndex)
+    compString = roomArray[roomIndex].doorKey
+//    if (enemy.alive === true) {
+//            compString = enemy.names[enemy.nameIndex]
+//        } else {
+//        }
     }
-}
 
-// Initialize door counter
-function renderDoorText(roomIndex) {
-    switch(roomIndex) {
-        case 0:
-            doorOne()
-            break;
-        case 1:
-            doorTwo()
-            break;
-        case 2:
-            doorThree()
-            break;
-    }
-}
 
-// Initialize functions to set the door text
-function doorOne () {
+// Function to select door text according to current room and set it in the HTML
+function renderDoorText () {
     if (nearDoor === false) {
-        document.querySelector('#firstHalf').innerText = 'Her Highness\' Royal And '
-        document.querySelector('#typo').innerText = 'Msot'
-        document.querySelector('#secondHalf').innerText = ' Perfect Essay on The History of Spells'
-        nearDoor = true
-    } 
-}
-
-// Initialize functions to set the door text
-function doorTwo () {
-    if (nearDoor === false) {
-        document.querySelector('#firstHalf').innerText = 'And here is the '
-        document.querySelector('#typo').innerText = 'azginma'
-        document.querySelector('#secondHalf').innerText = ' second sentence'
-        nearDoor = true
-    } 
-}
-
-// Initialize functions to set the door text
-function doorThree () {
-    if (nearDoor === false) {
-        document.querySelector('#firstHalf').innerText = 'And finally, the '
-        document.querySelector('#typo').innerText = 'mnecitnifiag'
-        document.querySelector('#secondHalf').innerText = ' second sentence'
+        document.querySelector('#firstHalf').innerText = roomArray[roomIndex].doorStart
+        document.querySelector('#typo').innerText = roomArray[roomIndex].doorTypo
+        document.querySelector('#secondHalf').innerText = roomArray[roomIndex].doorEnd
         nearDoor = true
     } 
 }
@@ -195,7 +236,7 @@ function generatePlayer () {
 //================================================
 
 // Initialize array of enemy names
-let enemyNames = [ 'das', 'sed', 'wras', 'fas',
+let spellWords = [ 'das', 'sed', 'wras', 'fas',
                    'qar', 'xas', 'dax', 'wes',
 ]
 
@@ -203,78 +244,11 @@ let enemyNames = [ 'das', 'sed', 'wras', 'fas',
 function generateEnemy () {
     enemy = new Constructor(600, 300, 'grey', 40, 80)
     
-    enemy.names = [selectRandom(enemyNames), 
-                   selectRandom(enemyNames),
-                   selectRandom(enemyNames)]
+    enemy.names = [selectRandom(spellWords), 
+                   selectRandom(spellWords),
+                   selectRandom(spellWords)]
 
     enemy.nameIndex = 0
-    console.log(enemy.names[1])
-}
-
-//================================================
-//
-//          Placement/Draw Functions
-//
-//================================================
-
-// Function to check which room the player should progress to next, and
-// run all associated functions for it
-function moveToNextRoom (roomIndex) {
-    switch(roomIndex) {
-        case 0:
-            doorOne()
-            break;
-        case 1:
-            drawSecondRoom()
-            doorTwoe()
-            break;
-        case 2:
-            drawThirdRoom()
-            doorThree()
-            break;
-        case 3:
-            console.log('You won!')
-    }
-}
-
-// Create second room
-function drawSecondRoom () {
-    // Place new locked door
-    placeDoorLocked(400, 400)
-    compString = 'amazing'
-    doorUnlocked = false
-    door.color = 'red'
-    
-    // Place player
-    hero.x = 40
-    hero.y = 40
-}
-
-// Create third and final room
-function drawThirdRoom () {
-    // Place new locked door
-    placeDoorLocked(600, 200)
-    compString = 'magnificient'
-    doorUnlocked = false
-    door.color = 'red'
-    
-    // Place player
-    hero.x = 40
-    hero.y = 40
-}
-
-function placeDoorLocked (x, y) { 
-    // Move door, doormat, and doormat edge to
-    // proper place
-    door.x = x
-    door.y = y
-    doorMat.x = door.x-(door.width/2)
-    doorMat.y = door.y-(door.height/2)
-    doorMatEdge.x = door.x-(door.width/2)-15
-    doorMatEdge.y = door.y-(door.height/2)-15
-    
-    // Set door to locked
-    door.alive = true
 }
 
 //================================================
@@ -390,7 +364,6 @@ let detectHit = (obj) => {
         // Check bottom left corner
         ((hero.x >= obj.x && hero.x < obj.x+obj.width) &&
         (hero.y <= obj.y && hero.y+hero.height > obj.y))) {
-            console.log('Hit detected')
             return true
         } else {
             return false
@@ -503,33 +476,34 @@ let gameLoop = () => {
     
     // Check if player is near a door
     if (detectHit(doorMat)) {
-        renderDoorText(roomIndex)
+        renderDoorText()
     } else if (detectHit(doorMatEdge)) {
         clearText()
     }
     
     // Check if player is trying and able to move through door
     if (detectHit(door) && doorUnlocked) {
-        console.log('Move to next room')
+        console.log(roomArray[roomIndex])
         door.alive = true
         clearText()
         roomIndex++
-        moveToNextRoom(roomIndex)
+        console.log(roomArray[roomIndex])
+        moveToNextRoom()
     } else if (detectHit(door)) {
         
     }
     
     // Move the enemy to the player
-    moveToPlayer(enemy)
+    //moveToPlayer(enemy)
     
     // Look to see if the enemy has hit the player
-    if (detectHit(enemy)) {
-        if (!playerJustHit) {
-            hero.health--
-            playerJustHit = true
-            setTimeout(iframes, 1500)
-        }
-    }
+//    if (detectHit(enemy)) {
+//        if (!playerJustHit) {
+//            hero.health--
+//            playerJustHit = true
+//            setTimeout(iframes, 1500)
+//        }
+//    }
     
     // Check if player is going over the border
     if (hero.x < 0) {
@@ -549,13 +523,13 @@ let gameLoop = () => {
     doorMat.render()
     door.render()
     
-    enemy.render()
+    //enemy.render()
     hero.render()
 }
 
 function gameBegin() {
     generateDoor()
-    generateEnemy()
+    //generateEnemy()
     generatePlayer()
     gameInterval = setInterval(gameLoop, 30)
     compString = 'Most'
