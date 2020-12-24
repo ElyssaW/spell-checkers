@@ -129,12 +129,6 @@ function drawText (string, obj) {
     ctx.font = '20px sans-serif'
     ctx.fillText(string, obj.x, obj.y-5)
 }
-// Declare function
-    // Accept text input
-    // Accept object
-    // Draw text input above above object height + 10
-
-// Function to clear text
 
 // Determine current string to check for comparison
 function setCompString() {
@@ -162,16 +156,26 @@ function clearText () {
     nearDoor = false
 }
 
+//// If input matches expected string, unlock door
+//function compareString(input, compString) {
+//    if (input == compString) {
+//        doorUnlocked = true
+//        door.color = 'white'
+//    } else {
+//    // If string input is not correct, deduct health
+//        console.log('Booooo')
+//        hero.health--
+//        console.log(hero.health)
+//    }
+//}
+
 // If input matches expected string, unlock door
 function compareString(input, compString) {
-    if (input == compString) {
-        doorUnlocked = true
-        door.color = 'white'
+    if (input === compString) {
+        return true
     } else {
     // If string input is not correct, deduct health
-        console.log('Booooo')
-        hero.health--
-        console.log(hero.health)
+        return false
     }
 }
 
@@ -187,9 +191,29 @@ document.querySelector('form').addEventListener('submit', (e)=> {
     // Reset text input box to empty
     textInput.value = ''
     
-    if (nearDoor) {
-        compareString(playerInput, compString)
+    console.log('working')
+    let match = compareString(playerInput, compString)
+    
+    if (enemy.alive) {
+        console.log('working too')
+        console.log(playerInput)
+        console.log(compString)
+        console.log(match)
+        if (match) {
+            console.log('Correct')
+            match = false
+        }
     }
+//    } else if (nearDoor) {
+//        if (match) {
+//            console.log('Correct')
+//            doorUnlocked = true
+//            door.color = 'white'
+//        } else {
+//            console.log('Boo')
+//            hero.health--
+//        }
+//    }
 })
 
 //================================================
@@ -548,7 +572,7 @@ function gameBegin() {
     //enemy.alive = false
     generatePlayer()
     gameInterval = setInterval(gameLoop, 30)
-    compString = 'Most'
+    compString = setCompString()
     gameStart = true
 }
 
