@@ -133,9 +133,9 @@ function drawText (string, obj) {
 // Determine current string to check for comparison
 function setCompString() {
     if (enemy.alive === true) {
-            compString = enemy.names[enemy.nameIndex]
+            return enemy.names[enemy.nameIndex]
         } else {
-            compString = roomArray[roomIndex].doorKey
+            return roomArray[roomIndex].doorKey
         }
     }
 
@@ -191,29 +191,25 @@ document.querySelector('form').addEventListener('submit', (e)=> {
     // Reset text input box to empty
     textInput.value = ''
     
-    console.log('working')
     let match = compareString(playerInput, compString)
     
     if (enemy.alive) {
-        console.log('working too')
-        console.log(playerInput)
-        console.log(compString)
-        console.log(match)
         if (match) {
             console.log('Correct')
+            enemy.alive = false
             match = false
+            compString = setCompString()
+        }
+    } else if (nearDoor) {
+        if (match) {
+            console.log('Correct')
+            doorUnlocked = true
+            door.color = 'white'
+        } else {
+            console.log('Boo')
+            hero.health--
         }
     }
-//    } else if (nearDoor) {
-//        if (match) {
-//            console.log('Correct')
-//            doorUnlocked = true
-//            door.color = 'white'
-//        } else {
-//            console.log('Boo')
-//            hero.health--
-//        }
-//    }
 })
 
 //================================================
@@ -569,10 +565,11 @@ let gameLoop = () => {
 function gameBegin() {
     generateDoor()
     generateEnemy()
-    //enemy.alive = false
     generatePlayer()
+    
     gameInterval = setInterval(gameLoop, 30)
     compString = setCompString()
+    console.log(compString)
     gameStart = true
 }
 
