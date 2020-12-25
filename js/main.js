@@ -520,6 +520,7 @@ let gameLoop = () => {
         roomIndex++
         console.log(roomArray[roomIndex])
         moveToNextRoom()
+        compString = setCompString()
     } else if (detectHit(door)) {
         
     }
