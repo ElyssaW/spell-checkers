@@ -27,7 +27,10 @@ let moveObject = {up: false,
                  }
 
 // Initialize array of objects containing room data
-let roomArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
+let roomArray = []
+
+// Initialize array of objects containing room data
+let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
                  {doorKey: 'amazing', doorStart: 'And here is the ', doorTypo: 'azginma', doorEnd: ' second sentence'},
                  {doorKey: 'magnificient', doorStart: 'And lastly, the ', doorTypo: 'mnecitnifiag', doorEnd: ' end of the essay!'}
                 ]
@@ -41,8 +44,8 @@ let keyValue
 // Set attribute and get computed style make the game more
 // responsive, allowing for clicks and computer graphics to still
 // display properly when set
-game.setAttribute('width', getComputedStyle(game)['width'])
-game.setAttribute('height', getComputedStyle(game)['height'])
+game.setAttribute('width', 1200)
+game.setAttribute('height', 600)
 
 //===============================================
 //
@@ -63,7 +66,7 @@ function selectRandom (randomArray) {
 // Function to check which room the player should progress to next, and
 // run all associated functions for it
 function moveToNextRoom() {
-    setCompString()
+    clearRoom()
     
     switch(roomIndex) {
         case 1:
@@ -75,6 +78,22 @@ function moveToNextRoom() {
         case 3:
             console.log('You won!')
     }
+}
+
+// Function to reset needed data when moving onto the next room
+function clearRoom () {
+    
+    // Set the door back to alive
+    door.alive = true
+    
+    // Clear HTML text
+    clearText()
+    
+    // Increment room index
+    roomIndex++
+    
+    // Set comp string to next room's key
+    compString = setCompString()
 }
 
 // Create second room
@@ -135,16 +154,16 @@ function setCompString() {
     if (enemy.alive === true) {
             return enemy.names[enemy.nameIndex]
         } else {
-            return roomArray[roomIndex].doorKey
+            return textArray[roomIndex].doorKey
         }
     }
 
 // Function to select door text according to current room and set it in the HTML
 function renderDoorText () {
     if (nearDoor === false) {
-        document.querySelector('#firstHalf').innerText = roomArray[roomIndex].doorStart
-        document.querySelector('#typo').innerText = roomArray[roomIndex].doorTypo
-        document.querySelector('#secondHalf').innerText = roomArray[roomIndex].doorEnd
+        document.querySelector('#firstHalf').innerText = textArray[roomIndex].doorStart
+        document.querySelector('#typo').innerText = textArray[roomIndex].doorTypo
+        document.querySelector('#secondHalf').innerText = textArray[roomIndex].doorEnd
         nearDoor = true
     } 
 }
@@ -243,9 +262,33 @@ function Constructor(x, y, color, width, height) {
     }
 }
 
+// Constructor function for new doors
+function DoorConstructor(x, y, leadsTo) {
+    this.x = x
+    this.y = y
+    this.color = 'red'
+    this.width = 40
+    this.height = 40
+    this.firstLock = '',
+    this.secondLock = '',
+    this.typo = '',
+    this.locked = true
+    this.leadsTo = leadsTo,
+    this.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+}
+
+// Constructor function for new rooms
+function RoomConstructor() {
+    this.cleared = false,
+    this.contains = []
+}
+
 // Generates new door + door adjacent objects
 function generateDoor () { 
-    door = new Constructor(850, 40, 'red', 60, 60)
+    door = new DoorConstructor(850, 40, 1)
     doorMat = new Constructor(door.x-((door.width)/2), door.y-((door.height)/2), 'blue', 120, 120)
     doorMatEdge = new Constructor(door.x-((door.width)/2)-15, door.y-((door.height)/2)-15, 'green', 150, 150)
 }
@@ -401,6 +444,17 @@ let detectHit = (obj) => {
         }
 }
 
+// Detects nearness
+let detectNear = (obj, threshold) => {
+        // Check top left corner
+    if ((hero.x >= obj.x - threshold && hero.x < obj.x+obj.width + threshold) &&
+        (hero.y >= obj.y - threshold && hero.y < obj.y+obj.height + threshold)) {
+            return true
+        } else {
+            return false
+        }
+}
+
 //================================================
 //
 //          Player Functions
@@ -514,13 +568,9 @@ let gameLoop = () => {
     
     // Check if player is trying and able to move through door
     if (detectHit(door) && doorUnlocked) {
-        console.log(roomArray[roomIndex])
-        door.alive = true
-        clearText()
-        roomIndex++
-        console.log(roomArray[roomIndex])
+        
         moveToNextRoom()
-        compString = setCompString()
+        
     } else if (detectHit(door)) {
         
     }
@@ -543,17 +593,7 @@ let gameLoop = () => {
     }
     
     // Check if player is going over the border
-    if (hero.x < 0) {
-        hero.x = 0
-    } else if (hero.x+hero.width > game.width) {
-        hero.x = game.width  - hero.width
-    }
-    
-    if (hero.y < 0) {
-        hero.y = 0
-    } else if (hero.y+hero.height > game.height) {
-        hero.y = game.height  - hero.height
-    }
+    wallCheck(hero)
 
     // Render hero
     doorMatEdge.render()

@@ -15,8 +15,8 @@ body {
 
 canvas {
   background-color: white;
-  width: 80%;
-  height: 80vh;
+  width: 1600;
+  height: 1600;
 }
 
 div#word-bank {
