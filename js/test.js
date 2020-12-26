@@ -8,6 +8,10 @@ let frame = 0
 let roomIndex = 0
 // Expected String Input
 let compString
+// Player's submitted input
+let playerInput
+// Variable to contain if input was correct
+let correctInput
 // Game Loop Interval
 let gameInterval
 // Checks if game is on
@@ -47,22 +51,43 @@ function selectRandom (randomArray) {
     return randomArray[Math.floor(Math.random() * randomArray.length)]
 }
 
-// Function to select door text according to current room and set it in the HTML
-function renderDoorText (door) {
-    if (nearDoor === false) {
-        document.querySelector('#firstHalf').innerText = door.firstLock
-        document.querySelector('#typo').innerText = door.typo
-        document.querySelector('#secondHalf').innerText = door.secondLock
-        nearDoor = true
-    } 
-}
-
 // Function to write text above object
 function drawText (string, obj) {
     ctx.fillStyle = 'red'
     ctx.font = '20px sans-serif'
     ctx.fillText(string, obj.x, obj.y-5)
 }
+
+// If input matches expected string, unlock door
+function compareString(input, compString) {
+    if (input === compString) {
+        return true
+    } else {
+    // If string input is not correct, deduct health
+        return false
+    }
+}
+
+function submissionEvent(e) {
+    // Prevent dafult refresh
+    e.preventDefault()
+    
+    // Grab player input from box
+    playerInput = textInput.value
+    
+    // Reset text input box to empty
+    textInput.value = ''
+    
+    if (compareString(playerInput, compString)) {
+        console.log('Correct!')
+        correctInput = true
+    } else {
+        console.log('Wrong!')
+        correctInput = false
+    }
+}
+
+document.addEventListener('submit', submissionEvent)
 
 //================================================
 //
@@ -137,6 +162,7 @@ function DoorConstructor(x, y, leadsTo) {
     this.firstLock = 'Test test ',
     this.secondLock = 'test test',
     this.typo = 'stet ',
+    this.key = 'test'
     this.locked = true
     this.leadsTo = leadsTo,
     this.textFrameIndex = 0
@@ -149,15 +175,21 @@ function DoorConstructor(x, y, leadsTo) {
         if (this.locked) {
             //If door is locked, check if player is near
             if (detectNear(this, 200)) {
+                // Set expected string to key text
+                compString = this.key
                 // And display typo text
                 drawTypo(door, this.firstLock, this.typo, this.secondLock)
-                // And watch for input
+                
+                if (correctInput) {
+                    console.log('Door unlocked')
+                    this.locked = false
+                    correctInput = false
+                }
             }
         // If door is unlocked, watch for collision
         } else if (detectHit(this)) {
             // And take player to next room
-            console.log('Hello')
-            
+            console.log('Moving to next room')
         } 
     }
 }
@@ -170,13 +202,12 @@ function RoomConstructor() {
 
 // Generates new door + door adjacent objects
 function generateDoor () { 
-    door = new DoorConstructor(580, 200, 1)
-    doorMat = new Constructor(door.x+(door.width/2)-200, door.y+(door.height/2)-200, 'blue', 400, 400)
+    door = new DoorConstructor(580, -20, 1)
 }
 
 // Generates new player. Should only run on game start
 function generatePlayer () {
-    hero = new Constructor(150, 150, 'hotpink', 60, 60)
+    hero = new Constructor(580, 500, 'hotpink', 60, 60)
 }
 
 //================================================
@@ -238,7 +269,7 @@ let detectNear = (obj, threshold) => {
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
 function drawTypo (obj, string1, string2, string3) {
-    let floatValueArray = [0, 0, -1, -1, -2, -2, -4, -4, -7, -7, -4, -4, -2, -2, -1, -1]
+    let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
     
     getCenter = (ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width)/2.5
