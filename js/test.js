@@ -134,14 +134,31 @@ function DoorConstructor(x, y, leadsTo) {
     this.color = 'red'
     this.width = 60
     this.height = 60
-    this.firstLock = '',
-    this.secondLock = '',
-    this.typo = '',
+    this.firstLock = 'Test test ',
+    this.secondLock = 'test test',
+    this.typo = 'stet ',
     this.locked = true
     this.leadsTo = leadsTo,
+    this.textFrameIndex = 0
     this.render = function() {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+    this.activate = function() {
+        // Check if door is locked
+        if (this.locked) {
+            //If door is locked, check if player is near
+            if (detectNear(this, 200)) {
+                // And display typo text
+                drawTypo(door, this.firstLock, this.typo, this.secondLock)
+                // And watch for input
+            }
+        // If door is unlocked, watch for collision
+        } else if (detectHit(this)) {
+            // And take player to next room
+            console.log('Hello')
+            
+        } 
     }
 }
 
@@ -187,8 +204,20 @@ function wallCheck(obj) {
 // Four corner collision detection
 let detectHit = (obj) => {
         // Check top left corner
-    if ((hero.x >= obj.x && hero.x+hero.width < obj.x+obj.width) &&
-        (hero.y >= obj.y && hero.y+hero.height < obj.y+obj.height)) {
+    if (((hero.x >= obj.x && hero.x < obj.x+obj.width) &&
+        (hero.y >= obj.y && hero.y < obj.y+obj.height)) ||
+        
+        // Check top right corner
+        ((hero.x+hero.width >= obj.x && hero.x < obj.x) &&
+        (hero.y >= obj.y && hero.y < obj.y+obj.height)) ||
+        
+        // Check bottom right corner
+        ((hero.x <= obj.x && hero.x+hero.width > obj.x) &&
+        (hero.y+hero.height >= obj.y && hero.y < obj.y)) ||
+        
+        // Check bottom left corner
+        ((hero.x >= obj.x && hero.x < obj.x+obj.width) &&
+        (hero.y <= obj.y && hero.y+hero.height > obj.y))) {
             return true
         } else {
             return false
@@ -209,7 +238,7 @@ let detectNear = (obj, threshold) => {
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
 function drawTypo (obj, string1, string2, string3) {
-    let floatValueArray = [0, 0, 1, 1, 2, 2, 4, 4, 7, 7, 4, 4, 2, 2, 1, 1]
+    let floatValueArray = [0, 0, -1, -1, -2, -2, -4, -4, -7, -7, -4, -4, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
     
     getCenter = (ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width)/2.5
@@ -307,10 +336,6 @@ let gameLoop = () => {
     
     //Clear board
     ctx.clearRect(0, 0, game.width, game.height)
-    ctx.fillStyle = 'aliceblue'
-    ctx.fillRect(50, 50, 1100, 500)
-    
-    drawTypo(hero, 'Hello, my name is ', 'Madge ', 'the Mage')
     
     // Increment frame
     frame++
@@ -320,19 +345,12 @@ let gameLoop = () => {
     
     // Wall check player
     wallCheck(hero)
-    
-    if (detectHit(door)) {
-        console.log('Touching door')
-    }
-    
-    if (detectNear(door, 200)) {
-        console.log('Nearing door')
-    }
 
-    // Render hero
-    doorMat.render()
+    // Render door
     door.render()
+    door.activate()
     
+    // Render hero
     hero.render()
 }
 
