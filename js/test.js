@@ -81,6 +81,7 @@ function Constructor(x, y, color, width, height) {
     this.xdir = 0
     this.ydir = 0
     this.frameIndex = 0
+    this.textFrameIndex = 0
     this.render = function() {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
@@ -101,6 +102,7 @@ function HeroConstructor(x, y) {
     this.xdir = 0
     this.ydir = 0
     this.frameIndex = 0
+    this.textFrameIndex = 0
     this.render = function() {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
@@ -204,24 +206,26 @@ let detectNear = (obj, threshold) => {
         }
 }
 
-let textFloatIndex = 0
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
-function drawTypo (string1, string2, string3) {
+function drawTypo (obj, string1, string2, string3) {
     let floatValueArray = [0, 0, 1, 1, 2, 2, 4, 4, 7, 7, 4, 4, 2, 2, 1, 1]
-    let floatValue = floatValueArray[textFloatIndex]
+    let floatValue = floatValueArray[obj.textFrameIndex]
+    
+    getCenter = (ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width)/2.5
+    textX = obj.x - getCenter
     
     ctx.fillStyle = 'black'
     ctx.font = '20px sans-serif'
     ctx.textAlign = 'left'
-    ctx.fillText(string1, 10, 10 + floatValue)
+    ctx.fillText(string1, textX, obj.y - 5 + floatValue)
     ctx.fillStyle = 'red'
-    ctx.fillText(string2, 10 + ctx.measureText(string1).width, 10 + floatValue)
+    ctx.fillText(string2, textX + ctx.measureText(string1).width, obj.y - 5 + floatValue)
     ctx.fillStyle = 'black'
-    ctx.fillText(string3, 10 + ctx.measureText(string1).width + ctx.measureText(string2).width, 10 + floatValue)
+    ctx.fillText(string3, textX + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue)
     
-    textFloatIndex++
-    if (textFloatIndex ===  floatValueArray.length) {textFloatIndex = 0}
+    obj.textFrameIndex++
+    if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
 
 //================================================
@@ -306,7 +310,7 @@ let gameLoop = () => {
     ctx.fillStyle = 'aliceblue'
     ctx.fillRect(50, 50, 1100, 500)
     
-    drawTypo('Hello, my name is ', ' Madge ', ' the Mage')
+    drawTypo(hero, 'Hello, my name is ', 'Madge ', 'the Mage')
     
     // Increment frame
     frame++
