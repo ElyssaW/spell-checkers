@@ -6,6 +6,8 @@ let ctx = game.getContext('2d')
 let frame = 0
 // Current room
 let roomIndex = 0
+// Current chest
+let chestIndex = 0
 // Expected String Input
 let compString
 // Player's submitted input
@@ -27,11 +29,8 @@ let moveObject = {up: false,
 let playerText = []
 // Initialize array of objects containing room data
 let roomArray = []
-
 // Initialize array of objects containing the word puzzle key/locks
 let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
-                 {doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
-                 {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
                  {doorKey: 'spells', doorStart: 'Magic is wonderful, and ', doorTypo: 'spllese', doorEnd: ' are wonderful too!'},
                  {doorKey: 'wonderful', doorStart: 'And you know what else is ', doorTypo: 'ndferwulo', doorEnd: '? Madge!'},
                  {doorKey: 'kindest', doorStart: 'She is the most wonderful, the ', doorTypo: 'nkidtse', doorEnd: ', most obvlivious person I know.'},
@@ -39,14 +38,17 @@ let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorT
                  {doorKey: 'bury', doorStart: '...was to ', doorTypo: 'yurb', doorEnd: ' it in an essay on magic.'},
                  {doorKey: 'magnificient', doorStart: 'But more than ', doorTypo: 'yanhingt', doorEnd: ', I would like to tell her...'}
                 ]
-//// Initialize array of enemy names
-//let spellWords = ['das', 'sed', 'wras', 'fas',
-//                  'qar', 'xas', 'dax', 'wes',
-//                  'qas', 'deas', 'sera', 'deras',
-//                  'qaras', 'tera', 'wexa', 'zeras',
-//                  'vaqed', 'gerat', 'dered'
-//]
-
+// Initialize secondary array of non-plot-relevant locks/keys for chests and doors that do not progress forward
+let chestArray = [{doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
+                  {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
+                  {doorKey: 'speaking', doorStart: 'Magic cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
+                  {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
+                  {doorKey: 'known', doorStart: 'Magic words have been ', doorTypo: 'nownk', doorEnd: ' to roam about and wreak havoc'},
+                  {doorKey: 'fight', doorStart: 'But Spellcheckers ', doorTypo: 'fihgt', doorEnd: ' every day to keep them in line.'},
+                  {doorKey: 'protect', doorStart: 'Royal Spellcheckers ', doorTypo: 'teproct', doorEnd: ' all royal correspondance from wild magic.'},
+                  {doorKey: 'wrestle', doorStart: 'Spellcheckers ', doorTypo: 'sertwle', doorEnd: ' with typos, run-ons, and wild punctuation.'},
+                  {doorKey: 'invaluable', doorStart: 'This makes their service ', doorTypo: 'invalauble', doorEnd: ''},
+                ]
 // Initialize array of enemy names
 let spellWords = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
                   'craft', 'webcast', 'swagger', 'waste', 'cedar', 'brace', 'fast', 'stave',
@@ -359,10 +361,10 @@ function ChestConstructor(x, y, item) {
     this.color = 'yellow'
     this.width = 60
     this.height = 60
-    this.firstLock = 'I like big ',
-    this.secondLock = 'and I cannot lie',
-    this.typo = 'sttub ',
-    this.key = 'butts'
+    this.firstLock = chestArray[chestIndex].doorStart
+    this.secondLock = chestArray[chestIndex].doorEnd
+    this.typo = chestArray[chestIndex].doorTypo
+    this.key = chestArray[chestIndex].doorKey
     this.locked = true
     this.alive = true
     this.item = item,
@@ -388,6 +390,7 @@ function ChestConstructor(x, y, item) {
             if (hero.health < hero.maxhealth) {
                 hero.health++
                 this.alive = false
+                chestIndex++
             }
         } 
     }
@@ -406,8 +409,11 @@ function generateRoomContent() {
     let randomItem
     
     let door = new DoorConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100), 1+roomIndex)
+    let chest = new ChestConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+    
     playerInput = []
     array.push(door)
+    array.push(chest)
     
     for (let i = 0; i < 3; i++) {
         random = Math.floor(Math.random() * 5)
@@ -419,7 +425,7 @@ function generateRoomContent() {
                 randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
                 break;
             case 3:
-                randomItem = new ChestConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
                 break;
             default:
                 randomItem = null
