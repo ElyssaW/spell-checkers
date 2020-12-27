@@ -70,15 +70,12 @@ function compareString(input, compString) {
     }
 }
 
-function submissionEvent(e) {
-    // Prevent dafult refresh
-    e.preventDefault()
+function submissionEvent() {
     
     // Grab player input from box
-    playerInput = textInput.value
+    playerInput = playerText.join('')
     
-    // Reset text input box to empty
-    textInput.value = ''
+    // Reset player text array
     playerText = []
     
     if (compareString(playerInput, compString)) {
@@ -89,8 +86,6 @@ function submissionEvent(e) {
         correctInput = false
     }
 }
-
-document.addEventListener('submit', submissionEvent)
 
 //================================================
 //
@@ -362,7 +357,12 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keypress', e => {
     if (e.charCode >= 97 && e.charCode <= 122) {
         playerText.push(e.key)
+    } else if (e.keyCode === 13) {
+        submissionEvent()
+    } else if (e.keyCode === 8) {
+        playerText.pop()
     }
+    
     console.log(playerText)
 })
 
