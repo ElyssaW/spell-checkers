@@ -35,6 +35,10 @@ let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorT
                  {doorKey: 'amazing', doorStart: 'And here is the ', doorTypo: 'azginma', doorEnd: ' second sentence'},
                  {doorKey: 'magnificient', doorStart: 'And lastly, the ', doorTypo: 'mnecitnifiag', doorEnd: ' end of the essay!'}
                 ]
+// Initialize array of enemy names
+let spellWords = [ 'das', 'sed', 'wras', 'fas',
+                   'qar', 'xas', 'dax', 'wes',
+]
 
 // Set canvas width/height
 // Set attribute and get computed style make the game more
@@ -70,21 +74,32 @@ function compareString(input, compString) {
     }
 }
 
-function submissionEvent() {
+//================================================
+//
+//          Draw Functions
+//
+//================================================
+
+// Write typo text for doors/chests. This functions breaks a sentence
+// up into three strings, so that the typo part can be highlighted in red
+function drawTypo (obj, string1, string2, string3) {
+    let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
+    let floatValue = floatValueArray[obj.textFrameIndex]
     
-    // Grab player input from box
-    playerInput = playerText.join('')
+    getCenter = (ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width)/2.5
+    textX = obj.x - getCenter
     
-    // Reset player text array
-    playerText = []
+    ctx.fillStyle = 'black'
+    ctx.font = '20px sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(string1, textX, obj.y - 5 + floatValue)
+    ctx.fillStyle = 'red'
+    ctx.fillText(string2, textX + ctx.measureText(string1).width, obj.y - 5 + floatValue)
+    ctx.fillStyle = 'black'
+    ctx.fillText(string3, textX + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue)
     
-    if (compareString(playerInput, compString)) {
-        console.log('Correct!')
-        correctInput = true
-    } else {
-        console.log('Wrong!')
-        correctInput = false
-    }
+    obj.textFrameIndex++
+    if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
 
 //================================================
@@ -92,6 +107,9 @@ function submissionEvent() {
 //          Constructor Functions
 //
 //================================================
+
+// Persistent objects
+    let enemy
 
 // Constructor function for hero
 function Constructor(x, y, color, width, height) {
@@ -143,10 +161,61 @@ function GhostConstructor(x, y) {
     this.alive = true
     this.xdir = 0
     this.ydir = 0
+    this.speed = 1
     this.frameIndex = 0
     this.render = function() {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+    this.activate = function() {
+        if(detectNear(this, 200)) {
+            moveToPlayer(this)
+            
+            if (detectHit(this)) {
+                if (!playerJustHit) {
+                    hero.health--
+                    playerJustHit = true
+                    setTimeout(iframes, 1500)
+                }
+            }
+        } else {
+            randomWalk(this)
+        }
+        
+        wallCheck(this)
+    }
+}
+
+// Constructor function for new enemies
+function ExclaimerConstructor(x, y) {
+    this.x = x
+    this.y = y
+    this.color = 'black'
+    this.width = 30
+    this.height = 30
+    this.health = 1
+    this.alive = true
+    this.xdir = 0
+    this.ydir = 0
+    this.speed = 5
+    this.frameIndex = 0
+    this.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+    this.activate = function() {
+        moveToPlayer(this)
+            
+        if (detectHit(this)) {
+            this.alive = false
+            if (!playerJustHit) {
+                hero.health--
+                playerJustHit = true
+                setTimeout(iframes, 1500)
+            }
+        }
+        
+        wallCheck(this)
     }
 }
 
@@ -195,17 +264,7 @@ function DoorConstructor(x, y, leadsTo) {
 // Constructor function for new rooms
 function RoomConstructor() {
     this.cleared = false,
-    this.contains = []
-}
-
-// Generates new door + door adjacent objects
-function generateDoor () { 
-    door = new DoorConstructor(580, 60, 1)
-}
-
-// Generates new player. Should only run on game start
-function generatePlayer () {
-    hero = new Constructor(580, 500, 'hotpink', 60, 60)
+    this.contents = []
 }
 
 //================================================
@@ -213,6 +272,79 @@ function generatePlayer () {
 //          Movement functions
 //
 //================================================
+
+// Make object walk in random direction
+function pickDirection (obj) {
+    // Pick random direction value - +x, -x, +y, -y
+    let randDir = Math.floor(Math.random() * 5)
+    
+    // Set object's x/y direction to zero
+    obj.xdir = 0
+    obj.ydir = 0
+    
+    // Assign object's current direction based on
+    // the random value received above
+     switch(randDir) {
+        case 1:
+            obj.ydir -= obj.speed
+            break;
+        case 2:
+            obj.xdir -= obj.speed
+            break
+        case 3:
+            obj.ydir += obj.speed
+            break
+        case 4:
+            obj.xdir += obj.speed
+            break
+        default:
+        
+    }
+}
+
+// Function to make object move around canvas. Passes the object to be moved
+// and the pattern to move the object in (Random, set, move to player, etc.)
+function randomWalk(obj) {
+    // Every 30 frames, assign the
+    // object a new direction
+    if (obj.frameIndex === 30) {
+        obj.frameIndex = 0
+        pickDirection(obj)
+    } else {
+        obj.frameIndex++
+    }
+    
+    // Take object's x/y direction
+    // Add x/y direction to object's x/y
+    obj.x += obj.xdir
+    obj.y += obj.ydir
+    
+    // Check to make sure the object isn't yeeting off the game map
+    wallCheck(obj)
+}
+
+// Function to move closer to player
+function moveToPlayer (obj) {
+    
+    // Grabs player's x/y and moves toward it. The initial funky if statements
+    // help smooth the object's movement out - otherwise it jitters a little
+    // trying to get precisely on the same value as the player's x/y
+    if (obj.x <= hero.x + 2 && obj.x >= hero.x - 2) {
+        obj.x = hero.x
+    } else if (obj.x < hero.x) {
+        obj.x += obj.speed
+    } else {
+        obj.x -= obj.speed
+    }
+    
+    if (obj.y <= hero.y + 2 && obj.y >= hero.y - 2) {
+        obj.y = hero.y 
+    } else if (obj.y > hero.y) {
+        obj.y -= obj.speed
+    } else {
+        obj.y += obj.speed
+    }
+}
 
 // Detect collision between any given object and the wall
 function wallCheck(obj) {
@@ -264,31 +396,28 @@ let detectNear = (obj, threshold) => {
         }
 }
 
-// Write typo text for doors/chests. This functions breaks a sentence
-// up into three strings, so that the typo part can be highlighted in red
-function drawTypo (obj, string1, string2, string3) {
-    let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
-    let floatValue = floatValueArray[obj.textFrameIndex]
-    
-    getCenter = (ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width)/2.5
-    textX = obj.x - getCenter
-    
-    ctx.fillStyle = 'black'
-    ctx.font = '20px sans-serif'
-    ctx.textAlign = 'left'
-    ctx.fillText(string1, textX, obj.y - 5 + floatValue)
-    ctx.fillStyle = 'red'
-    ctx.fillText(string2, textX + ctx.measureText(string1).width, obj.y - 5 + floatValue)
-    ctx.fillStyle = 'black'
-    ctx.fillText(string3, textX + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue)
-    
-    obj.textFrameIndex++
-    if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
+//================================================
+//
+//          Player Functions
+//
+//================================================
+
+// Function to create iframes on the player, so that they
+// are not instantly killed on one hit from an enemy
+function iframes () {
+    console.log('iframes up')
+    playerJustHit = false
+}
+
+// Function to play on player death
+function killPlayer() {
+    console.log('u ded')
+    clearInterval(gameInterval)
 }
 
 //================================================
 //
-//          Player Functions
+//          Input Functions
 //
 //================================================
 
@@ -307,6 +436,23 @@ function movementHandler () {
     if (moveObject.left === true) {
              hero.x -= 5
          } 
+}
+
+function submissionEvent() {
+    
+    // Grab player input from box
+    playerInput = playerText.join('')
+    
+    // Reset player text array
+    playerText = []
+    
+    if (compareString(playerInput, compString)) {
+        console.log('Correct!')
+        correctInput = true
+    } else {
+        console.log('Wrong!')
+        correctInput = false
+    }
 }
 
 // This duo of functions essentially replicates the keypress events for the arrow keys.
@@ -354,16 +500,22 @@ document.addEventListener('keydown', e => {
          }
  })
 
+// Listen for letter or submission input from player
 document.addEventListener('keypress', e => {
-    if (e.charCode >= 97 && e.charCode <= 122) {
+     if (e.charCode >= 97 && e.charCode <= 122) {
         playerText.push(e.key)
     } else if (e.keyCode === 13) {
         submissionEvent()
     } else if (e.keyCode === 8) {
         playerText.pop()
     }
-    
-    console.log(playerText)
+})
+
+// Listen for backspace
+document.addEventListener('keydown', e => {
+    if (e.keyCode === 8) {
+        playerText.pop()
+    }
 })
 
 //================================================
@@ -388,18 +540,25 @@ let gameLoop = () => {
     
     // Wall check player
     wallCheck(hero)
-
-    // Render door
-    door.render()
-    door.activate()
+    
+    // Render and activate all contents of the room
+    for (let i = 0; i < room.contents; i++) {
+        if (room.contents[i].alive) {
+            room.contents[i].render()
+            room.contents[i].activate()
+        }
+    }
     
     // Render hero
     hero.render()
 }
 
 function gameBegin() {
-    generateDoor()
-    generatePlayer()
+    door = new DoorConstructor(580, 60, 1)
+    enemy = new ExclaimerConstructor(30, 30)
+    hero = new Constructor(580, 500, 'hotpink', 60, 60)
+    
+    console.log(enemy)
     
     gameInterval = setInterval(gameLoop, 30)
     gameStart = true
