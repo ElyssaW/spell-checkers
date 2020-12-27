@@ -25,6 +25,8 @@ let moveObject = {up: false,
                   left: false,
                   right: false
                  }
+// Initializes array to store player's text input letter by letter
+let playerText = []
 // Initialize array of objects containing room data
 let roomArray = []
 
@@ -77,6 +79,7 @@ function submissionEvent(e) {
     
     // Reset text input box to empty
     textInput.value = ''
+    playerText = []
     
     if (compareString(playerInput, compString)) {
         console.log('Correct!')
@@ -202,7 +205,7 @@ function RoomConstructor() {
 
 // Generates new door + door adjacent objects
 function generateDoor () { 
-    door = new DoorConstructor(580, -20, 1)
+    door = new DoorConstructor(580, 60, 1)
 }
 
 // Generates new player. Should only run on game start
@@ -258,8 +261,8 @@ let detectHit = (obj) => {
 // Detects nearness
 let detectNear = (obj, threshold) => {
         // Check top left corner
-    if ((hero.x >= obj.x - threshold && hero.x < obj.x+obj.width + threshold) &&
-        (hero.y >= obj.y - threshold && hero.y < obj.y+obj.height + threshold)) {
+    if ((hero.x+hero.width >= obj.x - threshold && hero.x < obj.x+obj.width + threshold) &&
+        (hero.y+hero.height >= obj.y - threshold && hero.y < obj.y+obj.height + threshold)) {
             return true
         } else {
             return false
@@ -356,6 +359,13 @@ document.addEventListener('keydown', e => {
          }
  })
 
+document.addEventListener('keypress', e => {
+    if (e.charCode >= 97 && e.charCode <= 122) {
+        playerText.push(e.key)
+    }
+    console.log(playerText)
+})
+
 //================================================
 //
 //          Game Loop
@@ -370,6 +380,8 @@ let gameLoop = () => {
     
     // Increment frame
     frame++
+    
+    ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
     
     // Move player
     movementHandler()
