@@ -134,6 +134,8 @@ function HeroConstructor(x, y) {
     this.height = 50
     this.health = 3
     this.maxhealth = 3
+    this.mana = 50
+    this.maxmana = 50
     this.alive = true
     this.justHit = false
     this.xdir = 0
@@ -191,8 +193,8 @@ function ExclaimerConstructor(x, y) {
     this.height = 30
     this.health = 1
     this.alive = true
-    this.xdir = 0
-    this.ydir = 0
+    this.xdir = randomRange(15, 30)
+    this.ydir = randomRange(15, 30)
     this.speed = 5
     this.frameIndex = 0
     this.render = function() {
@@ -200,11 +202,14 @@ function ExclaimerConstructor(x, y) {
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
     this.activate = function() {
-        moveToPlayer(this)
-            
+        this.x += this.xdir
+        this.y += this.ydir
+        
         if (detectHit(this)) {
             this.alive = false
             if (!playerJustHit) {
+                this.xdir = this.xdir * -1
+                this.ydir = this.ydir * -1
                 hero.health--
                 playerJustHit = true
                 setTimeout(iframes, 1500)
@@ -348,14 +353,18 @@ function wallCheck(obj) {
     // Check if player is going over the border
     if (obj.x < 0) {
         obj.x = 0
+        obj.xdir = obj.xdir * -1
     } else if (obj.x+obj.width > game.width) {
         obj.x = game.width  - obj.width
+        obj.xdir = obj.xdir * -1
     }
     
     if (obj.y < 0) {
         obj.y = 0
+        obj.ydir = obj.ydir * -1
     } else if (obj.y+obj.height > game.height) {
         obj.y = game.height  - obj.height
+        obj.ydir = obj.ydir * -1
     }
 }
 
@@ -515,6 +524,24 @@ document.addEventListener('keydown', e => {
     }
 })
 
+let shiftShield = false
+
+// Listen for backspace
+document.addEventListener('keydown', e => {
+    if (e.keyCode === 16) {
+        shiftShield = true
+        playerJustHit = true
+    }
+})
+
+// Listen for backspace
+document.addEventListener('keyup', e => {
+    if (e.keyCode === 16) {
+        shiftShield = false
+        playerJustHit = false
+    }
+})
+
 //================================================
 //
 //          Game Loop
@@ -532,41 +559,41 @@ let gameLoop = () => {
     
     ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
     
+    if (shiftShield && hero.mana > 0) {
+        console.log('Shielding')
+        ctx.fillStyle = 'rgba(0, 255, 255, 1)'
+        ctx.fillRect(hero.x-2, hero.y-2, hero.width+4, hero.height+4)
+        hero.mana--
+    } else {
+        setTimeout(() => {
+            while (hero.mana < hero.maxmana) {
+                hero.mana++
+                console.log('Filling mana')
+            }
+        }, 2000)
+    }
+    
     // Move player
     movementHandler()
     
     // Wall check player
     wallCheck(hero)
     
-    for (let i = 0; i < room.objects.length; i++) {
-        room.objects[i].render()
-        room.objects[i].activate()
-    }
+    enemy.render()
+    enemy.activate()
     
     // Render hero
     hero.render()
 }
 
-let roomIndex = 0
-let rooms = []
-
 function randomRange(min, max) {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-let room = {
-    id: roomIndex,
-    cleared: false,
-    objects: [
-        new DoorConstructor(580, 60, 1),
-        new ExclaimerConstructor(randomRange(50, 1100), 30),
-        new GhostConstructor(randomRange(50, 1100), 100)
-    ]
-}
-
 function gameBegin() {
     
-    hero = new Constructor(580, 500, 'hotpink', 60, 60)
+    enemy = new ExclaimerConstructor(randomRange(50, 1100), 30)
+    hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
     gameInterval = setInterval(gameLoop, 30)
     gameStart = true

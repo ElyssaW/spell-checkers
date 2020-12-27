@@ -275,6 +275,7 @@ function DoorConstructor(x, y, leadsTo) {
     this.typo = 'stet ',
     this.key = 'test'
     this.locked = true
+    this.alive = true
     this.leadsTo = leadsTo,
     this.textFrameIndex = 0
     this.render = function() {
@@ -287,7 +288,7 @@ function DoorConstructor(x, y, leadsTo) {
             //If door is locked, check if player is near
             if (detectNear(this, 200)) {
                 // Display typo text
-                drawTypo(door, this.firstLock, this.typo, this.secondLock)
+                drawTypo(this, this.firstLock, this.typo, this.secondLock)
                 
                 if (playerInput == this.key) {
                     this.locked = false
@@ -344,15 +345,19 @@ function ChestConstructor(x, y, item) {
 // Constructor function for new rooms
 function RoomConstructor(index) {
     this.index = index
-    this.contents = randomRoomContent()
+    this.contents = generateRoomContent()
+    roomArray.push(this)
 }
 
-function randomRoomContent() {
+function generateRoomContent() {
     let array = []
     let random
     let randomItem
     
-    for (let i = 0; i < 5; i++) {
+    let door = new DoorConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100), 1+roomIndex)
+    array.push(door)
+    
+    for (let i = 0; i < 3; i++) {
         random = Math.floor(Math.random() * 5)
         switch(random) {
             case 1:
