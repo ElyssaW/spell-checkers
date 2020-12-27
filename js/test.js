@@ -4,8 +4,6 @@ console.log('Hello!')
 let ctx = game.getContext('2d')
 // Curent frame of the game
 let frame = 0
-// Current room
-let roomIndex = 0
 // Expected String Input
 let compString
 // Player's submitted input
@@ -27,8 +25,6 @@ let moveObject = {up: false,
                  }
 // Initializes array to store player's text input letter by letter
 let playerText = []
-// Initialize array of objects containing room data
-let roomArray = []
 
 // Initialize array of objects containing room data
 let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
@@ -262,7 +258,8 @@ function DoorConstructor(x, y, leadsTo) {
 }
 
 // Constructor function for new rooms
-function RoomConstructor() {
+function RoomConstructor(index) {
+    this.index = index
     this.cleared = false,
     this.contents = []
 }
@@ -541,24 +538,35 @@ let gameLoop = () => {
     // Wall check player
     wallCheck(hero)
     
-    // Render and activate all contents of the room
-    for (let i = 0; i < room.contents; i++) {
-        if (room.contents[i].alive) {
-            room.contents[i].render()
-            room.contents[i].activate()
-        }
+    for (let i = 0; i < room.objects.length; i++) {
+        room.objects[i].render()
+        room.objects[i].activate()
     }
     
     // Render hero
     hero.render()
 }
 
+let roomIndex = 0
+let rooms = []
+
+function randomRange(min, max) {
+  return Math.floor(Math.random() * (max - min) + min)
+}
+
+let room = {
+    id: roomIndex,
+    cleared: false,
+    objects: [
+        new DoorConstructor(580, 60, 1),
+        new ExclaimerConstructor(randomRange(50, 1100), 30),
+        new GhostConstructor(randomRange(50, 1100), 100)
+    ]
+}
+
 function gameBegin() {
-    door = new DoorConstructor(580, 60, 1)
-    enemy = new ExclaimerConstructor(30, 30)
-    hero = new Constructor(580, 500, 'hotpink', 60, 60)
     
-    console.log(enemy)
+    hero = new Constructor(580, 500, 'hotpink', 60, 60)
     
     gameInterval = setInterval(gameLoop, 30)
     gameStart = true

@@ -8,14 +8,12 @@ let frame = 0
 let roomIndex = 0
 // Expected String Input
 let compString
+// Player's submitted input
+let playerInput
 // Game Loop Interval
 let gameInterval
 // Checks if game is on
 let gameStart = false
-// Checks if player is near a door
-let nearDoor = false
-// Checks if current room's door is unlocked
-let doorUnlocked = false
 // Checks if the player was hit recently, so that they can have
 // iframes between hits
 let playerJustHit = false
@@ -25,7 +23,8 @@ let moveObject = {up: false,
                   left: false,
                   right: false
                  }
-
+// Initializes array to store player's text input letter by letter
+let playerText = []
 // Initialize array of objects containing room data
 let roomArray = []
 
@@ -34,11 +33,10 @@ let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorT
                  {doorKey: 'amazing', doorStart: 'And here is the ', doorTypo: 'azginma', doorEnd: ' second sentence'},
                  {doorKey: 'magnificient', doorStart: 'And lastly, the ', doorTypo: 'mnecitnifiag', doorEnd: ' end of the essay!'}
                 ]
-
-// Track whether an arrow key is pressed. This way, when the player starts typing, and their keypress events
-// interrupt the arrow keys' repeating fires, the player will continue to move smoothly
-let keyDown = false
-let keyValue
+// Initialize array of enemy names
+let spellWords = [ 'das', 'sed', 'wras', 'fas',
+                   'qar', 'xas', 'dax', 'wes',
+]
 
 // Set canvas width/height
 // Set attribute and get computed style make the game more
@@ -57,136 +55,12 @@ function selectRandom (randomArray) {
     return randomArray[Math.floor(Math.random() * randomArray.length)]
 }
 
-//================================================
-//
-//          Placement/Draw Functions
-//
-//================================================
-
-// Function to check which room the player should progress to next, and
-// run all associated functions for it
-function moveToNextRoom() {
-    clearRoom()
-    
-    switch(roomIndex) {
-        case 1:
-            drawSecondRoom()
-            break;
-        case 2:
-            drawThirdRoom()
-            break;
-        case 3:
-            console.log('You won!')
-    }
-}
-
-// Function to reset needed data when moving onto the next room
-function clearRoom () {
-    
-    // Set the door back to alive
-    door.alive = true
-    
-    // Clear HTML text
-    clearText()
-    
-    // Increment room index
-    roomIndex++
-    
-    // Set comp string to next room's key
-    compString = setCompString()
-}
-
-// Create second room
-function drawSecondRoom () {
-    console.log('Room 2 drawn')
-
-    // Place player
-    hero.x = 40
-    hero.y = 40
-    
-    // Place new locked door
-    placeDoorLocked(400, 400)
-    doorUnlocked = false
-    door.color = 'red'
-}
-
-// Create third and final room
-function drawThirdRoom () {
-    // Place new locked door
-    placeDoorLocked(600, 200)
-    doorUnlocked = false
-    door.color = 'red'
-    
-    // Place player
-    hero.x = 40
-    hero.y = 40
-}
-
-function placeDoorLocked (x, y) { 
-    // Move door, doormat, and doormat edge to
-    // proper place
-    door.x = x
-    door.y = y
-    doorMat.x = door.x-(door.width/2)
-    doorMat.y = door.y-(door.height/2)
-    doorMatEdge.x = door.x-(door.width/2)-15
-    doorMatEdge.y = door.y-(door.height/2)-15
-    
-    // Set door to locked
-    door.alive = true
-}
-
-//===============================================
-//
-//          Typing Functions
-//
-//===============================================
-
 // Function to write text above object
 function drawText (string, obj) {
     ctx.fillStyle = 'red'
     ctx.font = '20px sans-serif'
     ctx.fillText(string, obj.x, obj.y-5)
 }
-
-// Determine current string to check for comparison
-function setCompString() {
-    if (enemy.alive === true) {
-            return enemy.names[enemy.nameIndex]
-        } else {
-            return textArray[roomIndex].doorKey
-        }
-    }
-
-// Function to select door text according to current room and set it in the HTML
-function renderDoorText () {
-    if (nearDoor === false) {
-        document.querySelector('#firstHalf').innerText = textArray[roomIndex].doorStart
-        document.querySelector('#typo').innerText = textArray[roomIndex].doorTypo
-        document.querySelector('#secondHalf').innerText = textArray[roomIndex].doorEnd
-        nearDoor = true
-    } 
-}
-
-function clearText () {
-    document.querySelector('#firstHalf').innerText = ''
-    document.querySelector('#typo').innerText = ''
-    document.querySelector('#secondHalf').innerText = ''
-    nearDoor = false
-}
-
-//// If input matches expected string, unlock door
-//function compareString(input, compString) {
-//    if (input == compString) {
-//        doorUnlocked = true
-//        door.color = 'white'
-//    } else {
-//    // If string input is not correct, deduct health
-//        console.log('Booooo')
-//        hero.health--
-//        console.log(hero.health)
-//    }
-//}
 
 // If input matches expected string, unlock door
 function compareString(input, compString) {
@@ -198,38 +72,50 @@ function compareString(input, compString) {
     }
 }
 
-// Add event listener for form submission
-document.querySelector('form').addEventListener('submit', (e)=> {
+//================================================
+//
+//          Draw Functions
+//
+//================================================
+
+// Write typo text for doors/chests. This functions breaks a sentence
+// up into three strings, so that the typo part can be highlighted in red
+function drawTypo (obj, string1, string2, string3) {
+    let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
+    let floatValue = floatValueArray[obj.textFrameIndex]
     
-    // Prevent dafult refresh
-    e.preventDefault()
+    getCenter = (ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width)/2.5
+    textX = obj.x - getCenter
     
-    // Grab player input from box
-    let playerInput = textInput.value
+    ctx.fillStyle = 'black'
+    ctx.font = '20px sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(string1, textX, obj.y - 5 + floatValue)
+    ctx.fillStyle = 'red'
+    ctx.fillText(string2, textX + ctx.measureText(string1).width, obj.y - 5 + floatValue)
+    ctx.fillStyle = 'black'
+    ctx.fillText(string3, textX + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue)
     
-    // Reset text input box to empty
-    textInput.value = ''
+    obj.textFrameIndex++
+    if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
+}
+
+function drawName (obj, string1) {
+    console.log(string1)
+    let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
+    let floatValue = floatValueArray[obj.textFrameIndex]
     
-    let match = compareString(playerInput, compString)
+    getCenter = ctx.measureText(string1).width / 2.5
+    textX = obj.x - getCenter
     
-    if (enemy.alive) {
-        if (match) {
-            console.log('Correct')
-            enemy.alive = false
-            match = false
-            compString = setCompString()
-        }
-    } else if (nearDoor) {
-        if (match) {
-            console.log('Correct')
-            doorUnlocked = true
-            door.color = 'white'
-        } else {
-            console.log('Boo')
-            hero.health--
-        }
-    }
-})
+    ctx.fillStyle = 'black'
+    ctx.font = '20px sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(string1, textX, obj.y - 5 + floatValue)
+    
+    obj.textFrameIndex++
+    if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
+}
 
 //================================================
 //
@@ -237,28 +123,127 @@ document.querySelector('form').addEventListener('submit', (e)=> {
 //
 //================================================
 
-// Initialize persistent objects
-let door
-let doorMat
-let doorMatEdge
-let enemy
-let hero
+// Persistent objects
+    let enemy
 
-// Constructor function for new objects
+// Constructor function for hero
 function Constructor(x, y, color, width, height) {
     this.x = x
     this.y = y
     this.color = color
     this.width = width
     this.height = height
-    this.health = 3
     this.alive = true
     this.xdir = 0
     this.ydir = 0
     this.frameIndex = 0
+    this.textFrameIndex = 0
     this.render = function() {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+}
+
+// Constructor function for hero
+function HeroConstructor(x, y) {
+    this.x = x
+    this.y = y
+    this.color = 'hotpink'
+    this.width = 50
+    this.height = 50
+    this.health = 3
+    this.maxhealth = 3
+    this.alive = true
+    this.justHit = false
+    this.xdir = 0
+    this.ydir = 0
+    this.frameIndex = 0
+    this.textFrameIndex = 0
+    this.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+}
+
+// Constructor function for new enemies
+function GhostConstructor(x, y) {
+    this.x = x
+    this.y = y
+    this.color = 'grey'
+    this.width = 40
+    this.height = 80
+    this.health = 3
+    this.alive = true
+    this.xdir = 0
+    this.ydir = 0
+    this.speed = 1
+    this.frameIndex = 0
+    this.textFrameIndex = 0
+    this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
+    this.spellWordIndex = 0
+    this.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+    this.activate = function() {
+        if(detectNear(this, 200)) {
+            moveToPlayer(this)
+            drawName(this, this.spellWords[this.spellWordIndex])
+            
+            if (playerInput == this.spellWords[this.spellWordIndex]) {
+                console.log('Hit!')
+                this.health--
+                    if (this.health === 0) {
+                        this.alive = false
+                    }
+                this.spellWordIndex++
+            }
+            
+            if (detectHit(this)) {
+                if (!playerJustHit) {
+                    hero.health--
+                    playerJustHit = true
+                    setTimeout(iframes, 1500)
+                }
+            }
+        } else {
+            randomWalk(this)
+        }
+        
+        wallCheck(this)
+    }
+}
+
+// Constructor function for new enemies
+function ExclaimerConstructor(x, y) {
+    this.x = x
+    this.y = y
+    this.color = 'black'
+    this.width = 30
+    this.height = 30
+    this.health = 1
+    this.alive = true
+    this.xdir = 0
+    this.ydir = 0
+    this.speed = 5
+    this.frameIndex = 0
+    this.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+    this.activate = function() {
+        moveToPlayer(this)
+            
+        if (detectHit(this)) {
+            this.alive = false
+            if (!playerJustHit) {
+                hero.health--
+                playerJustHit = true
+                setTimeout(iframes, 1500)
+            }
+        }
+        
+        wallCheck(this)
     }
 }
 
@@ -267,63 +252,45 @@ function DoorConstructor(x, y, leadsTo) {
     this.x = x
     this.y = y
     this.color = 'red'
-    this.width = 40
-    this.height = 40
-    this.firstLock = '',
-    this.secondLock = '',
-    this.typo = '',
+    this.width = 60
+    this.height = 60
+    this.firstLock = 'Test test ',
+    this.secondLock = 'test test',
+    this.typo = 'stet ',
+    this.key = 'test'
     this.locked = true
     this.leadsTo = leadsTo,
+    this.textFrameIndex = 0
     this.render = function() {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
+    this.activate = function() {
+        // Check if door is locked
+        if (this.locked) {
+            //If door is locked, check if player is near
+            if (detectNear(this, 200)) {
+                // Display typo text
+                drawTypo(door, this.firstLock, this.typo, this.secondLock)
+                
+                if (playerInput == this.key) {
+                    console.log('Door unlocked')
+                    this.locked = false
+                }
+            }
+        // If door is unlocked, watch for collision
+        } else if (detectHit(this)) {
+            // And take player to next room
+            console.log('Moving to next room')
+        } 
+    }
 }
 
 // Constructor function for new rooms
-function RoomConstructor() {
+function RoomConstructor(index) {
+    this.index = index
     this.cleared = false,
-    this.contains = []
-}
-
-// Generates new door + door adjacent objects
-function generateDoor () { 
-    door = new DoorConstructor(850, 40, 1)
-    doorMat = new Constructor(door.x-((door.width)/2), door.y-((door.height)/2), 'blue', 120, 120)
-    doorMatEdge = new Constructor(door.x-((door.width)/2)-15, door.y-((door.height)/2)-15, 'green', 150, 150)
-}
-
-// Generates new player. Should only run on game start
-function generatePlayer () {
-    hero = new Constructor(150, 150, 'hotpink', 60, 60)
-}
-
-//================================================
-//
-//               Enemy functions
-//
-//================================================
-
-// Initialize array of enemy names
-let spellWords = [ 'das', 'sed', 'wras', 'fas',
-                   'qar', 'xas', 'dax', 'wes',
-]
-
-// Function to generate an enemy
-function generateEnemy () {
-    enemy = new Constructor(600, 300, 'grey', 40, 80)
-    
-    enemy.names = [selectRandom(spellWords), 
-                   selectRandom(spellWords),
-                   selectRandom(spellWords)]
-
-    enemy.nameIndex = 0
-    
-    enemy.render = function() {
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.width, this.height)
-        drawText(this.names[this.nameIndex], this)
-    }
+    this.contents = []
 }
 
 //================================================
@@ -333,7 +300,7 @@ function generateEnemy () {
 //================================================
 
 // Make object walk in random direction
-function randomWalk (obj) {
+function pickDirection (obj) {
     // Pick random direction value - +x, -x, +y, -y
     let randDir = Math.floor(Math.random() * 5)
     
@@ -345,16 +312,16 @@ function randomWalk (obj) {
     // the random value received above
      switch(randDir) {
         case 1:
-            obj.ydir -= 2
+            obj.ydir -= obj.speed
             break;
         case 2:
-            obj.xdir -= 2
+            obj.xdir -= obj.speed
             break
         case 3:
-            obj.ydir += 2
+            obj.ydir += obj.speed
             break
         case 4:
-            obj.xdir += 2
+            obj.xdir += obj.speed
             break
         default:
         
@@ -363,12 +330,12 @@ function randomWalk (obj) {
 
 // Function to make object move around canvas. Passes the object to be moved
 // and the pattern to move the object in (Random, set, move to player, etc.)
-function objectWalk(obj) {
+function randomWalk(obj) {
     // Every 30 frames, assign the
     // object a new direction
     if (obj.frameIndex === 30) {
         obj.frameIndex = 0
-        randomWalk(obj)
+        pickDirection(obj)
     } else {
         obj.frameIndex++
     }
@@ -391,17 +358,17 @@ function moveToPlayer (obj) {
     if (obj.x <= hero.x + 2 && obj.x >= hero.x - 2) {
         obj.x = hero.x
     } else if (obj.x < hero.x) {
-        obj.x += 1
+        obj.x += obj.speed
     } else {
-        obj.x -= 1
+        obj.x -= obj.speed
     }
     
     if (obj.y <= hero.y + 2 && obj.y >= hero.y - 2) {
         obj.y = hero.y 
     } else if (obj.y > hero.y) {
-        obj.y -= 1
+        obj.y -= obj.speed
     } else {
-        obj.y += 1
+        obj.y += obj.speed
     }
 }
 
@@ -447,8 +414,8 @@ let detectHit = (obj) => {
 // Detects nearness
 let detectNear = (obj, threshold) => {
         // Check top left corner
-    if ((hero.x >= obj.x - threshold && hero.x < obj.x+obj.width + threshold) &&
-        (hero.y >= obj.y - threshold && hero.y < obj.y+obj.height + threshold)) {
+    if ((hero.x+hero.width >= obj.x - threshold && hero.x < obj.x+obj.width + threshold) &&
+        (hero.y+hero.height >= obj.y - threshold && hero.y < obj.y+obj.height + threshold)) {
             return true
         } else {
             return false
@@ -474,6 +441,12 @@ function killPlayer() {
     clearInterval(gameInterval)
 }
 
+//================================================
+//
+//          Input Functions
+//
+//================================================
+
 // Checks which direction the player is trying to move in, and moves them there
 function movementHandler () {
     
@@ -489,6 +462,14 @@ function movementHandler () {
     if (moveObject.left === true) {
              hero.x -= 5
          } 
+}
+
+function submissionEvent() {
+    // Grab player input from box
+    playerInput = playerText.join('')
+    
+    // Reset player text array
+    playerText = []
 }
 
 // This duo of functions essentially replicates the keypress events for the arrow keys.
@@ -536,6 +517,24 @@ document.addEventListener('keydown', e => {
          }
  })
 
+// Listen for letter or submission input from player
+document.addEventListener('keypress', e => {
+     if (e.charCode >= 97 && e.charCode <= 122) {
+        playerText.push(e.key)
+    } else if (e.keyCode === 13) {
+        submissionEvent()
+    } else if (e.keyCode === 8) {
+        playerText.pop()
+    }
+})
+
+// Listen for backspace
+document.addEventListener('keydown', e => {
+    if (e.keyCode === 8) {
+        playerText.pop()
+    }
+})
+
 //================================================
 //
 //          Game Loop
@@ -551,66 +550,34 @@ let gameLoop = () => {
     // Increment frame
     frame++
     
+    ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
+    
     // Move player
-    movementHandler(keyValue)
+    movementHandler()
     
-    // Check if player's health is at 0
-    if (hero.health === 0) {
-        killPlayer()
-    }
-    
-    // Check if player is near a door
-    if (detectHit(doorMat)) {
-        renderDoorText()
-    } else if (detectHit(doorMatEdge)) {
-        clearText()
-    }
-    
-    // Check if player is trying and able to move through door
-    if (detectHit(door) && doorUnlocked) {
-        
-        moveToNextRoom()
-        
-    } else if (detectHit(door)) {
-        
-    }
-    
-    // Check if enemy is alive
-    if (enemy.alive) {
-    // Move the enemy to the player
-        objectWalk(enemy)
-        
-    // Render enemy
-        enemy.render()
-        // Look to see if the enemy has hit the player
-        if (detectHit(enemy)) {
-            if (!playerJustHit) {
-                hero.health--
-                playerJustHit = true
-                setTimeout(iframes, 1500)
-            }
-        }
-    }
-    
-    // Check if player is going over the border
+    // Wall check player
     wallCheck(hero)
-
-    // Render hero
-    doorMatEdge.render()
-    doorMat.render()
-    door.render()
     
+    door.render()
+    door.activate()
+    
+    if (enemy.alive) {
+        enemy.render()
+        enemy.activate()
+    }
+    
+    // Render hero
     hero.render()
 }
 
 function gameBegin() {
-    generateDoor()
-    generateEnemy()
-    generatePlayer()
+    
+    door = new DoorConstructor(580, 60, 1),
+    enemy = new GhostConstructor(30, 30)
+    
+    hero = new Constructor(580, 500, 'hotpink', 60, 60)
     
     gameInterval = setInterval(gameLoop, 30)
-    compString = setCompString()
-    console.log(compString)
     gameStart = true
 }
 
