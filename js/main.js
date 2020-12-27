@@ -28,11 +28,17 @@ let playerText = []
 // Initialize array of objects containing room data
 let roomArray = []
 
-//// Initialize array of objects containing room data
-//let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
-//                 {doorKey: 'amazing', doorStart: 'And here is the ', doorTypo: 'azginma', doorEnd: ' second sentence'},
-//                 {doorKey: 'magnificient', doorStart: 'And lastly, the ', doorTypo: 'mnecitnifiag', doorEnd: ' end of the essay!'}
-//                ]
+// Initialize array of objects containing the word puzzle key/locks
+let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
+                 {doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
+                 {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
+                 {doorKey: 'spells', doorStart: 'Magic is wonderful, and ', doorTypo: 'spllese', doorEnd: ' are wonderful too!'},
+                 {doorKey: 'wonderful', doorStart: 'And you know what else is ', doorTypo: 'ndferwulo', doorEnd: '? Madge!'},
+                 {doorKey: 'kindest', doorStart: 'She is the most wonderful, the ', doorTypo: 'nkidtse', doorEnd: ', most obvlivious person I know.'},
+                 {doorKey: 'confession', doorStart: 'So obvlivious, the only way I could get her to take my ', doorTypo: 'fessconion', doorEnd: ' seriously...'},
+                 {doorKey: 'bury', doorStart: '...was to ', doorTypo: 'yurb', doorEnd: ' it in an essay on magic.'},
+                 {doorKey: 'magnificient', doorStart: 'But more than ', doorTypo: 'yanhingt', doorEnd: ', I would like to tell her...'}
+                ]
 //// Initialize array of enemy names
 //let spellWords = ['das', 'sed', 'wras', 'fas',
 //                  'qar', 'xas', 'dax', 'wes',
@@ -312,10 +318,10 @@ function DoorConstructor(x, y, leadsTo) {
     this.color = 'red'
     this.width = 60
     this.height = 60
-    this.firstLock = 'Test test ',
-    this.secondLock = 'test test',
-    this.typo = 'stet ',
-    this.key = 'test'
+    this.firstLock = textArray[roomIndex].doorStart
+    this.secondLock = textArray[roomIndex].doorEnd
+    this.typo = textArray[roomIndex].doorTypo
+    this.key = textArray[roomIndex].doorKey
     this.locked = true
     this.alive = true
     this.leadsTo = leadsTo,
@@ -650,7 +656,7 @@ document.addEventListener('keydown', e => {
 
 // Listen for letter or submission input from player
 document.addEventListener('keypress', e => {
-     if (e.charCode >= 97 && e.charCode <= 122) {
+     if (e.charCode >= 65 && e.charCode <= 122) {
         playerText.push(e.key)
     } else if (e.keyCode === 13) {
         submissionEvent()
