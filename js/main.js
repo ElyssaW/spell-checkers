@@ -55,6 +55,10 @@ function selectRandom (randomArray) {
     return randomArray[Math.floor(Math.random() * randomArray.length)]
 }
 
+function randomRange(min, max) {
+  return Math.floor(Math.random() * (max - min) + min)
+}
+
 // Function to write text above object
 function drawText (string, obj) {
     ctx.fillStyle = 'red'
@@ -101,7 +105,6 @@ function drawTypo (obj, string1, string2, string3) {
 }
 
 function drawName (obj, string1) {
-    console.log(string1)
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
     
@@ -125,6 +128,8 @@ function drawName (obj, string1) {
 
 // Persistent objects
     let enemy
+    let chest
+    let room
 
 // Constructor function for hero
 function Constructor(x, y, color, width, height) {
@@ -191,7 +196,6 @@ function GhostConstructor(x, y) {
             drawName(this, this.spellWords[this.spellWordIndex])
             
             if (playerInput == this.spellWords[this.spellWordIndex]) {
-                console.log('Hit!')
                 this.health--
                     if (this.health === 0) {
                         this.alive = false
@@ -227,12 +231,24 @@ function ExclaimerConstructor(x, y) {
     this.ydir = 0
     this.speed = 5
     this.frameIndex = 0
+    this.textFrameIndex = 0
+    this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
+    this.spellWordIndex = 0
     this.render = function() {
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
     this.activate = function() {
         moveToPlayer(this)
+        drawName(this, this.spellWords[this.spellWordIndex])
+        
+        if (playerInput == this.spellWords[this.spellWordIndex]) {
+                this.health--
+                    if (this.health === 0) {
+                        this.alive = false
+                    }
+                this.spellWordIndex++
+            }
             
         if (detectHit(this)) {
             this.alive = false
@@ -274,14 +290,50 @@ function DoorConstructor(x, y, leadsTo) {
                 drawTypo(door, this.firstLock, this.typo, this.secondLock)
                 
                 if (playerInput == this.key) {
-                    console.log('Door unlocked')
                     this.locked = false
                 }
             }
         // If door is unlocked, watch for collision
         } else if (detectHit(this)) {
             // And take player to next room
-            console.log('Moving to next room')
+        } 
+    }
+}
+
+// Constructor function for new chests
+function ChestConstructor(x, y, item) {
+    this.x = x
+    this.y = y
+    this.color = 'yellow'
+    this.width = 60
+    this.height = 60
+    this.firstLock = 'I like big ',
+    this.secondLock = 'and I cannot lie',
+    this.typo = 'sttub ',
+    this.key = 'butts'
+    this.locked = true
+    this.alive = true
+    this.item = item,
+    this.textFrameIndex = 0
+    this.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+    this.activate = function() {
+        // Check if door is locked
+        if (this.locked) {
+            //If door is locked, check if player is near
+            if (detectNear(this, 200)) {
+                // Display typo text
+                drawTypo(this, this.firstLock, this.typo, this.secondLock)
+                
+                if (playerInput == this.key) {
+                    this.locked = false
+                }
+            }
+        // If door is unlocked, watch for collision
+        } else if (detectHit(this)) {
+            // And take player to next room
         } 
     }
 }
@@ -289,8 +341,32 @@ function DoorConstructor(x, y, leadsTo) {
 // Constructor function for new rooms
 function RoomConstructor(index) {
     this.index = index
-    this.cleared = false,
-    this.contents = []
+    this.contents = randomRoomContent()
+}
+
+function randomRoomContent() {
+    let array = []
+    let random
+    let randomItem
+    
+    for (let i = 0; i < 5; i++) {
+        random = Math.floor(Math.random() * 4)
+        switch(random) {
+            case 1:
+                randomItem = new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                break;
+            case 2:
+                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                break;
+            case 3:
+                randomItem = new ChestConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                break;
+            default:
+        }
+        array.push(randomItem)   
+    }
+        
+    return array
 }
 
 //================================================
@@ -431,13 +507,11 @@ let detectNear = (obj, threshold) => {
 // Function to create iframes on the player, so that they
 // are not instantly killed on one hit from an enemy
 function iframes () {
-    console.log('iframes up')
     playerJustHit = false
 }
 
 // Function to play on player death
 function killPlayer() {
-    console.log('u ded')
     clearInterval(gameInterval)
 }
 
@@ -547,9 +621,15 @@ let gameLoop = () => {
     //Clear board
     ctx.clearRect(0, 0, game.width, game.height)
     
+    //Check if player is dead
+    if (hero.health === 0) {
+        killPlayer()
+    }
+    
     // Increment frame
     frame++
     
+    //Write player input text above player
     ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
     
     // Move player
@@ -558,12 +638,11 @@ let gameLoop = () => {
     // Wall check player
     wallCheck(hero)
     
-    door.render()
-    door.activate()
-    
-    if (enemy.alive) {
-        enemy.render()
-        enemy.activate()
+    for (let i = 0; i < room.contents.length; i++) {
+        if (room.contents[i].alive) {
+            room.contents[i].render()
+            room.contents[i].activate()
+        }
     }
     
     // Render hero
@@ -571,11 +650,16 @@ let gameLoop = () => {
 }
 
 function gameBegin() {
+//    chest = new ChestConstructor(740, 160, 'Potion')
+//    door = new DoorConstructor(580, 60, 1)
+//    enemy = new GhostConstructor(30, 30)
+//    enemy = new ExclaimerConstructor(30, 30)
     
-    door = new DoorConstructor(580, 60, 1),
-    enemy = new GhostConstructor(30, 30)
+    room = new RoomConstructor(roomIndex)
+    roomIndex++
+    console.log(room.contents)
     
-    hero = new Constructor(580, 500, 'hotpink', 60, 60)
+    hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
     gameInterval = setInterval(gameLoop, 30)
     gameStart = true

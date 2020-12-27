@@ -29,8 +29,8 @@ is through the arrow pad.
 
 ### Stretch Goals
 
-- [ ] Writing word-to-type directly on the canvas, instead of above
-- [ ] Enemies, whose names you have to type to defeat
+- [x] Writing word-to-type directly on the canvas, instead of above
+- [x] Enemies, whose names you have to type to defeat
 - [ ] Locked chests containing health
 - [ ] Shift-to-shield, allowing you to use SHIFT as a shield against attacks
 - [ ] Custom graphics
