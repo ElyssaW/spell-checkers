@@ -333,7 +333,10 @@ function ChestConstructor(x, y, item) {
             }
         // If door is unlocked, watch for collision
         } else if (detectHit(this)) {
-            // And take player to next room
+            if (hero.health < hero.maxhealth) {
+                hero.health++
+                this.alive = false
+            }
         } 
     }
 }
@@ -350,7 +353,7 @@ function randomRoomContent() {
     let randomItem
     
     for (let i = 0; i < 5; i++) {
-        random = Math.floor(Math.random() * 4)
+        random = Math.floor(Math.random() * 5)
         switch(random) {
             case 1:
                 randomItem = new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
@@ -362,10 +365,13 @@ function randomRoomContent() {
                 randomItem = new ChestConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
                 break;
             default:
+                randomItem = null
+                break;
         }
-        array.push(randomItem)   
+        if (randomItem !== null) {
+            array.push(randomItem)
+        }   
     }
-        
     return array
 }
 
