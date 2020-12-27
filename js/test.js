@@ -133,7 +133,7 @@ function HeroConstructor(x, y) {
     this.width = 50
     this.height = 50
     this.health = 3
-    this.maxhealth = 3
+    this.maxhealth = 5
     this.mana = 50
     this.maxmana = 50
     this.alive = true
@@ -432,15 +432,19 @@ function movementHandler () {
     
     if (moveObject.down === true) {
              hero.y += 5
+             hero.ydir = 5
          } 
     if (moveObject.up === true) {
              hero.y -= 5
+             hero.ydir = -5
          } 
     if (moveObject.right === true) {
              hero.x += 5
+             hero.xdir = 5
          } 
     if (moveObject.left === true) {
              hero.x -= 5
+             hero.xdir = -5
          } 
 }
 
@@ -491,18 +495,22 @@ document.addEventListener('keydown', e => {
      if (e.key == 'ArrowUp' || e.key == '8') {
              e.preventDefault()
              moveObject.up = false
+             hero.ydir = 0
          } 
     if (e.key == 'ArrowDown' || e.key == '2') {
              e.preventDefault()
              moveObject.down = false
+             hero.ydir = 0
          } 
     if (e.key == 'ArrowLeft' || e.key == '4') {
              e.preventDefault()
              moveObject.left = false
+             hero.xdir = 0
          } 
     if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = false
+             hero.xdir = 0
          }
  })
 
@@ -528,7 +536,7 @@ let shiftShield = false
 
 // Listen for backspace
 document.addEventListener('keydown', e => {
-    if (e.keyCode === 16) {
+    if (e.keyCode === 32) {
         shiftShield = true
         playerJustHit = true
     }
@@ -536,11 +544,57 @@ document.addEventListener('keydown', e => {
 
 // Listen for backspace
 document.addEventListener('keyup', e => {
-    if (e.keyCode === 16) {
+    if (e.keyCode === 32) {
         shiftShield = false
         playerJustHit = false
+        setTimeout(() => {
+            while (hero.mana < hero.maxmana) {
+                hero.mana++
+                console.log('Filling mana')
+            }
+        }, 2000)
     }
 })
+
+// Listen for backspace
+document.addEventListener('keydown', e => {
+    if (e.keyCode === 9) {
+        e.preventDefault()
+        hero.x = hero.x + (hero.xdir * 30)
+        hero.y = hero.y + (hero.ydir * 30)
+        hero.mana -= 20
+    }
+})
+
+function drawHealth() {
+    for (let i = hero.maxhealth; i > 0; i--) {
+        ctx.fillStyle = 'white'
+        ctx.beginPath()
+        ctx.arc(20+(30*i), 50, 30, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.stroke()
+    }
+    for (let i = hero.health; i > 0; i--) {
+        ctx.fillStyle = hero.color
+        ctx.beginPath()
+        ctx.arc(20+(30*i), 50, 30, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.stroke()
+    }
+}
+
+function drawMana() {
+    ctx.fillStyle = 'blue'
+    ctx.beginPath()
+    ctx.arc(80, 90, 50, 0, 2 * Math.PI)
+    ctx.stroke()
+    
+    ctx.beginPath()
+    ctx.arc(80, 90, 50*(hero.mana/hero.maxmana), 0, 2 * Math.PI)
+    ctx.fill()
+}
+
+
 
 //================================================
 //
@@ -557,21 +611,18 @@ let gameLoop = () => {
     // Increment frame
     frame++
     
+    // Draw player text
     ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
+    
+    drawMana()
+    drawHealth()
     
     if (shiftShield && hero.mana > 0) {
         console.log('Shielding')
         ctx.fillStyle = 'rgba(0, 255, 255, 1)'
         ctx.fillRect(hero.x-2, hero.y-2, hero.width+4, hero.height+4)
         hero.mana--
-    } else {
-        setTimeout(() => {
-            while (hero.mana < hero.maxmana) {
-                hero.mana++
-                console.log('Filling mana')
-            }
-        }, 2000)
-    }
+    } 
     
     // Move player
     movementHandler()

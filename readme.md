@@ -32,7 +32,7 @@ is through the arrow pad.
 - [x] Writing word-to-type directly on the canvas, instead of above
 - [x] Enemies, whose names you have to type to defeat
 - [x] Locked chests containing health
-- [ ] Shift-to-shield, allowing you to use SHIFT as a shield against attacks
+- [x] Space-to-shield, allowing you to use the space bar as a shield against attacks
 - [ ] Custom graphics
 - [ ] Super-stretch: Non-linear dungeon with rooms containing multiple entrances/exits
 - [ ] Super-stretch: Enemy/door types that require special words found elsewhere in the dungeon

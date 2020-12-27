@@ -28,14 +28,25 @@ let playerText = []
 // Initialize array of objects containing room data
 let roomArray = []
 
-// Initialize array of objects containing room data
-let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
-                 {doorKey: 'amazing', doorStart: 'And here is the ', doorTypo: 'azginma', doorEnd: ' second sentence'},
-                 {doorKey: 'magnificient', doorStart: 'And lastly, the ', doorTypo: 'mnecitnifiag', doorEnd: ' end of the essay!'}
-                ]
+//// Initialize array of objects containing room data
+//let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
+//                 {doorKey: 'amazing', doorStart: 'And here is the ', doorTypo: 'azginma', doorEnd: ' second sentence'},
+//                 {doorKey: 'magnificient', doorStart: 'And lastly, the ', doorTypo: 'mnecitnifiag', doorEnd: ' end of the essay!'}
+//                ]
+//// Initialize array of enemy names
+//let spellWords = ['das', 'sed', 'wras', 'fas',
+//                  'qar', 'xas', 'dax', 'wes',
+//                  'qas', 'deas', 'sera', 'deras',
+//                  'qaras', 'tera', 'wexa', 'zeras',
+//                  'vaqed', 'gerat', 'dered'
+//]
+
 // Initialize array of enemy names
-let spellWords = [ 'das', 'sed', 'wras', 'fas',
-                   'qar', 'xas', 'dax', 'wes',
+let spellWords = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
+                  'craft', 'webcast', 'swagger', 'waste', 'cedar', 'brace', 'fast', 'stave',
+                  'carve', 'caster', 'taxes', 'farts', 'strafe', 'grace', 'raw', 'straw',
+                  'water', 'craze', 'decaf', 'draft', 'bread', 'barf', 'grave', 'scare',
+                  'ersatz', 'great', 'grade', 'farce', 'after', 'extra', 'texas', 'swear'
 ]
 
 // Set canvas width/height
@@ -120,6 +131,34 @@ function drawName (obj, string1) {
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
 
+function drawHealth() {
+    for (let i = hero.maxhealth; i > 0; i--) {
+        ctx.fillStyle = 'white'
+        ctx.beginPath()
+        ctx.arc(20+(30*i), 50, 30, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.stroke()
+    }
+    for (let i = hero.health; i > 0; i--) {
+        ctx.fillStyle = hero.color
+        ctx.beginPath()
+        ctx.arc(20+(30*i), 50, 30, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.stroke()
+    }
+}
+
+function drawMana() {
+    ctx.fillStyle = 'blue'
+    ctx.beginPath()
+    ctx.arc(80, 90, 50, 0, 2 * Math.PI)
+    ctx.stroke()
+    
+    ctx.beginPath()
+    ctx.arc(80, 90, 50*(hero.mana/hero.maxmana), 0, 2 * Math.PI)
+    ctx.fill()
+}
+
 //================================================
 //
 //          Constructor Functions
@@ -158,8 +197,11 @@ function HeroConstructor(x, y) {
     this.height = 50
     this.health = 3
     this.maxhealth = 3
+    this.mana = 50
+    this.maxmana = 50
     this.alive = true
     this.justHit = false
+    this.shielded = false
     this.xdir = 0
     this.ydir = 0
     this.frameIndex = 0
@@ -191,7 +233,7 @@ function GhostConstructor(x, y) {
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
     this.activate = function() {
-        if(detectNear(this, 200)) {
+        if(detectNear(this, 400)) {
             moveToPlayer(this)
             drawName(this, this.spellWords[this.spellWordIndex])
             
@@ -296,7 +338,10 @@ function DoorConstructor(x, y, leadsTo) {
             }
         // If door is unlocked, watch for collision
         } else if (detectHit(this)) {
-            // And take player to next room
+            // Increment room index
+            roomIndex++
+            room = new RoomConstructor(roomIndex)
+            roomArray.push(room)
         } 
     }
 }
@@ -355,6 +400,7 @@ function generateRoomContent() {
     let randomItem
     
     let door = new DoorConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100), 1+roomIndex)
+    playerInput = []
     array.push(door)
     
     for (let i = 0; i < 3; i++) {
@@ -620,6 +666,28 @@ document.addEventListener('keydown', e => {
     }
 })
 
+// Listen for space bar, to bring up shield
+document.addEventListener('keydown', e => {
+    if (e.keyCode === 32) {
+        hero.shielded = true
+        playerJustHit = true
+    }
+})
+
+// Listen for space bar release, to drop shield and start mana regain timeout
+document.addEventListener('keyup', e => {
+    if (e.keyCode === 32) {
+        hero.shielded = false
+        playerJustHit = false
+        setTimeout(() => {
+            while (hero.mana < hero.maxmana) {
+                hero.mana++
+                console.log('Filling mana')
+            }
+        }, 2000)
+    }
+})
+
 //================================================
 //
 //          Game Loop
@@ -642,6 +710,17 @@ let gameLoop = () => {
     
     //Write player input text above player
     ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
+    
+    //Check if shield is up
+    if (hero.shielded && hero.mana > 0) {
+        ctx.fillStyle = 'rgba(0, 255, 255, 1)'
+        ctx.fillRect(hero.x-2, hero.y-2, hero.width+4, hero.height+4)
+        hero.mana--
+    } 
+    
+    // Draw player's health and mana UI
+    drawMana()
+    drawHealth()
     
     // Move player
     movementHandler()
