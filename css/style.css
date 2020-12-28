@@ -38,3 +38,7 @@ div#input-div {
 span#typo {
     color: red;
 }
+
+#imagebank {
+    display: none
+}
