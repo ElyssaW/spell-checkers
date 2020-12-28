@@ -139,6 +139,18 @@ function drawName (obj, string1) {
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
 
+function drawFloatAnim(obj) {
+    let floatValueArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    let floatValue = floatValueArray[obj.walkFrameIndex]
+    if (obj.xdir > 0) {
+            ctx.drawImage(obj.sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY + floatValue)
+        } else {
+            ctx.drawImage(obj.spriteFlipped, obj.x + obj.hitboxX, obj.y + obj.hitboxY + floatValue)
+        }
+    obj.walkFrameIndex++
+    if (obj.walkFrameIndex ===  floatValueArray.length) {obj.walkFrameIndex = 0}
+}
+
 function drawHealth() {
     for (let i = hero.maxhealth; i > 0; i--) {
         ctx.fillStyle = 'white'
@@ -167,11 +179,11 @@ function drawMana() {
     ctx.fill()
 }
 
-function drawSprite (obj) {
+function drawSprite (obj, hitboxX, hitboxY) {
     if (obj.xdir > 0) {
-            ctx.drawImage(obj.sprite, obj.x, obj.y)
+            ctx.drawImage(obj.sprite, obj.x + hitboxX, obj.y + hitboxY)
         } else {
-            ctx.drawImage(obj.spriteFlipped, obj.x, obj.y)
+            ctx.drawImage(obj.spriteFlipped, obj.x + hitboxX, obj.y + hitboxY)
         }
 }
 
@@ -208,6 +220,8 @@ function Constructor(x, y, color, width, height) {
 function HeroConstructor(x, y) {
     this.x = x
     this.y = y
+    this.hitboxX = -20
+    this.hitboxY = -20
     this.sprite = document.getElementById("madge")
     this.spriteFlipped = document.getElementById("madgeFlipped")
     this.color = 'hotpink'
@@ -224,8 +238,9 @@ function HeroConstructor(x, y) {
     this.ydir = 0
     this.frameIndex = 0
     this.textFrameIndex = 0
+    this.walkFrameIndex = randomRange(0, 5)
     this.render = function() {
-        drawSprite(this)
+        drawFloatAnim(this)
     }
 }
 
@@ -233,6 +248,8 @@ function HeroConstructor(x, y) {
 function GhostConstructor(x, y) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
     this.faceNum = randomRange(1, 5)
     this.sprite = document.getElementById('ghost' + this.faceNum)
     this.spriteFlipped = document.getElementById('ghost' + this.faceNum + 'Flipped')
@@ -246,10 +263,11 @@ function GhostConstructor(x, y) {
     this.speed = 1
     this.frameIndex = 0
     this.textFrameIndex = 0
+    this.walkFrameIndex = randomRange(0, 5)
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
     this.render = function() {
-        drawSprite(this)
+        drawFloatAnim(this)
     }
     this.activate = function() {
         if(detectNear(this, 400)) {
@@ -283,6 +301,8 @@ function GhostConstructor(x, y) {
 function ExclaimerConstructor(x, y) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
     this.sprite = document.getElementById("exclaimer")
     this.color = 'black'
     this.width = 70
@@ -328,6 +348,8 @@ function ExclaimerConstructor(x, y) {
 function EmDashConstructor(x, y) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
     this.color = 'black'
     this.width = 30
     this.height = 30
@@ -364,6 +386,8 @@ function EmDashConstructor(x, y) {
 function DoorConstructor(x, y, leadsTo) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
     this.color = 'red'
     this.width = 60
     this.height = 60
@@ -405,6 +429,8 @@ function DoorConstructor(x, y, leadsTo) {
 function ChestConstructor(x, y, item) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
     this.color = 'yellow'
     this.width = 60
     this.height = 60
@@ -773,9 +799,6 @@ let gameLoop = () => {
     // Increment frame
     frame++
     
-    //Write player input text above player
-    ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
-    
     //Check if shield is up
     if (hero.shielded && hero.mana > 0) {
         ctx.fillStyle = 'rgba(0, 255, 255, 1)'
@@ -802,6 +825,9 @@ let gameLoop = () => {
     
     // Render hero
     hero.render()
+    
+    //Write player input text above player
+    ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
 }
 
 function gameBegin() {
