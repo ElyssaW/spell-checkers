@@ -49,6 +49,15 @@ document.addEventListener('mousemove', (e) => {
     }
 })
 
+document.addEventListener('click', (e) => {
+    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518 && !animText.finished) {
+            animText.animate = true
+    } else {
+            animText.animate = false
+        
+    }
+})
+
 // Where the magic happens
 let gameLoop = () => {
     

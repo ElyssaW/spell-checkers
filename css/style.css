@@ -9,8 +9,10 @@ body {
     justify-content: center;
     align-items: center;
     color: black;
+    font-family: 'Bungee', cursive;
+    font-size: 30px;
     
-    background-color: aliceblue;
+    background-color: white;
 }
 
 canvas {

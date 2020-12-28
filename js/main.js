@@ -81,7 +81,6 @@ function randomRange(min, max) {
 // Function to write text above object
 function drawText (string, obj) {
     ctx.fillStyle = 'red'
-    ctx.font = '20px sans-serif'
     ctx.fillText(string, obj.x, obj.y-5)
 }
 
@@ -111,7 +110,6 @@ function drawTypo (obj, string1, string2, string3) {
     textX = obj.x - getCenter
     
     ctx.fillStyle = 'black'
-    ctx.font = '20px sans-serif'
     ctx.textAlign = 'left'
     ctx.fillText(string1, textX, obj.y - 5 + floatValue)
     ctx.fillStyle = 'red'
@@ -127,13 +125,15 @@ function drawName (obj, string1) {
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
     
-    getCenter = ctx.measureText(string1).width / 2.5
-    textX = obj.x - getCenter
+    textX = (obj.x+(obj.width/2)) - (ctx.measureText(string1).width / 2)
     
+    ctx.font = '20px Bungee'
     ctx.fillStyle = 'black'
-    ctx.font = '20px sans-serif'
     ctx.textAlign = 'left'
+    ctx.strokeStyle = 'white'
+    ctx.strokeText(string1, textX, obj.y - 4 + floatValue)
     ctx.fillText(string1, textX, obj.y - 5 + floatValue)
+    ctx.font = '20px Fredoka One'
     
     obj.textFrameIndex++
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
@@ -757,6 +757,7 @@ function gameBegin() {
 //    enemy = new GhostConstructor(30, 30)
 //    enemy = new ExclaimerConstructor(30, 30)
     
+    ctx.font = '20px Fredoka One'
     room = new RoomConstructor(roomIndex)
     roomIndex++
     console.log(room.contents)
