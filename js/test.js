@@ -122,9 +122,12 @@ function drawTypo (obj, string1, string2, string3) {
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
     
-    drawFillText(string1, obj.x, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
-    drawFillText(string2, obj.x + ctx.measureText(string1).width, obj.y - 5 + floatValue, 'red', 'Fredoka One', 20, 'left')
-    drawFillText(string3, obj.x + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
+    ctx.font = '20px Fredoka One'
+    let textLength = ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width
+    let textCenter = (obj.x+(obj.width/2)) - (textLength/2)
+    drawFillText(string1, textCenter, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
+    drawFillText(string2, textCenter + ctx.measureText(string1).width, obj.y - 5 + floatValue, 'red', 'Fredoka One', 20, 'left')
+    drawFillText(string3, textCenter + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
     
     obj.textFrameIndex++
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
@@ -803,14 +806,9 @@ let gameLoop = () => {
     hero.render()
     
     //Write player input text above player
-    ctx.textAlign = 'center'
-    ctx.strokeStyle = 'black'
-    ctx.font = '35px Fredoka One'
-    ctx.strokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3)
-    ctx.fillStyle = 'black'
-    ctx.fillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3)
-    ctx.fillStyle = 'hotpink'
-    ctx.fillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5)
+    drawStrokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'hotpink', 'Fredoka One', 35, 'center')
+    drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'black', 'Fredoka One', 35, 'center')
+    drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5, 'hotpink', 'Fredoka One', 35, 'center')
 }
 
 function gameBegin() {
