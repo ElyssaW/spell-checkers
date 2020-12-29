@@ -139,6 +139,18 @@ function drawName (obj, string1) {
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
 
+function drawFloatAnim(obj) {
+    let floatValueArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    let floatValue = floatValueArray[obj.walkFrameIndex]
+    if (obj.xdir > 0) {
+            ctx.drawImage(obj.sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY + floatValue)
+        } else {
+            ctx.drawImage(obj.spriteFlipped, obj.x + obj.hitboxX, obj.y + obj.hitboxY + floatValue)
+        }
+    obj.walkFrameIndex++
+    if (obj.walkFrameIndex ===  floatValueArray.length) {obj.walkFrameIndex = 0}
+}
+
 function drawHealth() {
     for (let i = hero.maxhealth; i > 0; i--) {
         ctx.fillStyle = 'white'
@@ -165,6 +177,14 @@ function drawMana() {
     ctx.beginPath()
     ctx.arc(80, 90, 50*(hero.mana/hero.maxmana), 0, 2 * Math.PI)
     ctx.fill()
+}
+
+function drawSprite (obj, hitboxX, hitboxY) {
+    if (obj.xdir > 0) {
+            ctx.drawImage(obj.sprite, obj.x + hitboxX, obj.y + hitboxY)
+        } else {
+            ctx.drawImage(obj.spriteFlipped, obj.x + hitboxX, obj.y + hitboxY)
+        }
 }
 
 //================================================
@@ -200,9 +220,13 @@ function Constructor(x, y, color, width, height) {
 function HeroConstructor(x, y) {
     this.x = x
     this.y = y
+    this.hitboxX = -20
+    this.hitboxY = -20
+    this.sprite = document.getElementById("madge")
+    this.spriteFlipped = document.getElementById("madgeFlipped")
     this.color = 'hotpink'
-    this.width = 50
-    this.height = 50
+    this.width = 40
+    this.height = 90
     this.health = 3
     this.maxhealth = 3
     this.mana = 50
@@ -214,9 +238,9 @@ function HeroConstructor(x, y) {
     this.ydir = 0
     this.frameIndex = 0
     this.textFrameIndex = 0
+    this.walkFrameIndex = randomRange(0, 5)
     this.render = function() {
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.width, this.height)
+        drawFloatAnim(this)
     }
 }
 
@@ -224,21 +248,26 @@ function HeroConstructor(x, y) {
 function GhostConstructor(x, y) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
+    this.faceNum = randomRange(1, 5)
+    this.sprite = document.getElementById('ghost' + this.faceNum)
+    this.spriteFlipped = document.getElementById('ghost' + this.faceNum + 'Flipped')
     this.color = 'grey'
-    this.width = 40
-    this.height = 80
+    this.width = 120
+    this.height = 120
     this.health = 3
     this.alive = true
     this.xdir = 0
     this.ydir = 0
-    this.speed = 1
+    this.speed = 2
     this.frameIndex = 0
     this.textFrameIndex = 0
+    this.walkFrameIndex = randomRange(0, 5)
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
     this.render = function() {
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.width, this.height)
+        drawFloatAnim(this)
     }
     this.activate = function() {
         if(detectNear(this, 400)) {
@@ -272,9 +301,12 @@ function GhostConstructor(x, y) {
 function ExclaimerConstructor(x, y) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
+    this.sprite = document.getElementById("exclaimer")
     this.color = 'black'
-    this.width = 30
-    this.height = 30
+    this.width = 70
+    this.height = 70
     this.health = 1
     this.alive = true
     this.xdir = 0
@@ -285,9 +317,8 @@ function ExclaimerConstructor(x, y) {
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
     this.render = function() {
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.width, this.height)
-    }
+            ctx.drawImage(this.sprite, this.x, this.y)
+        }
     this.activate = function() {
         moveToPlayer(this)
         drawName(this, this.spellWords[this.spellWordIndex])
@@ -313,10 +344,50 @@ function ExclaimerConstructor(x, y) {
     }
 }
 
+// Constructor function for new enemies
+function EmDashConstructor(x, y) {
+    this.x = x
+    this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
+    this.color = 'black'
+    this.width = 30
+    this.height = 30
+    this.health = 1
+    this.alive = true
+    this.xdir = randomRange(15, 30)
+    this.ydir = randomRange(15, 30)
+    this.speed = 5
+    this.frameIndex = 0
+    this.render = function() {
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+    this.activate = function() {
+        this.x += this.xdir
+        this.y += this.ydir
+        
+        if (detectHit(this)) {
+            this.alive = false
+            if (!playerJustHit) {
+                this.xdir = this.xdir * -1
+                this.ydir = this.ydir * -1
+                hero.health--
+                playerJustHit = true
+                setTimeout(iframes, 1500)
+            }
+        }
+        
+        wallCheck(this)
+    }
+}
+
 // Constructor function for new doors
 function DoorConstructor(x, y, leadsTo) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
     this.color = 'red'
     this.width = 60
     this.height = 60
@@ -358,6 +429,8 @@ function DoorConstructor(x, y, leadsTo) {
 function ChestConstructor(x, y, item) {
     this.x = x
     this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
     this.color = 'yellow'
     this.width = 60
     this.height = 60
@@ -504,32 +577,36 @@ function moveToPlayer (obj) {
         obj.x = hero.x
     } else if (obj.x < hero.x) {
         obj.x += obj.speed
+        obj.xdir = 1
     } else {
         obj.x -= obj.speed
+        obj.xdir = -1
     }
     
     if (obj.y <= hero.y + 2 && obj.y >= hero.y - 2) {
         obj.y = hero.y 
     } else if (obj.y > hero.y) {
         obj.y -= obj.speed
+        obj.ydir = -1
     } else {
         obj.y += obj.speed
+        obj.ydir = 1
     }
 }
 
 // Detect collision between any given object and the wall
 function wallCheck(obj) {
     // Check if player is going over the border
-    if (obj.x < 0) {
-        obj.x = 0
-    } else if (obj.x+obj.width > game.width) {
-        obj.x = game.width  - obj.width
+    if (obj.x < 30) {
+        obj.x = 30
+    } else if (obj.x+obj.width > game.width - 30) {
+        obj.x = game.width  - obj.width - 30
     }
     
-    if (obj.y < 0) {
-        obj.y = 0
-    } else if (obj.y+obj.height > game.height) {
-        obj.y = game.height  - obj.height
+    if (obj.y < 30) {
+        obj.y = 30
+    } else if (obj.y+obj.height > game.height - 30) {
+        obj.y = game.height  - obj.height - 30
     }
 }
 
@@ -624,7 +701,7 @@ document.addEventListener('keydown', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
      if (e.key == 'ArrowUp' || e.key == '8') {
              e.preventDefault()
-             moveObject.up = true
+             moveObject.up = true 
          } 
     if (e.key == 'ArrowDown' || e.key == '2') {
              e.preventDefault()
@@ -633,10 +710,12 @@ document.addEventListener('keydown', e => {
     if (e.key == 'ArrowLeft' || e.key == '4') {
              e.preventDefault()
              moveObject.left = true
+             hero.xdir = -5
          } 
     if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = true
+             hero.xdir = 5
          }
  })
 
@@ -720,9 +799,6 @@ let gameLoop = () => {
     // Increment frame
     frame++
     
-    //Write player input text above player
-    ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
-    
     //Check if shield is up
     if (hero.shielded && hero.mana > 0) {
         ctx.fillStyle = 'rgba(0, 255, 255, 1)'
@@ -749,6 +825,9 @@ let gameLoop = () => {
     
     // Render hero
     hero.render()
+    
+    //Write player input text above player
+    ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
 }
 
 function gameBegin() {

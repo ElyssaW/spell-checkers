@@ -100,22 +100,31 @@ function compareString(input, compString) {
 //
 //================================================
 
+// Function to draw text
+function drawFillText(string, x, y, color, font, size, align) {
+    ctx.font = size+'px '+font
+    ctx.fillStyle = color
+    ctx.textAlign = align
+    ctx.fillText(string, x, y)
+}
+
+// Function to draw stroke text
+function drawStrokeText(string, x, y, color, font, size, align) {
+    ctx.font = size+'px '+font
+    ctx.strokeStyle = color
+    ctx.textAlign = align
+    ctx.strokeText(string, x, y)
+}
+
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
 function drawTypo (obj, string1, string2, string3) {
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
     
-    getCenter = (ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width)/2.5
-    textX = obj.x - getCenter
-    
-    ctx.fillStyle = 'black'
-    ctx.textAlign = 'left'
-    ctx.fillText(string1, textX, obj.y - 5 + floatValue)
-    ctx.fillStyle = 'red'
-    ctx.fillText(string2, textX + ctx.measureText(string1).width, obj.y - 5 + floatValue)
-    ctx.fillStyle = 'black'
-    ctx.fillText(string3, textX + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue)
+    drawFillText(string1, obj.x, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
+    drawFillText(string2, obj.x + ctx.measureText(string1).width, obj.y - 5 + floatValue, 'red', 'Fredoka One', 20, 'left')
+    drawFillText(string3, obj.x + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
     
     obj.textFrameIndex++
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
@@ -125,15 +134,11 @@ function drawName (obj, string1) {
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
     
-    textX = (obj.x+(obj.width/2)) - (ctx.measureText(string1).width / 2)
+    ctx.fillStyle='white'
+    ctx.fillRect(obj.x, obj.y - 22 + floatValue, 90, 20)
     
-    ctx.font = '20px Bungee'
-    ctx.fillStyle = 'black'
-    ctx.textAlign = 'left'
-    ctx.strokeStyle = 'white'
-    ctx.strokeText(string1, textX, obj.y - 4 + floatValue)
-    ctx.fillText(string1, textX, obj.y - 5 + floatValue)
-    ctx.font = '20px Fredoka One'
+    drawStrokeText(string1, obj.x+(obj.width/2), obj.y - 4 + floatValue, 'white', 'Bungee', 20, 'center')
+    drawFillText(string1, obj.x+(obj.width/2), obj.y - 5 + floatValue, 'black', 'Bungee', 20, 'center')
     
     obj.textFrameIndex++
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
@@ -166,17 +171,6 @@ function drawHealth() {
         ctx.fill()
         ctx.stroke()
     }
-}
-
-function drawMana() {
-    ctx.fillStyle = 'blue'
-    ctx.beginPath()
-    ctx.arc(80, 90, 50, 0, 2 * Math.PI)
-    ctx.stroke()
-    
-    ctx.beginPath()
-    ctx.arc(80, 90, 50*(hero.mana/hero.maxmana), 0, 2 * Math.PI)
-    ctx.fill()
 }
 
 function drawSprite (obj, hitboxX, hitboxY) {
@@ -229,8 +223,6 @@ function HeroConstructor(x, y) {
     this.height = 90
     this.health = 3
     this.maxhealth = 3
-    this.mana = 50
-    this.maxmana = 50
     this.alive = true
     this.justHit = false
     this.shielded = false
@@ -260,7 +252,7 @@ function GhostConstructor(x, y) {
     this.alive = true
     this.xdir = 0
     this.ydir = 0
-    this.speed = 1
+    this.speed = 2
     this.frameIndex = 0
     this.textFrameIndex = 0
     this.walkFrameIndex = randomRange(0, 5)
@@ -481,7 +473,7 @@ function generateRoomContent() {
     let random
     let randomItem
     
-    let door = new DoorConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100), 1+roomIndex)
+    let door = new DoorConstructor(580, 50, 1+roomIndex)
     let chest = new ChestConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
     
     playerInput = []
@@ -577,36 +569,36 @@ function moveToPlayer (obj) {
         obj.x = hero.x
     } else if (obj.x < hero.x) {
         obj.x += obj.speed
-        obj.xdir += obj.speed
+        obj.xdir = 1
     } else {
         obj.x -= obj.speed
-        obj.xdir -= obj.speed
+        obj.xdir = -1
     }
     
     if (obj.y <= hero.y + 2 && obj.y >= hero.y - 2) {
         obj.y = hero.y 
     } else if (obj.y > hero.y) {
         obj.y -= obj.speed
-        obj.ydir -= obj.speed
+        obj.ydir = -1
     } else {
         obj.y += obj.speed
-        obj.ydir += obj.speed
+        obj.ydir = 1
     }
 }
 
 // Detect collision between any given object and the wall
 function wallCheck(obj) {
     // Check if player is going over the border
-    if (obj.x < 0) {
-        obj.x = 0
-    } else if (obj.x+obj.width > game.width) {
-        obj.x = game.width  - obj.width
+    if (obj.x < 30) {
+        obj.x = 30
+    } else if (obj.x+obj.width > game.width - 30) {
+        obj.x = game.width  - obj.width - 30
     }
     
-    if (obj.y < 0) {
-        obj.y = 0
-    } else if (obj.y+obj.height > game.height) {
-        obj.y = game.height  - obj.height
+    if (obj.y < 30) {
+        obj.y = 30
+    } else if (obj.y+obj.height > game.height - 30) {
+        obj.y = game.height  - obj.height - 30
     }
 }
 
@@ -701,21 +693,23 @@ document.addEventListener('keydown', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
      if (e.key == 'ArrowUp' || e.key == '8') {
              e.preventDefault()
-             moveObject.up = true 
+             moveObject.up = true
+             hero.ydir = -1
          } 
     if (e.key == 'ArrowDown' || e.key == '2') {
              e.preventDefault()
              moveObject.down = true
+             hero.ydir = 1
          } 
     if (e.key == 'ArrowLeft' || e.key == '4') {
              e.preventDefault()
              moveObject.left = true
-             hero.xdir = -5
+             hero.xdir = -1
          } 
     if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = true
-             hero.xdir = 5
+             hero.xdir = 1
          }
  })
 
@@ -724,18 +718,22 @@ document.addEventListener('keydown', e => {
      if (e.key == 'ArrowUp' || e.key == '8') {
              e.preventDefault()
              moveObject.up = false
+             hero.ydir = 0
          } 
     if (e.key == 'ArrowDown' || e.key == '2') {
              e.preventDefault()
              moveObject.down = false
+             hero.ydir = 0
          } 
     if (e.key == 'ArrowLeft' || e.key == '4') {
              e.preventDefault()
              moveObject.left = false
+             hero.xdir = 0
          } 
     if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = false
+             hero.xdir = 0
          }
  })
 
@@ -760,22 +758,8 @@ document.addEventListener('keydown', e => {
 // Listen for space bar, to bring up shield
 document.addEventListener('keydown', e => {
     if (e.keyCode === 32) {
-        hero.shielded = true
-        playerJustHit = true
-    }
-})
-
-// Listen for space bar release, to drop shield and start mana regain timeout
-document.addEventListener('keyup', e => {
-    if (e.keyCode === 32) {
-        hero.shielded = false
-        playerJustHit = false
-        setTimeout(() => {
-            while (hero.mana < hero.maxmana) {
-                hero.mana++
-                console.log('Filling mana')
-            }
-        }, 2000)
+        hero.x = hero.x + (hero.xdir * 200)
+        hero.y = hero.y + (hero.ydir * 200)
     }
 })
 
@@ -792,22 +776,14 @@ let gameLoop = () => {
     ctx.clearRect(0, 0, game.width, game.height)
     
     //Check if player is dead
-    if (hero.health === 0) {
-        killPlayer()
-    }
+//    if (hero.health === 0) {
+//        killPlayer()
+//    }
     
     // Increment frame
     frame++
     
-    //Check if shield is up
-    if (hero.shielded && hero.mana > 0) {
-        ctx.fillStyle = 'rgba(0, 255, 255, 1)'
-        ctx.fillRect(hero.x-2, hero.y-2, hero.width+4, hero.height+4)
-        hero.mana--
-    } 
-    
-    // Draw player's health and mana UI
-    drawMana()
+    // Draw player's health
     drawHealth()
     
     // Move player
@@ -827,7 +803,14 @@ let gameLoop = () => {
     hero.render()
     
     //Write player input text above player
-    ctx.fillText(playerText.join(''), hero.x, hero.y - 5)
+    ctx.textAlign = 'center'
+    ctx.strokeStyle = 'black'
+    ctx.font = '35px Fredoka One'
+    ctx.strokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3)
+    ctx.fillStyle = 'black'
+    ctx.fillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3)
+    ctx.fillStyle = 'hotpink'
+    ctx.fillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5)
 }
 
 function gameBegin() {
