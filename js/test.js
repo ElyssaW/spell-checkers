@@ -178,11 +178,11 @@ function drawHealth() {
     }
 }
 
-function drawSprite (obj, hitboxX, hitboxY) {
+function drawSprite (obj, spriteLeft, spriteRight) {
     if (obj.xdir > 0) {
-            ctx.drawImage(obj.sprite, obj.x + hitboxX, obj.y + hitboxY)
+            ctx.drawImage(spriteRight, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
         } else {
-            ctx.drawImage(obj.spriteFlipped, obj.x + hitboxX, obj.y + hitboxY)
+            ctx.drawImage(spriteLeft, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
         }
 }
 
@@ -224,9 +224,11 @@ function GhostConstructor(x, y) {
     this.y = y
     this.hitboxX = 0
     this.hitboxY = 0
-    this.faceNum = randomRange(1, 5)
-    this.sprite = document.getElementById('ghost' + this.faceNum)
-    this.spriteFlipped = document.getElementById('ghost' + this.faceNum + 'Flipped')
+    this.faceNum = 1
+    this.sprite = document.getElementById('ghostBlank')
+    this.spriteFlipped = document.getElementById('ghostBlankFlipped')
+    this.spriteFace = document.getElementById('ghost'+randomRange(1,5))
+    this.spriteFaceFlipped = document.getElementById('ghost'+randomRange(1,5)+'Flipped')
     this.color = 'grey'
     this.width = 120
     this.height = 120
@@ -242,6 +244,7 @@ function GhostConstructor(x, y) {
     this.spellWordIndex = 0
     this.render = function() {
         drawFloatAnim(this)
+        drawSprite(this, this.spriteFaceFlipped, this.spriteFace)
     }
     this.activate = function() {
         if(detectNear(this, 400)) {
@@ -251,6 +254,7 @@ function GhostConstructor(x, y) {
             if (playerInput == this.spellWords[this.spellWordIndex]) {
                 this.health--
                     if (this.health === 0) {
+                        room.enemyCount--
                         this.alive = false
                     }
                 this.spellWordIndex++
@@ -335,7 +339,7 @@ function DoorConstructor(x, y, leadsTo) {
     }
     this.activate = function() {
         // Check if door is locked
-        if (this.locked) {
+        if (this.locked && room.cleared) {
             //If door is locked, check if player is near
             if (detectNear(this, 200)) {
                 // Display typo text
@@ -378,7 +382,7 @@ function ChestConstructor(x, y, item) {
     }
     this.activate = function() {
         // Check if door is locked
-        if (this.locked) {
+        if (this.locked && room.cleared) {
             //If door is locked, check if player is near
             if (detectNear(this, 200)) {
                 // Display typo text
@@ -402,11 +406,13 @@ function ChestConstructor(x, y, item) {
 // Constructor function for new rooms
 function RoomConstructor(index) {
     this.index = index
-    this.contents = generateRoomContent()
+    this.enemyCount = 0
+    this.cleared = false
+    this.contents = generateRoomContent(this)
     roomArray.push(this)
 }
 
-function generateRoomContent() {
+function generateRoomContent(room) {
     let array = []
     let random
     let randomItem
@@ -426,9 +432,11 @@ function generateRoomContent() {
                 break;
             case 2:
                 randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                room.enemyCount++
                 break;
             case 3:
                 randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                room.enemyCount++
                 break;
             default:
                 randomItem = null
@@ -719,10 +727,14 @@ let gameLoop = () => {
     
     ctx.drawImage(document.getElementById('dungeoncontinue'), 0, 0)
     
+    if (room.enemyCount === 0) {
+        room.cleared = true
+    }
+    
     //Check if player is dead
-//    if (hero.health === 0) {
-//        killPlayer()
-//    }
+    if (hero.health === 0) {
+        killPlayer()
+    }
     
     // Increment frame
     frame++
