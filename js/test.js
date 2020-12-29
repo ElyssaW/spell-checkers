@@ -62,7 +62,7 @@ let spellWords = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'c
 // responsive, allowing for clicks and computer graphics to still
 // display properly when set
 game.setAttribute('width', 1200)
-game.setAttribute('height', 600)
+game.setAttribute('height', 700)
 
 //===============================================
 //
@@ -110,6 +110,7 @@ function drawFillText(string, x, y, color, font, size, align) {
 
 // Function to draw stroke text
 function drawStrokeText(string, x, y, color, font, size, align) {
+    ctx.lineWidth = 10
     ctx.font = size+'px '+font
     ctx.strokeStyle = color
     ctx.textAlign = align
@@ -125,8 +126,11 @@ function drawTypo (obj, string1, string2, string3) {
     ctx.font = '20px Fredoka One'
     let textLength = ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width
     let textCenter = (obj.x+(obj.width/2)) - (textLength/2)
+    drawStrokeText(string1, textCenter, obj.y - 3 + floatValue, 'white', 'Fredoka One', 20, 'left')
     drawFillText(string1, textCenter, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
+    drawStrokeText(string2, textCenter + ctx.measureText(string1).width, obj.y - 3 + floatValue, 'white', 'Fredoka One', 20, 'left')
     drawFillText(string2, textCenter + ctx.measureText(string1).width, obj.y - 5 + floatValue, 'red', 'Fredoka One', 20, 'left')
+    drawStrokeText(string3, textCenter + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'white', 'Fredoka One', 20, 'left')
     drawFillText(string3, textCenter + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
     
     obj.textFrameIndex++
@@ -136,9 +140,6 @@ function drawTypo (obj, string1, string2, string3) {
 function drawName (obj, string1) {
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
-    
-    ctx.fillStyle='white'
-    ctx.fillRect(obj.x, obj.y - 22 + floatValue, 90, 20)
     
     drawStrokeText(string1, obj.x+(obj.width/2), obj.y - 4 + floatValue, 'white', 'Bungee', 20, 'center')
     drawFillText(string1, obj.x+(obj.width/2), obj.y - 5 + floatValue, 'black', 'Bungee', 20, 'center')
@@ -160,6 +161,7 @@ function drawFloatAnim(obj) {
 }
 
 function drawHealth() {
+    ctx.lineWidth = 1
     for (let i = hero.maxhealth; i > 0; i--) {
         ctx.fillStyle = 'white'
         ctx.beginPath()
@@ -189,29 +191,6 @@ function drawSprite (obj, hitboxX, hitboxY) {
 //          Constructor Functions
 //
 //================================================
-
-// Persistent objects
-    let enemy
-    let chest
-    let room
-
-// Constructor function for hero
-function Constructor(x, y, color, width, height) {
-    this.x = x
-    this.y = y
-    this.color = color
-    this.width = width
-    this.height = height
-    this.alive = true
-    this.xdir = 0
-    this.ydir = 0
-    this.frameIndex = 0
-    this.textFrameIndex = 0
-    this.render = function() {
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.width, this.height)
-    }
-}
 
 // Constructor function for hero
 function HeroConstructor(x, y) {
@@ -300,12 +279,12 @@ function ExclaimerConstructor(x, y) {
     this.hitboxY = 0
     this.sprite = document.getElementById("exclaimer")
     this.color = 'black'
-    this.width = 70
-    this.height = 70
+    this.width = 20
+    this.height = 20
     this.health = 1
     this.alive = true
-    this.xdir = 0
-    this.ydir = 0
+    this.xdir = randomRange(20, 30)
+    this.ydir = randomRange(20, 30)
     this.speed = 5
     this.frameIndex = 0
     this.textFrameIndex = 0
@@ -314,50 +293,6 @@ function ExclaimerConstructor(x, y) {
     this.render = function() {
             ctx.drawImage(this.sprite, this.x, this.y)
         }
-    this.activate = function() {
-        moveToPlayer(this)
-        drawName(this, this.spellWords[this.spellWordIndex])
-        
-        if (playerInput == this.spellWords[this.spellWordIndex]) {
-                this.health--
-                    if (this.health === 0) {
-                        this.alive = false
-                    }
-                this.spellWordIndex++
-            }
-            
-        if (detectHit(this)) {
-            this.alive = false
-            if (!playerJustHit) {
-                hero.health--
-                playerJustHit = true
-                setTimeout(iframes, 1500)
-            }
-        }
-        
-        wallCheck(this)
-    }
-}
-
-// Constructor function for new enemies
-function EmDashConstructor(x, y) {
-    this.x = x
-    this.y = y
-    this.hitboxX = 0
-    this.hitboxY = 0
-    this.color = 'black'
-    this.width = 30
-    this.height = 30
-    this.health = 1
-    this.alive = true
-    this.xdir = randomRange(15, 30)
-    this.ydir = randomRange(15, 30)
-    this.speed = 5
-    this.frameIndex = 0
-    this.render = function() {
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.width, this.height)
-    }
     this.activate = function() {
         this.x += this.xdir
         this.y += this.ydir
@@ -594,14 +529,18 @@ function wallCheck(obj) {
     // Check if player is going over the border
     if (obj.x < 30) {
         obj.x = 30
+        obj.xdir = obj.xdir * -1
     } else if (obj.x+obj.width > game.width - 30) {
         obj.x = game.width  - obj.width - 30
+        obj.xdir = obj.xdir * -1
     }
     
     if (obj.y < 30) {
         obj.y = 30
+        obj.ydir = obj.ydir * -1
     } else if (obj.y+obj.height > game.height - 30) {
         obj.y = game.height  - obj.height - 30
+        obj.ydir = obj.ydir * -1
     }
 }
 
@@ -778,6 +717,8 @@ let gameLoop = () => {
     //Clear board
     ctx.clearRect(0, 0, game.width, game.height)
     
+    ctx.drawImage(document.getElementById('dungeoncontinue'), 0, 0)
+    
     //Check if player is dead
 //    if (hero.health === 0) {
 //        killPlayer()
@@ -806,21 +747,14 @@ let gameLoop = () => {
     hero.render()
     
     //Write player input text above player
-    drawStrokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'hotpink', 'Fredoka One', 35, 'center')
-    drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'black', 'Fredoka One', 35, 'center')
+    drawStrokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'black', 'Fredoka One', 35, 'center')
     drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5, 'hotpink', 'Fredoka One', 35, 'center')
 }
 
 function gameBegin() {
-//    chest = new ChestConstructor(740, 160, 'Potion')
-//    door = new DoorConstructor(580, 60, 1)
-//    enemy = new GhostConstructor(30, 30)
-//    enemy = new ExclaimerConstructor(30, 30)
-    
     ctx.font = '20px Fredoka One'
     room = new RoomConstructor(roomIndex)
     roomIndex++
-    console.log(room.contents)
     
     hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
