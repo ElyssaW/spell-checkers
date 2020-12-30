@@ -1,8 +1,9 @@
 // Initial variables
 let ctx = game.getContext('2d')
 game.setAttribute('width', 1200)
-game.setAttribute('height', 600)
+game.setAttribute('height', 700)
 
+// Letter array
 let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
                     'h', 'i', 'j', 'k', 'l', 'm',
                    'n', 'o', 'p', 'q', 'r', 's',
@@ -30,16 +31,19 @@ let circleFrame = 0
 let circleIncrease = true
 let gradient
 let mouseover
+let roomIndex = 0
 let animText = {x: 560,
                 y: 360,
                 alpha: 0,
                 animate: false,
                 finished: false}
 
+// Function to grab a random range
 function randomRange(min, max) {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
+// Function to listen for a mouseover on the title text
 document.addEventListener('mousemove', (e) => {
     if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518 && !animText.finished) {
             animText.animate = true
@@ -50,11 +54,8 @@ document.addEventListener('mousemove', (e) => {
 })
 
 document.addEventListener('click', (e) => {
-    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518 && !animText.finished) {
-            animText.animate = true
-    } else {
-            animText.animate = false
-        
+    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518) {
+            roomBase.active = true
     }
 })
 
@@ -104,7 +105,6 @@ let gameLoop = () => {
     }
     
     if (frame % 8 === 0) {
-        console.log('circle')
         if (circleIncrease) {
             circleFrame++
         } else {
@@ -141,12 +141,10 @@ let gameLoop = () => {
             ctx.fillText('- Start -', 560, 350) 
     }
     
-    
     if (frame === 750) {
         frame = 0
     } 
 }
-
 
 function gameBegin() {
     

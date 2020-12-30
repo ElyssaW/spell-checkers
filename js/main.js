@@ -29,6 +29,12 @@ let moveObject = {up: false,
 let playerText = []
 // Initialize array of objects containing room data
 let roomArray = []
+// Letter array
+let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
+                    'h', 'i', 'j', 'k', 'l', 'm',
+                   'n', 'o', 'p', 'q', 'r', 's',
+                   't', 'u', 'v', 'w', 'x', 'y', 'z'
+                  ]
 // Initialize array of objects containing the word puzzle key/locks
 let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
                  {doorKey: 'spells', doorStart: 'Magic is wonderful, and ', doorTypo: 'spllese', doorEnd: ' are wonderful too!'},
@@ -322,9 +328,9 @@ function DoorConstructor(x, y, leadsTo) {
     this.y = y
     this.hitboxX = 0
     this.hitboxY = 0
-    this.color = 'red'
+    this.color = 'black'
     this.width = 60
-    this.height = 60
+    this.height = 0
     this.firstLock = textArray[roomIndex].doorStart
     this.secondLock = textArray[roomIndex].doorEnd
     this.typo = textArray[roomIndex].doorTypo
@@ -339,24 +345,45 @@ function DoorConstructor(x, y, leadsTo) {
     }
     this.activate = function() {
         // Check if door is locked
-        if (this.locked && room.cleared) {
+        if (this.locked) {
             //If door is locked, check if player is near
-            if (detectNear(this, 200)) {
+            if (detectNear(this, 200) && room.enemyCount === 0) {
                 // Display typo text
                 drawTypo(this, this.firstLock, this.typo, this.secondLock)
+                if (this.height < 10) {
+                    this.height++
+                }
                 
                 if (playerInput == this.key) {
                     this.locked = false
                 }
-            }
+            } 
         // If door is unlocked, watch for collision
         } else if (detectHit(this)) {
             // Increment room index
-            roomIndex++
-            room = new RoomConstructor(roomIndex)
-            roomArray.push(room)
-        } 
+            moveToNextRoom()
+        } else {
+            if (this.height < 90) {
+                this.height++
+            }
+        }
     }
+}
+
+function moveToNextRoom() {
+    clearInterval(gameInterval)
+    ctx.clearRect(0, 0, game.width, game.height)
+    ctx.fillStyle = 'white'
+    ctx.fillRect(0, 0, game.width, game.height)
+    roomIndex++
+    hero.x = game.width/2
+    hero.y = game.height/2
+    room = new RoomConstructor(roomIndex)
+    roomArray.push(room)
+    setTimeout(() => {
+        console.log('Hello!')
+        gameInterval = setInterval(gameLoop, 30)
+    }, 1500)
 }
 
 // Constructor function for new chests
@@ -365,6 +392,8 @@ function ChestConstructor(x, y, item) {
     this.y = y
     this.hitboxX = 0
     this.hitboxY = 0
+    this.sprite = document.getElementById('heart')
+    this.spriteFlipped = document.getElementById('heart')
     this.color = 'yellow'
     this.width = 60
     this.height = 60
@@ -376,24 +405,12 @@ function ChestConstructor(x, y, item) {
     this.alive = true
     this.item = item,
     this.textFrameIndex = 0
+    this.walkFrameIndex = 0
     this.render = function() {
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.width, this.height)
+        drawFloatAnim(this)
     }
     this.activate = function() {
-        // Check if door is locked
-        if (this.locked && room.cleared) {
-            //If door is locked, check if player is near
-            if (detectNear(this, 200)) {
-                // Display typo text
-                drawTypo(this, this.firstLock, this.typo, this.secondLock)
-                
-                if (playerInput == this.key) {
-                    this.locked = false
-                }
-            }
-        // If door is unlocked, watch for collision
-        } else if (detectHit(this)) {
+        if (detectHit(this)) {
             if (hero.health < hero.maxhealth) {
                 hero.health++
                 this.alive = false
@@ -407,7 +424,6 @@ function ChestConstructor(x, y, item) {
 function RoomConstructor(index) {
     this.index = index
     this.enemyCount = 0
-    this.cleared = false
     this.contents = generateRoomContent(this)
     roomArray.push(this)
 }
@@ -417,8 +433,8 @@ function generateRoomContent(room) {
     let random
     let randomItem
     
-    let door = new DoorConstructor(580, 50, 1+roomIndex)
-    let chest = new ChestConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+    let door = new DoorConstructor(570, 50, 1+roomIndex)
+    let chest = new ChestConstructor(280, 320)
     
     playerInput = []
     array.push(door)
@@ -546,8 +562,8 @@ function wallCheck(obj) {
     if (obj.y < 30) {
         obj.y = 30
         obj.ydir = obj.ydir * -1
-    } else if (obj.y+obj.height > game.height - 30) {
-        obj.y = game.height  - obj.height - 30
+    } else if (obj.y+obj.height > game.height - 60) {
+        obj.y = game.height  - obj.height - 60
         obj.ydir = obj.ydir * -1
     }
 }
@@ -725,11 +741,32 @@ let gameLoop = () => {
     //Clear board
     ctx.clearRect(0, 0, game.width, game.height)
     
-    ctx.drawImage(document.getElementById('dungeoncontinue'), 0, 0)
-    
-    if (room.enemyCount === 0) {
-        room.cleared = true
+    ctx.font = '20px serif'
+    ctx.fillStyle = 'lightgrey'
+    let index = 0
+    for (let j = 0; j < game.width/10; j++) {
+        for (let i = 0; i < letterArray.length; i++) {
+            if (index % 2) {
+                ctx.fillText(letterArray[i], (30*j), (30*i)+frame)
+                ctx.fillText(letterArray[i], (30*j), (30*i)+frame-750)
+            } else {
+                ctx.fillText(letterArray[i], (30*j), (30*i)-frame)
+                ctx.fillText(letterArray[i], (30*j), (30*i)-frame+750)
+            }
+        }
+        index++
     }
+    
+    gradient = ctx.createRadialGradient(562,300,700,562,300,0)
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, game.width, game.height)
+    
+    ctx.drawImage(document.getElementById('dungeoncontinue'), 30, 20)
+    
+//    ctx.fillStyle = 'aliceblue'
+//    ctx.fillRect(30, 30, game.width-60, game.height-60)
     
     //Check if player is dead
     if (hero.health === 0) {
@@ -738,6 +775,10 @@ let gameLoop = () => {
     
     // Increment frame
     frame++
+    
+    if (frame === 740) {
+        frame = 0
+    }
     
     // Draw player's health
     drawHealth()
@@ -767,6 +808,8 @@ function gameBegin() {
     ctx.font = '20px Fredoka One'
     room = new RoomConstructor(roomIndex)
     roomIndex++
+    
+    console.log(room)
     
     hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
