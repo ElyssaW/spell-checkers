@@ -289,7 +289,7 @@ function GhostConstructor(x, y) {
     this.alive = true
     this.xdir = 0
     this.ydir = 0
-    this.speed = 2
+    this.speed = randomRange(1, 3)
     this.walkDirection = 0
     this.textFrameIndex = 0
     this.walkFrameIndex = randomRange(0, 5)
@@ -409,7 +409,7 @@ function DoorConstructor(x, y, leadsTo) {
         // Check if door is locked
         if (this.locked) {
             //If door is locked, check if player is near
-            if (detectNear(this, 200) && room.enemyCount === 0) {
+            if (room.enemyCount === 0) {
                 // Display typo text
                 drawTypo(this, this.firstLock, this.typo, this.secondLock)
                 if (this.height < 10) {
@@ -483,6 +483,7 @@ function ChestConstructor(x, y, item) {
     this.textFrameIndex = 0
     this.walkFrameIndex = 0
     this.render = function() {
+        ctx.lineWidth = 2
         circle(this.x, this.y + getFloatPos(this), 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
     }
     this.activate = function() {
@@ -728,17 +729,29 @@ function damangePlayer (obj) {
         new Particle()
     }
     
+    pushObject(obj, hero)
+}
+
+function pushObject (pusher, pushed) {
+    let pushPointX = pusher.x + pusher.width/2
+    let pushPointY = pusher.y + pusher.height/2
     // Push player
-    if (hero.x + (hero.width/2) < obj.x + (obj.width/2)) {
-        hero.x -= 20
-    } else {
-        hero.x += 20
-    }
-    if (hero.y + (hero.height/2) < obj.y + (obj.height/2)) {
-        hero.y -= 20
-    } else {
-        hero.y += 20
-    }  
+    let pushInterval = setInterval(() => {
+        if (pushed.x + (pushed.width/2) < pushPointX) {
+            pushed.x -= 4
+        } else {
+            pushed.x += 4
+        }
+        if (pushed.y + (pushed.height/2) < pushPointY) {
+            pushed.y -= 4
+        } else {
+            pushed.y += 4
+        }  
+    }, 30)
+    
+    setTimeout(() => {
+        clearInterval(pushInterval)
+    }, 300)
 }
 
 function damageEnemy(obj, color, undercolor) {
