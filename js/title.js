@@ -26,12 +26,10 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
 //                  ]
 
 let index = 0
-let frame = 0
 let circleFrame = 0
 let circleIncrease = true
 let gradient
 let mouseover
-let roomIndex = 0
 let animText = {x: 560,
                 y: 360,
                 alpha: 0,
@@ -59,31 +57,7 @@ document.addEventListener('click', (e) => {
     }
 })
 
-// Where the magic happens
-let gameLoop = () => {
-    
-    frame++
-    //Clear board
-    ctx.clearRect(0, 0, game.width, game.height)
-    
-    ctx.font = '20px serif'
-    ctx.fillStyle = 'lightgrey'
-    for (let j = 0; j < game.width/10; j++) {
-        for (let i = 0; i < letterArray.length; i++) {
-            if (index % 2) {
-                ctx.fillText(letterArray[i], (30*j), (30*i)+frame)
-                ctx.fillText(letterArray[i], (30*j), (30*i)+frame-750)
-            } else {
-                ctx.fillText(letterArray[i], (30*j), (30*i)-frame)
-                ctx.fillText(letterArray[i], (30*j), (30*i)-frame+750)
-            }
-        }
-        index++
-    }
-    
-    
-    index = 0
-    
+function drawCircle() {
     ctx.fillStyle = 'white'
     ctx.strokeStyle = 'black'
     ctx.beginPath()
@@ -111,20 +85,46 @@ let gameLoop = () => {
             circleFrame--
         }
     }
-    
+}
+
+function drawGradient() {
     gradient = ctx.createRadialGradient(562,300,700,562,300,0)
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
     gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, game.width, game.height)
-    
+}
+
+function drawTitle() {
     ctx.font = '50px Londrina Solid'
     ctx.textAlign = 'center'
     ctx.fillStyle = 'white'
     ctx.fillText('SPELL CHECKERS', 562, 305+circleFrame)
     ctx.fillStyle = 'black'
     ctx.fillText('SPELL CHECKERS', 562, 300+circleFrame)
+}
+
+function drawBackgroundScroll () {
+    ctx.font = '20px serif'
+    ctx.fillStyle = 'lightgrey'
+    for (let j = 0; j < game.width/10; j++) {
+        for (let i = 0; i < letterArray.length; i++) {
+            if (index % 2) {
+                ctx.fillText(letterArray[i], (30*j), (30*i)+frame)
+                ctx.fillText(letterArray[i], (30*j), (30*i)+frame-750)
+            } else {
+                ctx.fillText(letterArray[i], (30*j), (30*i)-frame)
+                ctx.fillText(letterArray[i], (30*j), (30*i)-frame+750)
+            }
+        }
+        index++
+    }
     
+    
+    index = 0
+}
+
+function drawStartText() {
     if (!animText.finished && animText.animate) {
             animText.y--
             ctx.font = '30px serif'
@@ -135,15 +135,37 @@ let gameLoop = () => {
                 console.log('Finished')
                 animText.finished = true
             }
-    } else if (animText.finished) {
+    }  else if (animText.finished) {
             ctx.font = '30px serif'
             ctx.fillStyle = 'grey'
             ctx.fillText('- Start -', 560, 350) 
-    }
+    } 
+}
+
+function titleLoop () {
+    frame++
+    //Clear board
+    ctx.clearRect(0, 0, game.width, game.height)
+    
+    drawBackgroundScroll()
+    
+    drawGradient()
+    
+    drawCircle()
+    
+    drawTitle()
+    
+    drawStartText()
     
     if (frame === 750) {
         frame = 0
-    } 
+    }
+}
+
+// Where the magic happens
+let gameLoop = () => {
+    
+     
 }
 
 function gameBegin() {

@@ -5,7 +5,7 @@ let ctx = game.getContext('2d')
 // Curent frame of the game
 let frame = 0
 // Current room
-let roomIndex = 0
+let roomIndex = -1
 // Current chest
 let chestIndex = 0
 // Expected String Input
@@ -35,17 +35,18 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
                    'n', 'o', 'p', 'q', 'r', 's',
                    't', 'u', 'v', 'w', 'x', 'y', 'z'
                   ]
+//// Initialize array of objects containing the word puzzle key/locks
+//let textArray = [{doorKey: 'Most', doorStart: 'Welcome to Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Magic'},
+//                 {doorKey: 'spells', doorStart: 'Magic is wonderful, and ', doorTypo: 'spllse', doorEnd: ' are wonderful too!'},
+//                 {doorKey: 'wonderful', doorStart: 'And you know what else is ', doorTypo: 'ndferwulo', doorEnd: '? Madge!'},
+//                 {doorKey: 'kindest', doorStart: 'She is the most wonderful, the ', doorTypo: 'nkidtse', doorEnd: ', most obvlivious person I know.'},
+//                 {doorKey: 'confession', doorStart: 'So obvlivious, the only way I could get her to take my ', doorTypo: 'fessconion', doorEnd: ' seriously...'},
+//                 {doorKey: 'bury', doorStart: '...was to ', doorTypo: 'yurb', doorEnd: ' it in an essay on magic.'},
+//                 {doorKey: 'magnificient', doorStart: 'But more than ', doorTypo: 'yanhingt', doorEnd: ', I would like to tell her...'}
+//                ]
 // Initialize array of objects containing the word puzzle key/locks
-let textArray = [{doorKey: 'Most', doorStart: 'Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Spells'},
-                 {doorKey: 'spells', doorStart: 'Magic is wonderful, and ', doorTypo: 'spllese', doorEnd: ' are wonderful too!'},
-                 {doorKey: 'wonderful', doorStart: 'And you know what else is ', doorTypo: 'ndferwulo', doorEnd: '? Madge!'},
-                 {doorKey: 'kindest', doorStart: 'She is the most wonderful, the ', doorTypo: 'nkidtse', doorEnd: ', most obvlivious person I know.'},
-                 {doorKey: 'confession', doorStart: 'So obvlivious, the only way I could get her to take my ', doorTypo: 'fessconion', doorEnd: ' seriously...'},
-                 {doorKey: 'bury', doorStart: '...was to ', doorTypo: 'yurb', doorEnd: ' it in an essay on magic.'},
-                 {doorKey: 'magnificient', doorStart: 'But more than ', doorTypo: 'yanhingt', doorEnd: ', I would like to tell her...'}
-                ]
-// Initialize secondary array of non-plot-relevant locks/keys for chests and doors that do not progress forward
-let chestArray = [{doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
+let textArray = [{doorKey: 'Most', doorStart: 'Welcome to Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Magic'},
+                 {doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
                   {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
                   {doorKey: 'speaking', doorStart: 'Magic cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
                   {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
@@ -53,8 +54,19 @@ let chestArray = [{doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'g
                   {doorKey: 'fight', doorStart: 'But Spellcheckers ', doorTypo: 'fihgt', doorEnd: ' every day to keep them in line.'},
                   {doorKey: 'protect', doorStart: 'Royal Spellcheckers ', doorTypo: 'teproct', doorEnd: ' all royal correspondance from wild magic.'},
                   {doorKey: 'wrestle', doorStart: 'Spellcheckers ', doorTypo: 'sertwle', doorEnd: ' with typos, run-ons, and wild punctuation.'},
-                  {doorKey: 'invaluable', doorStart: 'This makes their service ', doorTypo: 'invalauble', doorEnd: ''},
+                  {doorKey: 'invaluable', doorStart: 'This makes their service ', doorTypo: 'invalauble', doorEnd: ''}
                 ]
+// Initialize secondary array of non-plot-relevant locks/keys for chests and doors that do not progress forward
+//let chestArray = [{doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
+//                  {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
+//                  {doorKey: 'speaking', doorStart: 'Magic cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
+//                  {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
+//                  {doorKey: 'known', doorStart: 'Magic words have been ', doorTypo: 'nownk', doorEnd: ' to roam about and wreak havoc'},
+//                  {doorKey: 'fight', doorStart: 'But Spellcheckers ', doorTypo: 'fihgt', doorEnd: ' every day to keep them in line.'},
+//                  {doorKey: 'protect', doorStart: 'Royal Spellcheckers ', doorTypo: 'teproct', doorEnd: ' all royal correspondance from wild magic.'},
+//                  {doorKey: 'wrestle', doorStart: 'Spellcheckers ', doorTypo: 'sertwle', doorEnd: ' with typos, run-ons, and wild punctuation.'},
+//                  {doorKey: 'invaluable', doorStart: 'This makes their service ', doorTypo: 'invalauble', doorEnd: ''}
+//                ]
 // Initialize array of enemy names
 let spellWords = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
                   'craft', 'webcast', 'swagger', 'waste', 'cedar', 'brace', 'fast', 'stave',
@@ -377,11 +389,10 @@ function moveToNextRoom() {
     ctx.fillRect(0, 0, game.width, game.height)
     roomIndex++
     hero.x = game.width/2
-    hero.y = game.height/2
+    hero.y = game.height/2 + 200
     room = new RoomConstructor(roomIndex)
     roomArray.push(room)
     setTimeout(() => {
-        console.log('Hello!')
         gameInterval = setInterval(gameLoop, 30)
     }, 1500)
 }
@@ -397,10 +408,6 @@ function ChestConstructor(x, y, item) {
     this.color = 'yellow'
     this.width = 60
     this.height = 60
-    this.firstLock = chestArray[chestIndex].doorStart
-    this.secondLock = chestArray[chestIndex].doorEnd
-    this.typo = chestArray[chestIndex].doorTypo
-    this.key = chestArray[chestIndex].doorKey
     this.locked = true
     this.alive = true
     this.item = item,
@@ -433,7 +440,7 @@ function generateRoomContent(room) {
     let random
     let randomItem
     
-    let door = new DoorConstructor(570, 50, 1+roomIndex)
+    let door = new DoorConstructor(570, 50, roomIndex)
     let chest = new ChestConstructor(280, 320)
     
     playerInput = []
@@ -444,14 +451,14 @@ function generateRoomContent(room) {
         random = Math.floor(Math.random() * 5)
         switch(random) {
             case 1:
-                randomItem = new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                randomItem = new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
                 break;
             case 2:
-                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
                 room.enemyCount++
                 break;
             case 3:
-                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-100))
+                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
                 room.enemyCount++
                 break;
             default:
@@ -551,19 +558,19 @@ function moveToPlayer (obj) {
 // Detect collision between any given object and the wall
 function wallCheck(obj) {
     // Check if player is going over the border
-    if (obj.x < 30) {
-        obj.x = 30
+    if (obj.x < 50) {
+        obj.x = 50
         obj.xdir = obj.xdir * -1
-    } else if (obj.x+obj.width > game.width - 30) {
-        obj.x = game.width  - obj.width - 30
+    } else if (obj.x+obj.width > game.width - 50) {
+        obj.x = game.width  - obj.width - 50
         obj.xdir = obj.xdir * -1
     }
     
     if (obj.y < 30) {
         obj.y = 30
         obj.ydir = obj.ydir * -1
-    } else if (obj.y+obj.height > game.height - 60) {
-        obj.y = game.height  - obj.height - 60
+    } else if (obj.y+obj.height > game.height - 70) {
+        obj.y = game.height  - obj.height - 70
         obj.ydir = obj.ydir * -1
     }
 }
@@ -731,6 +738,145 @@ document.addEventListener('keydown', e => {
 
 //================================================
 //
+//          Title functions/loop
+//
+//================================================
+
+let index = 0
+let circleFrame = 0
+let circleIncrease = true
+let gradient
+let mouseover
+let animText = {x: 560,
+                y: 360,
+                alpha: 0,
+                animate: false,
+                finished: false}
+
+// Function to listen for a mouseover on the title text
+document.addEventListener('mousemove', (e) => {
+    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518 && !animText.finished) {
+            animText.animate = true
+    } else {
+            animText.animate = false
+        
+    }
+})
+
+document.addEventListener('click', (e) => {
+    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518) {
+            moveToNextRoom()
+    }
+})
+
+function drawCircle() {
+    ctx.fillStyle = 'white'
+    ctx.strokeStyle = 'black'
+    ctx.beginPath()
+    ctx.arc(game.width/2, 280, 150, 0, 2 * Math.PI)
+    ctx.fill()
+    
+    ctx.strokeStyle = 'black'
+    ctx.beginPath()
+    ctx.setLineDash([5, 5])
+    ctx.beginPath()
+    ctx.arc(game.width/2, 280, 150, 0 - frame, 2 * Math.PI + frame)
+    ctx.closePath()
+    ctx.stroke()
+    ctx.setLineDash([])
+    
+    if (circleFrame > 3) {
+        circleIncrease = false
+    } else if (circleFrame === 0) {
+        circleIncrease = true
+    }
+    
+    if (frame % 8 === 0) {
+        if (circleIncrease) {
+            circleFrame++
+        } else {
+            circleFrame--
+        }
+    }
+}
+
+function drawGradient() {
+    gradient = ctx.createRadialGradient(game.width/2,300,700,562,300,0)
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, game.width, game.height)
+}
+
+function drawTitle() {
+    ctx.font = '50px Londrina Solid'
+    ctx.textAlign = 'center'
+    ctx.fillStyle = 'white'
+    ctx.fillText('SPELL CHECKERS', game.width/2, 305+circleFrame)
+    ctx.fillStyle = 'black'
+    ctx.fillText('SPELL CHECKERS', game.width/2, 300+circleFrame)
+}
+
+function drawBackgroundScroll () {
+    ctx.font = '20px serif'
+    ctx.fillStyle = 'lightgrey'
+    for (let j = 0; j < game.width/10; j++) {
+        for (let i = 0; i < letterArray.length; i++) {
+            if (index % 2) {
+                ctx.fillText(letterArray[i], (30*j), (30*i)+frame)
+                ctx.fillText(letterArray[i], (30*j), (30*i)+frame-750)
+            } else {
+                ctx.fillText(letterArray[i], (30*j), (30*i)-frame)
+                ctx.fillText(letterArray[i], (30*j), (30*i)-frame+750)
+            }
+        }
+        index++
+    }
+    
+    
+    index = 0
+}
+
+function drawStartText() {
+    if (!animText.finished && animText.animate) {
+            animText.y--
+            ctx.font = '30px serif'
+            ctx.fillStyle = 'grey'
+            ctx.fillText('- Start -', game.width/2, animText.y)
+            
+            if (animText.y === 350) {
+                console.log('Finished')
+                animText.finished = true
+            }
+    }  else if (animText.finished) {
+            ctx.font = '30px serif'
+            ctx.fillStyle = 'grey'
+            ctx.fillText('- Start -', game.width/2, 350) 
+    } 
+}
+
+function titleLoop () {
+    frame++
+    //Clear board
+    ctx.clearRect(0, 0, game.width, game.height)
+    
+    drawBackgroundScroll()
+    
+    drawGradient()
+    
+    drawCircle()
+    
+    drawTitle()
+    
+    drawStartText()
+    
+    if (frame === 750) {
+        frame = 0
+    }
+}
+
+//================================================
+//
 //          Game Loop
 //
 //================================================
@@ -776,7 +922,7 @@ let gameLoop = () => {
     // Increment frame
     frame++
     
-    if (frame === 740) {
+    if (frame === 750) {
         frame = 0
     }
     
@@ -806,14 +952,10 @@ let gameLoop = () => {
 
 function gameBegin() {
     ctx.font = '20px Fredoka One'
-    room = new RoomConstructor(roomIndex)
-    roomIndex++
-    
-    console.log(room)
     
     hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
-    gameInterval = setInterval(gameLoop, 30)
+    gameInterval = setInterval(titleLoop, 30)
     gameStart = true
 }
 
