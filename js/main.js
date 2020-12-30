@@ -138,6 +138,27 @@ function drawStrokeText(string, x, y, color, font, size, align) {
     ctx.strokeText(string, x, y)
 }
 
+// Generic function to draw a circle
+function circle(x, y, radius, fill, stroke, start, end, dash) {
+    if (typeof start === 'undefined') {
+        start = 0
+    }
+    if (typeof end === 'undefined') {
+        end = 2 * Math.PI
+    }
+    ctx.fillStyle = fill
+    ctx.strokeStyle = stroke
+    if (typeof dash !== 'undefined') {
+        ctx.setLineDash(dash)
+    }
+    ctx.beginPath()
+    ctx.arc(x, y, radius, start, end)
+    ctx.closePath()
+    ctx.fill()
+    ctx.stroke()
+    ctx.setLineDash([])
+}
+
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
 function drawTypo (obj, string1, string2, string3) {
@@ -201,19 +222,11 @@ function drawHealth() {
     ctx.lineWidth = 1
     // Draw empty health circles
     for (let i = hero.maxhealth; i > 0; i--) {
-        ctx.fillStyle = 'white'
-        ctx.beginPath()
-        ctx.arc(20+(30*i), 50, 30, 0, 2 * Math.PI)
-        ctx.fill()
-        ctx.stroke()
+        circle(20+(30*i), 50, 30, 'white', 'black', 0, 2 * Math.PI, [5, 5])
     }
     // Fill health circles
     for (let i = hero.health; i > 0; i--) {
-        ctx.fillStyle = hero.color
-        ctx.beginPath()
-        ctx.arc(20+(30*i), 50, 30, 0, 2 * Math.PI)
-        ctx.fill()
-        ctx.stroke()
+        circle(20+(30*i), 50, 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
     }
 }
 
@@ -875,19 +888,7 @@ function drawStartText() {
 
 // Draw the dashed circle behind the text
 function drawCircle() {
-    ctx.fillStyle = titleSettings.circleFill
-    ctx.strokeStyle = titleSettings.circleStroke
-    ctx.beginPath()
-    ctx.arc(titleSettings.circleX, titleSettings.circleY, titleSettings.circleRadius, 0, 2 * Math.PI)
-    ctx.fill()
-    
-    ctx.beginPath()
-    ctx.setLineDash(titleSettings.linedash)
-    ctx.beginPath()
-    ctx.arc(titleSettings.circleX, titleSettings.circleY, titleSettings.circleRadius, 0 - frame, 2 * Math.PI + frame)
-    ctx.closePath()
-    ctx.stroke()
-    ctx.setLineDash([])
+    circle(titleSettings.circleX, titleSettings.circleY, titleSettings.circleRadius, titleSettings.circleFill, titleSettings.circleStroke, 0 - frame, 2 * Math.PI + frame, [5, 5])
 }
 
 // Draw gradient
