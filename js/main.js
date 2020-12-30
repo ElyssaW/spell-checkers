@@ -48,7 +48,8 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
 let textArray = [{doorKey: 'Most', doorStart: 'Welcome to Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Magic'},
                  {doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
                   {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
-                  {doorKey: 'speaking', doorStart: 'Magic cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
+                 {doorKey: 'back', doorStart: 'Okay fine, fine - ', doorTypo: 'bakc', doorEnd: ' to the topic of magic.'},
+                  {doorKey: 'speaking', doorStart: 'Magic can be cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
                   {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
                   {doorKey: 'known', doorStart: 'Magic words have been ', doorTypo: 'nownk', doorEnd: ' to roam about and wreak havoc'},
                   {doorKey: 'fight', doorStart: 'But Spellcheckers ', doorTypo: 'fihgt', doorEnd: ' every day to keep them in line.'},
@@ -88,15 +89,17 @@ game.setAttribute('height', 700)
 //
 //===============================================
 
+// Select random item from given array
 function selectRandom (randomArray) {
     return randomArray[Math.floor(Math.random() * randomArray.length)]
 }
 
+// Select random number from given range
 function randomRange(min, max) {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-// Function to write text above object
+// Write text above object
 function drawText (string, obj) {
     ctx.fillStyle = 'red'
     ctx.fillText(string, obj.x, obj.y-5)
@@ -138,23 +141,37 @@ function drawStrokeText(string, x, y, color, font, size, align) {
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
 function drawTypo (obj, string1, string2, string3) {
+    // Creates an array of numbers to modify y position with, to simulate floating
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
+    // Passes the current index value to the modifier variable
     let floatValue = floatValueArray[obj.textFrameIndex]
     
+    // Set font/size
     ctx.font = '20px Fredoka One'
+    // Get total width of the text, so that the text can be centered above the object generating it
     let textLength = ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width
+    // Find the center of the total width
     let textCenter = (obj.x+(obj.width/2)) - (textLength/2)
+    
+    // Draw first half of the sentence
     drawStrokeText(string1, textCenter, obj.y - 3 + floatValue, 'white', 'Fredoka One', 20, 'left')
     drawFillText(string1, textCenter, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
+    
+    // Draw typo in the sentence
     drawStrokeText(string2, textCenter + ctx.measureText(string1).width, obj.y - 3 + floatValue, 'white', 'Fredoka One', 20, 'left')
     drawFillText(string2, textCenter + ctx.measureText(string1).width, obj.y - 5 + floatValue, 'red', 'Fredoka One', 20, 'left')
+    
+    // Draw second half of the sentence
     drawStrokeText(string3, textCenter + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'white', 'Fredoka One', 20, 'left')
     drawFillText(string3, textCenter + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'grey', 'Fredoka One', 20, 'left')
     
+    // Increment float array index, so as to move the text into the next position when it is drawn
     obj.textFrameIndex++
+    // Reset the index if it has reached the end of the array
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
 
+// Draw the current word-to-type above the enemy's head
 function drawName (obj, string1) {
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
     let floatValue = floatValueArray[obj.textFrameIndex]
@@ -166,6 +183,7 @@ function drawName (obj, string1) {
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
 
+// Small function to simulate floating on objects directly
 function drawFloatAnim(obj) {
     let floatValueArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
     let floatValue = floatValueArray[obj.walkFrameIndex]
@@ -178,8 +196,10 @@ function drawFloatAnim(obj) {
     if (obj.walkFrameIndex ===  floatValueArray.length) {obj.walkFrameIndex = 0}
 }
 
+// Function to draw health
 function drawHealth() {
     ctx.lineWidth = 1
+    // Draw empty health circles
     for (let i = hero.maxhealth; i > 0; i--) {
         ctx.fillStyle = 'white'
         ctx.beginPath()
@@ -187,6 +207,7 @@ function drawHealth() {
         ctx.fill()
         ctx.stroke()
     }
+    // Fill health circles
     for (let i = hero.health; i > 0; i--) {
         ctx.fillStyle = hero.color
         ctx.beginPath()
@@ -196,6 +217,7 @@ function drawHealth() {
     }
 }
 
+// Draw sprite without float value
 function drawSprite (obj, spriteLeft, spriteRight) {
     if (obj.xdir > 0) {
             ctx.drawImage(spriteRight, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
@@ -228,7 +250,7 @@ function HeroConstructor(x, y) {
     this.shielded = false
     this.xdir = 0
     this.ydir = 0
-    this.frameIndex = 0
+    this.wallDirection = 0
     this.textFrameIndex = 0
     this.walkFrameIndex = randomRange(0, 5)
     this.render = function() {
@@ -255,40 +277,51 @@ function GhostConstructor(x, y) {
     this.xdir = 0
     this.ydir = 0
     this.speed = 2
-    this.frameIndex = 0
+    this.walkDirection = 0
     this.textFrameIndex = 0
     this.walkFrameIndex = randomRange(0, 5)
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
     this.render = function() {
+        // Draw sprite body
         drawFloatAnim(this)
+        // Draw sprite face
         drawSprite(this, this.spriteFaceFlipped, this.spriteFace)
     }
+    // Define enemy behavior
     this.activate = function() {
+        // Check if near player
         if(detectNear(this, 400)) {
+            // Move to player
             moveToPlayer(this)
+            // Draw name to type
             drawName(this, this.spellWords[this.spellWordIndex])
             
+            // If player input matches name, decrement health
             if (playerInput == this.spellWords[this.spellWordIndex]) {
                 this.health--
+                    // If health is depeleted, kill enemy
                     if (this.health === 0) {
                         room.enemyCount--
                         this.alive = false
                     }
+                // Move onto the next spell word
                 this.spellWordIndex++
             }
-            
+            // Decrement player health if hit
             if (detectHit(this)) {
                 if (!playerJustHit) {
                     hero.health--
                     playerJustHit = true
+                    // Set iframes running
                     setTimeout(iframes, 1500)
                 }
             }
+        // If the player is not nearby, walk randomly
         } else {
             randomWalk(this)
         }
-        
+        // Chck if bumping against the wall
         wallCheck(this)
     }
 }
@@ -308,19 +341,22 @@ function ExclaimerConstructor(x, y) {
     this.xdir = randomRange(20, 30)
     this.ydir = randomRange(20, 30)
     this.speed = 5
-    this.frameIndex = 0
+    this.walkDirection = 0
     this.textFrameIndex = 0
-    this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
-    this.spellWordIndex = 0
     this.render = function() {
+            // Draw sprite
             ctx.drawImage(this.sprite, this.x, this.y)
         }
     this.activate = function() {
+        // Move x/y position
         this.x += this.xdir
         this.y += this.ydir
         
+        // Check if the player is hit
         if (detectHit(this)) {
+            // Kill enemy if hit
             this.alive = false
+            // Decrement health
             if (!playerJustHit) {
                 this.xdir = this.xdir * -1
                 this.ydir = this.ydir * -1
@@ -329,7 +365,7 @@ function ExclaimerConstructor(x, y) {
                 setTimeout(iframes, 1500)
             }
         }
-        
+        // Check if enemy is hitting a wall
         wallCheck(this)
     }
 }
@@ -365,7 +401,7 @@ function DoorConstructor(x, y, leadsTo) {
                 if (this.height < 10) {
                     this.height++
                 }
-                
+                // Unlock door
                 if (playerInput == this.key) {
                     this.locked = false
                 }
@@ -375,6 +411,7 @@ function DoorConstructor(x, y, leadsTo) {
             // Increment room index
             moveToNextRoom()
         } else {
+            // Expand door as it's unlocked
             if (this.height < 90) {
                 this.height++
             }
@@ -382,19 +419,30 @@ function DoorConstructor(x, y, leadsTo) {
     }
 }
 
+// Function to move the player to the next room
 function moveToNextRoom() {
+    // Stop game loop
     clearInterval(gameInterval)
+    // Clear canvas
     ctx.clearRect(0, 0, game.width, game.height)
+    // Throw a view over the board
     ctx.fillStyle = 'white'
     ctx.fillRect(0, 0, game.width, game.height)
+    // Increment room index
     roomIndex++
+    // Reset player input
+    playerInput = []
+    // Place the player at the bottom of the room
     hero.x = game.width/2
     hero.y = game.height/2 + 200
+    // Construct new room and pass it to the current index
     room = new RoomConstructor(roomIndex)
+    // Push the newly constructed room to the main room array
     roomArray.push(room)
+    // Set gameloop running again
     setTimeout(() => {
         gameInterval = setInterval(gameLoop, 30)
-    }, 1500)
+    }, 1000)
 }
 
 // Constructor function for new chests
@@ -417,6 +465,7 @@ function ChestConstructor(x, y, item) {
         drawFloatAnim(this)
     }
     this.activate = function() {
+        // Increment the player's health and erase chest
         if (detectHit(this)) {
             if (hero.health < hero.maxhealth) {
                 hero.health++
@@ -429,42 +478,55 @@ function ChestConstructor(x, y, item) {
 
 // Constructor function for new rooms
 function RoomConstructor(index) {
+    // Set new room's index to current index
     this.index = index
+    // Get enemy count
     this.enemyCount = 0
+    // Generate new enemies for the room
     this.contents = generateRoomContent(this)
-    roomArray.push(this)
 }
 
+// Function to randomly generate new content for each room
 function generateRoomContent(room) {
+    // Initialize array to contain enemies
     let array = []
+    // Initialize random value
     let random
+    // Initialize value to hold the item
     let randomItem
     
+    // Each room must contain a door and a chest, so they're generated here
     let door = new DoorConstructor(570, 50, roomIndex)
     let chest = new ChestConstructor(280, 320)
     
-    playerInput = []
     array.push(door)
     array.push(chest)
     
+    // Iterate through a loop three times, picking a random option each time to populate into the room
     for (let i = 0; i < 3; i++) {
+        // Set random number
         random = Math.floor(Math.random() * 5)
         switch(random) {
             case 1:
+                // Add in exclaimer if random num is 1
                 randomItem = new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
                 break;
             case 2:
+                // Add in ghost if random num is 2
                 randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
                 room.enemyCount++
                 break;
             case 3:
+                // Ad in ghost if random num is 3
                 randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
                 room.enemyCount++
                 break;
+                // Add in nothing if none are met
             default:
                 randomItem = null
                 break;
         }
+        // Push the generated item to the room contents array if it is not null
         if (randomItem !== null) {
             array.push(randomItem)
         }   
@@ -512,11 +574,11 @@ function pickDirection (obj) {
 function randomWalk(obj) {
     // Every 30 frames, assign the
     // object a new direction
-    if (obj.frameIndex === 30) {
-        obj.frameIndex = 0
+    if (obj.walkDirection === 30) {
+        obj.walkDirection = 0
         pickDirection(obj)
     } else {
-        obj.frameIndex++
+        obj.walkDirection++
     }
     
     // Take object's x/y direction
@@ -637,15 +699,19 @@ function movementHandler () {
     
     if (moveObject.down === true) {
              hero.y += 5
+             hero.ydir = 1
          } 
     if (moveObject.up === true) {
              hero.y -= 5
+             hero.ydir = -1
          } 
     if (moveObject.right === true) {
              hero.x += 5
+             hero.xdir = 1
          } 
     if (moveObject.left === true) {
              hero.x -= 5
+             hero.xdir = -1
          } 
 }
 
@@ -728,7 +794,7 @@ document.addEventListener('keydown', e => {
     }
 })
 
-// Listen for space bar, to bring up shield
+// Listen for space bar, to teleport the player 
 document.addEventListener('keydown', e => {
     if (e.keyCode === 32) {
         hero.x = hero.x + (hero.xdir * 200)
@@ -742,11 +808,17 @@ document.addEventListener('keydown', e => {
 //
 //================================================
 
+// Initialize index
 let index = 0
-let circleFrame = 0
-let circleIncrease = true
+// Initialize frame for circle
+let titleFrame = 0
+// Initialize circle increase
+let titleIncrease = true
+// Initialize gradient
 let gradient
+// Initialize mouseover
 let mouseover
+// Create animation controller object
 let animText = {x: 560,
                 y: 360,
                 alpha: 0,
@@ -763,12 +835,14 @@ document.addEventListener('mousemove', (e) => {
     }
 })
 
+// Start game if clicked
 document.addEventListener('click', (e) => {
     if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518) {
             moveToNextRoom()
     }
 })
 
+// Draw the dashed circle behind the text
 function drawCircle() {
     ctx.fillStyle = 'white'
     ctx.strokeStyle = 'black'
@@ -784,22 +858,9 @@ function drawCircle() {
     ctx.closePath()
     ctx.stroke()
     ctx.setLineDash([])
-    
-    if (circleFrame > 3) {
-        circleIncrease = false
-    } else if (circleFrame === 0) {
-        circleIncrease = true
-    }
-    
-    if (frame % 8 === 0) {
-        if (circleIncrease) {
-            circleFrame++
-        } else {
-            circleFrame--
-        }
-    }
 }
 
+// Draw gradient
 function drawGradient() {
     gradient = ctx.createRadialGradient(game.width/2,300,700,562,300,0)
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
@@ -812,11 +873,27 @@ function drawTitle() {
     ctx.font = '50px Londrina Solid'
     ctx.textAlign = 'center'
     ctx.fillStyle = 'white'
-    ctx.fillText('SPELL CHECKERS', game.width/2, 305+circleFrame)
+    ctx.fillText('SPELL CHECKERS', game.width/2, 305+titleFrame)
     ctx.fillStyle = 'black'
-    ctx.fillText('SPELL CHECKERS', game.width/2, 300+circleFrame)
+    ctx.fillText('SPELL CHECKERS', game.width/2, 300+titleFrame)
+    
+    // Animate the text bounce
+    if (titleFrame > 3) {
+        titleIncrease = false
+    } else if (titleFrame === 0) {
+        titleIncrease = true
+    }
+    
+    if (frame % 8 === 0) {
+        if (titleIncrease) {
+            titleFrame++
+        } else {
+            titleFrame--
+        }
+    }
 }
 
+// Draw the strings of letters scrolling up/down in the title screen
 function drawBackgroundScroll () {
     ctx.font = '20px serif'
     ctx.fillStyle = 'lightgrey'
@@ -832,11 +909,10 @@ function drawBackgroundScroll () {
         }
         index++
     }
-    
-    
     index = 0
 }
 
+// Draw the "Start game!" which flies up when the mouse hovers over the title area
 function drawStartText() {
     if (!animText.finished && animText.animate) {
             animText.y--
@@ -887,32 +963,13 @@ let gameLoop = () => {
     //Clear board
     ctx.clearRect(0, 0, game.width, game.height)
     
-    ctx.font = '20px serif'
-    ctx.fillStyle = 'lightgrey'
+   // Draw background text/gradient
     let index = 0
-    for (let j = 0; j < game.width/10; j++) {
-        for (let i = 0; i < letterArray.length; i++) {
-            if (index % 2) {
-                ctx.fillText(letterArray[i], (30*j), (30*i)+frame)
-                ctx.fillText(letterArray[i], (30*j), (30*i)+frame-750)
-            } else {
-                ctx.fillText(letterArray[i], (30*j), (30*i)-frame)
-                ctx.fillText(letterArray[i], (30*j), (30*i)-frame+750)
-            }
-        }
-        index++
-    }
+    drawBackgroundScroll()
+    drawGradient()
     
-    gradient = ctx.createRadialGradient(562,300,700,562,300,0)
-    gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
-    gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, game.width, game.height)
-    
+    // Draw room map
     ctx.drawImage(document.getElementById('dungeoncontinue'), 30, 20)
-    
-//    ctx.fillStyle = 'aliceblue'
-//    ctx.fillRect(30, 30, game.width-60, game.height-60)
     
     //Check if player is dead
     if (hero.health === 0) {
@@ -922,6 +979,7 @@ let gameLoop = () => {
     // Increment frame
     frame++
     
+    // Reset frame if it reaches 750, to preserve looping on the background scrool
     if (frame === 750) {
         frame = 0
     }
@@ -935,6 +993,7 @@ let gameLoop = () => {
     // Wall check player
     wallCheck(hero)
     
+    // Draw room contents
     for (let i = 0; i < room.contents.length; i++) {
         if (room.contents[i].alive) {
             room.contents[i].render()
