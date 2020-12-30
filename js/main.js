@@ -808,53 +808,83 @@ document.addEventListener('keydown', e => {
 //
 //================================================
 
-// Initialize index
-let index = 0
-// Initialize frame for circle
-let titleFrame = 0
-// Initialize circle increase
-let titleIncrease = true
 // Initialize gradient
 let gradient
 // Initialize mouseover
 let mouseover
-// Create animation controller object
-let animText = {x: 560,
-                y: 360,
-                alpha: 0,
-                animate: false,
-                finished: false}
+// Object to hold variables for the title screen
+let titleSettings = {// Title text specific
+                     textX: game.width/2,
+                     textY: 300,
+                     textCeiling: 297,
+                     textFloor: 302,
+                     textIncrease: false,
+                     textFont: '50px Londrina Solid',
+                    
+                     // Background circles specific
+                     circleX: game.width/2,
+                     circleY: 280,
+                     circleRadius: 150,
+                     circleFill: 'white',
+                     circleStroke: 'black',
+                     linedash: [5, 5],
+    
+                     // Background scroll specific
+                     scrollIndex: 0,
+                     scrollColor: 'lightgrey',
+                     scrollFont: '20px serif',
+    
+                     // Start text specific
+                     startFont: '30px serif',
+                     startX: game.width/2,
+                     startY: 360,
+                     startAlpha: 0,
+                     startAnimate: false,
+                     startFinished: false,
+                     startCeiling: 350
+}
 
 // Function to listen for a mouseover on the title text
 document.addEventListener('mousemove', (e) => {
-    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518 && !animText.finished) {
-            animText.animate = true
-    } else {
-            animText.animate = false
-        
-    }
+    if (e.x > titleSettings.circleX - titleSettings.circleRadius
+        && e.x < titleSettings.circleX + titleSettings.circleRadius 
+        && e.y > titleSettings.circleY - titleSettings.circleRadius 
+        && e.y < titleSettings.circleY + titleSettings.circleRadius 
+        && !titleSettings.startFinished) {
+            titleSettings.startAnimate = true
+    } 
 })
 
-// Start game if clicked
-document.addEventListener('click', (e) => {
-    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518) {
-            moveToNextRoom()
-    }
-})
+// Draw the "Start game!" which flies up when the mouse hovers over the title area
+function drawStartText() {
+    if (!titleSettings.startFinished && titleSettings.startAnimate) {
+            titleSettings.startY--
+            ctx.font = titleSettings.startFont
+            ctx.fillStyle = 'grey'
+            ctx.fillText('- Start -', game.width/2, titleSettings.startY)
+            
+            if (titleSettings.startY === titleSettings.startCeiling) {
+                titleSettings.startFinished = true
+            }
+    }  else if (titleSettings.startFinished) {
+            ctx.font = '30px serif'
+            ctx.fillStyle = 'grey'
+            ctx.fillText('- Start -', titleSettings.startX, titleSettings.startY) 
+    } 
+}
 
 // Draw the dashed circle behind the text
 function drawCircle() {
-    ctx.fillStyle = 'white'
-    ctx.strokeStyle = 'black'
+    ctx.fillStyle = titleSettings.circleFill
+    ctx.strokeStyle = titleSettings.circleStroke
     ctx.beginPath()
-    ctx.arc(game.width/2, 280, 150, 0, 2 * Math.PI)
+    ctx.arc(titleSettings.circleX, titleSettings.circleY, titleSettings.circleRadius, 0, 2 * Math.PI)
     ctx.fill()
     
-    ctx.strokeStyle = 'black'
     ctx.beginPath()
-    ctx.setLineDash([5, 5])
+    ctx.setLineDash(titleSettings.linedash)
     ctx.beginPath()
-    ctx.arc(game.width/2, 280, 150, 0 - frame, 2 * Math.PI + frame)
+    ctx.arc(titleSettings.circleX, titleSettings.circleY, titleSettings.circleRadius, 0 - frame, 2 * Math.PI + frame)
     ctx.closePath()
     ctx.stroke()
     ctx.setLineDash([])
@@ -862,44 +892,45 @@ function drawCircle() {
 
 // Draw gradient
 function drawGradient() {
-    gradient = ctx.createRadialGradient(game.width/2,300,700,562,300,0)
+    gradient = ctx.createRadialGradient(titleSettings.textX,300,700,562,300,0)
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
     gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, game.width, game.height)
 }
 
+// Draw title text
 function drawTitle() {
-    ctx.font = '50px Londrina Solid'
+    ctx.font = titleSettings.textFont
     ctx.textAlign = 'center'
     ctx.fillStyle = 'white'
-    ctx.fillText('SPELL CHECKERS', game.width/2, 305+titleFrame)
+    ctx.fillText('SPELL CHECKERS', titleSettings.textX, titleSettings.textY + 5)
     ctx.fillStyle = 'black'
-    ctx.fillText('SPELL CHECKERS', game.width/2, 300+titleFrame)
+    ctx.fillText('SPELL CHECKERS', titleSettings.textX, titleSettings.textY)
     
     // Animate the text bounce
-    if (titleFrame > 3) {
-        titleIncrease = false
-    } else if (titleFrame === 0) {
-        titleIncrease = true
+    if (titleSettings.textY === titleSettings.textFloor) {
+        titleSettings.textIncrease = false
+    } else if (titleSettings.textY === titleSettings.textCeiling) {
+        titleSettings.textIncrease = true
     }
     
-    if (frame % 8 === 0) {
-        if (titleIncrease) {
-            titleFrame++
+    if (frame % 6 === 0) {
+        if (titleSettings.textIncrease) {
+            titleSettings.textY++
         } else {
-            titleFrame--
+            titleSettings.textY--
         }
     }
 }
 
 // Draw the strings of letters scrolling up/down in the title screen
 function drawBackgroundScroll () {
-    ctx.font = '20px serif'
-    ctx.fillStyle = 'lightgrey'
+    ctx.font = titleSettings.scrollFont
+    ctx.fillStyle = titleSettings.scrollColor
     for (let j = 0; j < game.width/10; j++) {
         for (let i = 0; i < letterArray.length; i++) {
-            if (index % 2) {
+            if (titleSettings.scrollIndex % 2) {
                 ctx.fillText(letterArray[i], (30*j), (30*i)+frame)
                 ctx.fillText(letterArray[i], (30*j), (30*i)+frame-750)
             } else {
@@ -907,29 +938,17 @@ function drawBackgroundScroll () {
                 ctx.fillText(letterArray[i], (30*j), (30*i)-frame+750)
             }
         }
-        index++
+        titleSettings.scrollIndex++
     }
-    index = 0
+    titleSettings.scrollIndex = 0
 }
 
-// Draw the "Start game!" which flies up when the mouse hovers over the title area
-function drawStartText() {
-    if (!animText.finished && animText.animate) {
-            animText.y--
-            ctx.font = '30px serif'
-            ctx.fillStyle = 'grey'
-            ctx.fillText('- Start -', game.width/2, animText.y)
-            
-            if (animText.y === 350) {
-                console.log('Finished')
-                animText.finished = true
-            }
-    }  else if (animText.finished) {
-            ctx.font = '30px serif'
-            ctx.fillStyle = 'grey'
-            ctx.fillText('- Start -', game.width/2, 350) 
-    } 
-}
+// Start game if clicked
+document.addEventListener('click', (e) => {
+    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518) {
+            moveToNextRoom()
+    }
+})
 
 function titleLoop () {
     frame++
