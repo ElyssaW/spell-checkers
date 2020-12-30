@@ -312,9 +312,11 @@ function GhostConstructor(x, y) {
             
             // If player input matches name, decrement health
             if (playerInput == this.spellWords[this.spellWordIndex]) {
+                damageEnemy(this, 'white', 'lightgrey')
                 this.health--
                     // If health is depeleted, kill enemy
                     if (this.health === 0) {
+                        killEnemy(this, 'white', 'lightgrey')
                         room.enemyCount--
                         this.alive = false
                     }
@@ -324,8 +326,9 @@ function GhostConstructor(x, y) {
             // Decrement player health if hit
             if (detectHit(this)) {
                 if (!playerJustHit) {
-                    hero.health--
-                    playerJustHit = true
+                    
+                    damangePlayer(this)
+                    
                     // Set iframes running
                     setTimeout(iframes, 1500)
                 }
@@ -373,9 +376,7 @@ function ExclaimerConstructor(x, y) {
             if (!playerJustHit) {
                 this.xdir = this.xdir * -1
                 this.ydir = this.ydir * -1
-                hero.health--
-                playerJustHit = true
-                setTimeout(iframes, 1500)
+                damangePlayer(this)
             }
         }
         // Check if enemy is hitting a wall
@@ -458,14 +459,21 @@ function moveToNextRoom() {
     }, 1000)
 }
 
+function getFloatPos(obj) {
+    let floatValue = obj.floatArray[obj.floatIndex] 
+    obj.floatIndex++
+    if (obj.floatIndex === obj.floatArray.length) {
+        obj.floatIndex = 0
+    }
+    return floatValue
+}
+
 // Constructor function for new chests
 function ChestConstructor(x, y, item) {
     this.x = x
     this.y = y
-    this.hitboxX = 0
-    this.hitboxY = 0
-    this.sprite = document.getElementById('heart')
-    this.spriteFlipped = document.getElementById('heart')
+    this.floatIndex = 0
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
     this.color = 'yellow'
     this.width = 60
     this.height = 60
@@ -475,7 +483,7 @@ function ChestConstructor(x, y, item) {
     this.textFrameIndex = 0
     this.walkFrameIndex = 0
     this.render = function() {
-        drawFloatAnim(this)
+        circle(this.x, this.y + getFloatPos(this), 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
     }
     this.activate = function() {
         // Increment the player's health and erase chest
@@ -701,6 +709,64 @@ function killPlayer() {
     clearInterval(gameInterval)
 }
 
+function damangePlayer (obj) {
+    // Decrement player health
+    hero.health--
+    
+    // Set iframes on player
+    playerJustHit = true
+    setTimeout(iframes, 1500)
+    
+    // Set particle emitter to player's location
+    particleSettings.font = '40px'
+    particleSettings.startingX = hero.x
+    particleSettings.startingY = hero.y
+    particleSettings.color = 'hotpink',
+    particleSettings.undercolor = 'black'
+    // Emit particles
+    for (let i = 0; i < 5; i++) {
+        new Particle()
+    }
+    
+    // Push player
+    if (hero.x + (hero.width/2) < obj.x + (obj.width/2)) {
+        hero.x -= 20
+    } else {
+        hero.x += 20
+    }
+    if (hero.y + (hero.height/2) < obj.y + (obj.height/2)) {
+        hero.y -= 20
+    } else {
+        hero.y += 20
+    }  
+}
+
+function damageEnemy(obj, color, undercolor) {
+    // Set particle emitter to player's location
+    particleSettings.font = '20px'
+    particleSettings.startingX = obj.x + (obj.width/2)
+    particleSettings.startingY = obj.y + (obj.height/2)
+    particleSettings.color = color
+    particleSettings.undercolor = undercolor
+    // Emit particles
+    for (let i = 0; i < 5; i++) {
+        new Particle()
+    }
+}
+
+function killEnemy(obj, color, undercolor) {
+    // Set particle emitter to player's location
+    particleSettings.font = '40px'
+    particleSettings.startingX = obj.x + (obj.width/2)
+    particleSettings.startingY = obj.y + (obj.height/2)
+    particleSettings.color = color
+    particleSettings.undercolor = undercolor
+    // Emit particles
+    for (let i = 0; i < 20; i++) {
+        new Particle()
+    }
+}
+
 //================================================
 //
 //          Input Functions
@@ -814,6 +880,78 @@ document.addEventListener('keydown', e => {
         hero.y = hero.y + (hero.ydir * 200)
     }
 })
+
+//================================================
+//
+//          Particle functions
+//
+//================================================
+
+let particles = {}
+let particleIndex = 0
+let particleSettings = {
+    density: 5,
+    particleSize: 5,
+    startingX: 0,
+    startingY: 0,
+    gravity: -.5,
+    maxLife: 150,
+    color: 'hotpink',
+    undercolor: 'black',
+    fontSize: '20',
+    font: 'serif',
+    groundLevel: game.height,
+    leftwall: 0,
+    rightwall: game.width
+}
+
+function Particle() {
+        this.x = particleSettings.startingX
+        this.y = particleSettings.startingY
+        this.color = particleSettings.color
+        this.undercolor = particleSettings.undercolor
+        this.font = particleSettings.font
+        this.fontSize = particleSettings.fontSize
+        this.vx = randomRange(-30, 30)
+        this.vy = randomRange(-5, -10)
+        this.letter = selectRandom(letterArray)
+        
+        particleIndex++
+        particles[particleIndex] = this
+        this.id = particleIndex
+        this.life = 0
+        this.maxLife = particleSettings.maxLife
+        this.opacity = 1
+}
+
+Particle.prototype.draw = function() {
+    this.x += this.vx
+    this.y += this.vy
+    this.life++
+    
+    if (this.y + particleSettings.particleSize > particleSettings.groundLevel) {
+        this.vy *= -0.6
+        this.vx *= 0.75
+        this.y = particleSettings.groundLevel - particleSettings.particleSize
+    }
+
+    this.vy += particleSettings.gravity
+    this.life++
+    this.opacity -= .02
+    
+    if (this.life >= this.maxLife) {
+        delete particles[this.id]
+    }
+    
+    console.log(this.color)
+    ctx.globalAlpha = this.opacity
+    ctx.font = this.fontSize + 'px ' + this.font
+    ctx.fillStyle = this.undercolor
+    ctx.fillText(this.letter, this.x, this.y+3)
+    ctx.fillStyle = this.color
+    ctx.fillText(this.letter, this.x, this.y)
+    ctx.globalAlpha = 1
+}
 
 //================================================
 //
@@ -990,6 +1128,10 @@ let gameLoop = () => {
     
     // Draw room map
     ctx.drawImage(document.getElementById('dungeoncontinue'), 30, 20)
+    
+    for (var i in particles) {
+          particles[i].draw();
+        }
     
     //Check if player is dead
     if (hero.health === 0) {
