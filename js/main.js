@@ -231,11 +231,11 @@ function drawHealth() {
 }
 
 // Draw sprite without float value
-function drawSprite (obj, spriteLeft, spriteRight) {
+function drawSprite (obj) {
     if (obj.xdir > 0) {
-            ctx.drawImage(spriteRight, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
+            ctx.drawImage(obj.spriteRight, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
         } else {
-            ctx.drawImage(spriteLeft, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
+            ctx.drawImage(obj.spriteLeft, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
         }
 }
 
@@ -278,10 +278,11 @@ function GhostConstructor(x, y) {
     this.hitboxX = 0
     this.hitboxY = 0
     this.faceNum = 1
+    this.faceNum = randomRange(2, 5)
     this.sprite = document.getElementById('ghostBlank')
     this.spriteFlipped = document.getElementById('ghostBlankFlipped')
-    this.spriteFace = document.getElementById('ghost'+randomRange(1,5))
-    this.spriteFaceFlipped = document.getElementById('ghost'+randomRange(1,5)+'Flipped')
+    this.spriteRight = document.getElementById('ghost'+this.faceNum)
+    this.spriteLeft = document.getElementById('ghost'+this.faceNum+'Flipped')
     this.color = 'grey'
     this.width = 120
     this.height = 120
@@ -299,7 +300,7 @@ function GhostConstructor(x, y) {
         // Draw sprite body
         drawFloatAnim(this)
         // Draw sprite face
-        drawSprite(this, this.spriteFaceFlipped, this.spriteFace)
+        drawSprite(this)
     }
     // Define enemy behavior
     this.activate = function() {
@@ -313,11 +314,9 @@ function GhostConstructor(x, y) {
             // If player input matches name, decrement health
             if (playerInput == this.spellWords[this.spellWordIndex]) {
                 damageEnemy(this, 'white', 'lightgrey')
-                this.health--
                     // If health is depeleted, kill enemy
                     if (this.health === 0) {
                         killEnemy(this, 'white', 'lightgrey')
-                        room.enemyCount--
                         this.alive = false
                     }
                 // Move onto the next spell word
@@ -490,6 +489,7 @@ function ChestConstructor(x, y, item) {
         // Increment the player's health and erase chest
         if (detectHit(this)) {
             if (hero.health < hero.maxhealth) {
+                emitParticles(this.x, this.y, 'white', 'pink', 10, 5)
                 hero.health++
                 this.alive = false
                 chestIndex++
@@ -707,7 +707,7 @@ function iframes () {
 
 // Function to play on player death
 function killPlayer() {
-    clearInterval(gameInterval)
+    //clearInterval(gameInterval)
 }
 
 function damangePlayer (obj) {
@@ -729,55 +729,58 @@ function damangePlayer (obj) {
         new Particle()
     }
     
-    pushObject(obj, hero)
+    pushObject(obj, hero, 4, 10, 100)
 }
 
-function pushObject (pusher, pushed) {
+// Function to push an object
+function pushObject (pusher, pushed, force, speed, length) {
+    
     let pushPointX = pusher.x + pusher.width/2
     let pushPointY = pusher.y + pusher.height/2
+    // Grab object's current speed
+    let oldSpeed = pushed.speed
+    // Set speed to 0
+    pushed.speed = 0
+    
     // Push player
     let pushInterval = setInterval(() => {
+        
         if (pushed.x + (pushed.width/2) < pushPointX) {
-            pushed.x -= 4
+            pushed.x -= force
         } else {
-            pushed.x += 4
+            pushed.x += force
         }
         if (pushed.y + (pushed.height/2) < pushPointY) {
-            pushed.y -= 4
+            pushed.y -= force
         } else {
-            pushed.y += 4
+            pushed.y += force
         }  
-    }, 30)
+    }, speed)
     
     setTimeout(() => {
+        setTimeout(() => {
+            // Set old speed back to the object
+            pushed.speed = oldSpeed
+        }, 500)
         clearInterval(pushInterval)
-    }, 300)
+    }, length)
 }
 
+// Function to damage enemy
 function damageEnemy(obj, color, undercolor) {
+    // Decrement enemy health
+    obj.health--
+    // Push enemy
+    pushObject(hero, obj, 4, 20, 200)
     // Set particle emitter to player's location
-    particleSettings.font = '20px'
-    particleSettings.startingX = obj.x + (obj.width/2)
-    particleSettings.startingY = obj.y + (obj.height/2)
-    particleSettings.color = color
-    particleSettings.undercolor = undercolor
-    // Emit particles
-    for (let i = 0; i < 5; i++) {
-        new Particle()
-    }
+    emitParticles(obj.x + (obj.width/2), obj.y + (obj.height/2), color, undercolor, 5, 20)
 }
 
 function killEnemy(obj, color, undercolor) {
+    // Decrement enemy room count
+    room.enemyCount--
     // Set particle emitter to player's location
-    particleSettings.font = '40px'
-    particleSettings.startingX = obj.x + (obj.width/2)
-    particleSettings.startingY = obj.y + (obj.height/2)
-    particleSettings.color = color
-    particleSettings.undercolor = undercolor
-    // Emit particles
-    for (let i = 0; i < 20; i++) {
-        new Particle()
-    }
+    emitParticles(obj.x + (obj.width/2), obj.y + (obj.height/2), color, undercolor, 20, 40)
 }
 
 //================================================
@@ -964,6 +967,18 @@ Particle.prototype.draw = function() {
     ctx.fillStyle = this.color
     ctx.fillText(this.letter, this.x, this.y)
     ctx.globalAlpha = 1
+}
+
+function emitParticles (x, y, color, undercolor, amount, size) {
+    particleSettings.font = size + 'px'
+    particleSettings.startingX = x
+    particleSettings.startingY = y
+    particleSettings.color = color
+    particleSettings.undercolor = undercolor
+    // Emit particles
+    for (let i = 0; i < amount; i++) {
+        new Particle()
+    }
 }
 
 //================================================
