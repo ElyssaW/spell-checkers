@@ -720,71 +720,7 @@ function startGameOver() {
     let timer = setInterval(gameOverLoop, 30)
 }
                             
-let gameOver = {backgroundFinished: false,
-               bigTextFinished: false,
-               bigTextY: game.height/2+100,
-               bigtextopacity: 0,
-               bigTextCeiling: game.width/2 - 100,
-               startOverFinished: false,
-               startOverOpacity: 0
-               }
 
-function gameOverLoop() {
-    if (!gameOver.backgroundFinished) {
-        ctx.globalAlpha += .1
-        ctx.fillRect(0, 0, game.width, game.height)
-        console.log(ctx.globalAlpha)
-        //drawFillText('Game Over', game.width/2, game.height/2, 'white', 'Londrina Solid', '30', 'center')
-        
-        if (ctx.globalAlpha >= .9) {
-            ctx.globalAlpha = 0
-            gameOver.backgroundFinished = true
-        }
-    }
-    
-    if(gameOver.backgroundFinished) {
-        ctx.clearRect(0, 0, game.width, game.height)
-        ctx.fillStyle = 'hotpink'
-        ctx.fillRect(0, 0, game.width, game.height)
-    }
-    
-    if (gameOver.backgroundFinished && !gameOver.bigTextFinished) {
-        ctx.globalAlpha = gameOver.bigtextopacity
-        drawFillText('Game Over', game.width/2, gameOver.bigTextY, 'white', 'Londrina Solid', '80', 'center')
-        gameOver.bigtextopacity += .2
-        gameOver.bigTextY -= 20
-        ctx.globalAlpha = 1
-        
-        if (gameOver.bigtextopacity >= .9 && gameOver.bigTextY <= gameOver.bigTextCeiling) {
-            drawFillText('Game Over', game.width/2, gameOver.bigTextY, 'white', 'Londrina Solid', '80', 'center')
-            gameOver.bigTextFinished = true
-        }
-    }
-    
-    if(gameOver.bigTextFinished) {
-        drawFillText('Game Over', game.width/2, gameOver.bigTextY, 'white', 'Londrina Solid', '80', 'center')
-    }
-                   
-    if(gameOver.bigTextFinished && !gameOver.startOverFinished) {
-        ctx.globalAlpha = gameOver.startOverOpacity
-        drawFillText('Restart?', game.width/2, gameOver.bigTextY+200, 'white', 'serif', '40', 'center')
-        ctx.fillStyle = 'black'
-        ctx.fillRect(game.width/2, gameOver.bigTextY+200, 50, 30)
-        gameOver.startOverOpacity += .2
-        ctx.globalAlpha = 1
-        
-        if (gameOver.startOverOpacity >= .9) {
-            drawFillText('Restart?', game.width/2, gameOver.bigTextY+200, 'white', 'serif', '40', 'center')
-            gameOver.startOverFinished = true
-        }
-    }
-    
-    if (gameOver.startOverOpacity >= .9) {
-            drawFillText('Restart?', game.width/2, gameOver.bigTextY+200, 'white', 'serif', '40', 'center')
-            ctx.fillStyle = 'black'
-            ctx.fillRect(game.width/2, gameOver.bigTextY+200, 50, 30)
-        }
-}
 
 function damangePlayer (obj) {
     // Decrement player health
@@ -1131,13 +1067,28 @@ let gradient
 // Initialize mouseover
 let mouseover
 // Object to hold variables for the title screen
-let titleSettings = {// Title text specific
+let titleSettings = {//Background gradient
+                     gradient1Red: 255,
+                     gradient1Green: 255,
+                     gradient1Blue: 255,
+                     gradient1Alpha: 0,
+    
+                     // Gradient 2
+                     gradient2Red: 255,
+                     gradient2Green: 255,
+                     gradient2Blue: 255,
+                     gradient2Alpha: 1,
+    
+                    // Title text specific
                      textX: game.width/2,
                      textY: 300,
                      textCeiling: 297,
                      textFloor: 302,
                      textIncrease: false,
+                     textColor: 'black',
+                     textUndercolor: 'white',
                      textFont: '50px Londrina Solid',
+                     titleString: 'SPELL CHECKERS',
                     
                      // Background circles specific
                      circleX: game.width/2,
@@ -1153,7 +1104,9 @@ let titleSettings = {// Title text specific
                      scrollFont: '20px serif',
     
                      // Start text specific
+                     startString: '- Restart? -',
                      startFont: '30px serif',
+                     startColor: 'grey',
                      startX: game.width/2,
                      startY: 360,
                      startAlpha: 0,
@@ -1178,16 +1131,16 @@ function drawStartText() {
     if (!titleSettings.startFinished && titleSettings.startAnimate) {
             titleSettings.startY--
             ctx.font = titleSettings.startFont
-            ctx.fillStyle = 'grey'
-            ctx.fillText('- Start -', game.width/2, titleSettings.startY)
+            ctx.fillStyle = titleSettings.startColor
+            ctx.fillText(titleSettings.startString, game.width/2, titleSettings.startY)
             
             if (titleSettings.startY === titleSettings.startCeiling) {
                 titleSettings.startFinished = true
             }
     }  else if (titleSettings.startFinished) {
-            ctx.font = '30px serif'
-            ctx.fillStyle = 'grey'
-            ctx.fillText('- Start -', titleSettings.startX, titleSettings.startY) 
+            ctx.font = titleSettings.startFont
+            ctx.fillStyle = titleSettings.startColor
+            ctx.fillText(titleSettings.startString, titleSettings.startX, titleSettings.startY) 
     } 
 }
 
@@ -1199,8 +1152,8 @@ function drawCircle() {
 // Draw gradient
 function drawGradient() {
     gradient = ctx.createRadialGradient(titleSettings.textX,300,700,562,300,0)
-    gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
-    gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
+    gradient.addColorStop(1, `rgba(${titleSettings.gradient1Red}, ${titleSettings.gradient1Green}, ${titleSettings.gradient1Blue}, ${titleSettings.gradient1Alpha})`)
+    gradient.addColorStop(0, `rgba(${titleSettings.gradient2Red}, ${titleSettings.gradient2Green}, ${titleSettings.gradient2Blue}, ${titleSettings.gradient2Alpha})`)
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, game.width, game.height)
 }
@@ -1209,10 +1162,10 @@ function drawGradient() {
 function drawTitle() {
     ctx.font = titleSettings.textFont
     ctx.textAlign = 'center'
-    ctx.fillStyle = 'white'
-    ctx.fillText('SPELL CHECKERS', titleSettings.textX, titleSettings.textY + 5)
-    ctx.fillStyle = 'black'
-    ctx.fillText('SPELL CHECKERS', titleSettings.textX, titleSettings.textY)
+    ctx.fillStyle = titleSettings.textUndercolor
+    ctx.fillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY + 5)
+    ctx.fillStyle = titleSettings.textColor
+    ctx.fillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY)
     
     // Animate the text bounce
     if (titleSettings.textY === titleSettings.textFloor) {
