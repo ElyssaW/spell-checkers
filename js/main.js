@@ -16,9 +16,6 @@ let playerInput
 let gameInterval
 // Checks if game is on
 let gameStart = false
-// Checks if the player was hit recently, so that they can have
-// iframes between hits
-let playerJustHit = false
 // Initialize movement object to allow continuous/diagonal movement
 let moveObject = {up: false,
                   down: false,
@@ -35,19 +32,10 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
                    'n', 'o', 'p', 'q', 'r', 's',
                    't', 'u', 'v', 'w', 'x', 'y', 'z'
                   ]
-//// Initialize array of objects containing the word puzzle key/locks
-//let textArray = [{doorKey: 'Most', doorStart: 'Welcome to Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Magic'},
-//                 {doorKey: 'spells', doorStart: 'Magic is wonderful, and ', doorTypo: 'spllse', doorEnd: ' are wonderful too!'},
-//                 {doorKey: 'wonderful', doorStart: 'And you know what else is ', doorTypo: 'ndferwulo', doorEnd: '? Madge!'},
-//                 {doorKey: 'kindest', doorStart: 'She is the most wonderful, the ', doorTypo: 'nkidtse', doorEnd: ', most obvlivious person I know.'},
-//                 {doorKey: 'confession', doorStart: 'So obvlivious, the only way I could get her to take my ', doorTypo: 'fessconion', doorEnd: ' seriously...'},
-//                 {doorKey: 'bury', doorStart: '...was to ', doorTypo: 'yurb', doorEnd: ' it in an essay on magic.'},
-//                 {doorKey: 'magnificient', doorStart: 'But more than ', doorTypo: 'yanhingt', doorEnd: ', I would like to tell her...'}
-//                ]
 // Initialize array of objects containing the word puzzle key/locks
-let textArray = [{doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
-                 {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
-                 {doorKey: 'typing', doorStart: 'Tame the wild quotation spirit by', doorTypo: 'tpying', doorEnd: ' their names'},
+let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
+                  {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
+                  {doorKey: 'typing', doorStart: 'Tame the wild quotation spirit by', doorTypo: 'tpying', doorEnd: ' their names'},
                   {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' in earnest'},
                   {doorKey: 'back', doorStart: 'Okay fine, fine - ', doorTypo: 'bakc', doorEnd: ' to the topic of magic.'},
                   {doorKey: 'speaking', doorStart: 'Magic can be cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
@@ -58,23 +46,21 @@ let textArray = [{doorKey: 'typo', doorStart: 'Welcome to Spell Checker training
                   {doorKey: 'wrestle', doorStart: 'Spellcheckers ', doorTypo: 'sertwle', doorEnd: ' with typos, run-ons, and wild punctuation.'},
                   {doorKey: 'invaluable', doorStart: 'This makes their service ', doorTypo: 'invalauble', doorEnd: ''}
                 ]
-// Initialize secondary array of non-plot-relevant locks/keys for chests and doors that do not progress forward
-//let chestArray = [{doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
-//                  {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
-//                  {doorKey: 'speaking', doorStart: 'Magic cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
-//                  {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
-//                  {doorKey: 'known', doorStart: 'Magic words have been ', doorTypo: 'nownk', doorEnd: ' to roam about and wreak havoc'},
-//                  {doorKey: 'fight', doorStart: 'But Spellcheckers ', doorTypo: 'fihgt', doorEnd: ' every day to keep them in line.'},
-//                  {doorKey: 'protect', doorStart: 'Royal Spellcheckers ', doorTypo: 'teproct', doorEnd: ' all royal correspondance from wild magic.'},
-//                  {doorKey: 'wrestle', doorStart: 'Spellcheckers ', doorTypo: 'sertwle', doorEnd: ' with typos, run-ons, and wild punctuation.'},
-//                  {doorKey: 'invaluable', doorStart: 'This makes their service ', doorTypo: 'invalauble', doorEnd: ''}
-//                ]
 // Initialize array of enemy names
-let spellWords = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
+let spellWords = []
+
+let spellWordsRight = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
                   'craft', 'webcast', 'swagger', 'waste', 'cedar', 'brace', 'fast', 'stave',
-                  'carve', 'caster', 'taxes', 'farts', 'strafe', 'grace', 'raw', 'straw',
+                  'carve', 'caster', 'taxes', 'farts', 'sad', 'strafe', 'grace', 'raw', 'straw',
                   'water', 'craze', 'decaf', 'draft', 'bread', 'barf', 'grave', 'scare',
                   'ersatz', 'great', 'grade', 'farce', 'after', 'extra', 'texas', 'swear'
+]
+
+let spellWordsLeft = ['only', 'big', 'bug', 'king', 'junk', 'numb', 'punk', 'milk',
+                  'limp', 'jump', 'lingo', 'bingo', 'gumbo', 'ghoul', 'himbo', 'pylon',
+                  'hokum', 'limbo', 'plumb', 'vinyl', 'goblin', 'unholy', 'joking', 'joy', 'poking',
+                  'boil', 'puking', 'kingly', 'hulk', 'bump', 'buoy', 'moghul', 'gluon',
+                  'glyph', 'bunko', 'young', 'hunk', 'gulp', 'bijou', 'blimp', 'glib'
 ]
 
 // Set canvas width/height
@@ -265,7 +251,6 @@ function HeroConstructor(x, y) {
     this.maxhealth = 3
     this.alive = true
     this.justHit = false
-    this.shielded = false
     this.xdir = 0
     this.ydir = 0
     this.wallDirection = 0
@@ -331,7 +316,7 @@ function GhostConstructor(x, y) {
             }
             // Decrement player health if hit
             if (detectHit(this)) {
-                if (!playerJustHit) {
+                if (!hero.justHit) {
                     
                     damangePlayer(this)
                     
@@ -379,7 +364,7 @@ function ExclaimerConstructor(x, y) {
             // Kill enemy if hit
             this.alive = false
             // Decrement health
-            if (!playerJustHit) {
+            if (!hero.justHit) {
                 this.xdir = this.xdir * -1
                 this.ydir = this.ydir * -1
                 damangePlayer(this)
@@ -500,7 +485,6 @@ function generateRoomContent(room) {
     
     // End the function pre-emptively if the player is still in the tutorial rooms
     if (roomIndex <= 2) {
-        console.log(roomIndex)
         
         if(roomIndex === 2) {
             array.push(door)
@@ -518,8 +502,6 @@ function generateRoomContent(room) {
             return array
         }
     }
-    
-    console.log('no escape')
     
     // Otherwise, continue as normal, randomly generating content and pushing it to the room array
     array.push(door)
@@ -729,7 +711,7 @@ let detectNear = (obj, threshold) => {
 // Function to create iframes on the player, so that they
 // are not instantly killed on one hit from an enemy
 function iframes () {
-    playerJustHit = false
+    hero.justHit = false
 }
 
 // Function to play on player death
@@ -743,7 +725,7 @@ function damangePlayer (obj) {
     hero.health--
     
     // Set iframes on player
-    playerJustHit = true
+    hero.justHit = true
     setTimeout(iframes, 1500)
     
     // Set particle emitter to player's location
@@ -1193,11 +1175,47 @@ let titleSettings = {//Background gradient
                      startAlpha: 0,
                      startAnimate: false,
                      startFinished: false,
-                     startCeiling: 350
+                     startCeiling: 350,
+    
+                     // Option bank
+                     optionX: game.width/2,
+                     optionY: 500,
+                     optionAlpha: 0
+}
+
+let leftHandMode = false
+
+function addClick() {
+   // Start game if clicked
+    game.addEventListener('click', (e) => {
+        
+        console.log(e.offsetY)
+        console.log(e.offsetX)
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 500) {
+            console.log('clicked1')
+            moveToNextRoom()
+        }
+        
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 520 && e.offsetY < 550) {
+            console.log('clicked2')
+            roomIndex = 2
+            moveToNextRoom()
+        }
+        
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 570 && e.offsetY < 600) {
+            if (leftHandMode) {
+                spellWords = spellWordsRight
+                leftHandMode = false
+            } else {
+                spellWords = spellWordsLeft
+                leftHandMode = true
+            }
+        }
+    }) 
 }
 
 // Function to listen for a mouseover on the title text
-document.addEventListener('mousemove', (e) => {
+game.addEventListener('mousemove', (e) => {
     if (e.x > titleSettings.circleX - titleSettings.circleRadius
         && e.x < titleSettings.circleX + titleSettings.circleRadius 
         && e.y > titleSettings.circleY - titleSettings.circleRadius 
@@ -1209,20 +1227,33 @@ document.addEventListener('mousemove', (e) => {
 
 // Draw the "Start game!" which flies up when the mouse hovers over the title area
 function drawStartText() {
-    if (!titleSettings.startFinished && titleSettings.startAnimate) {
-            titleSettings.startY--
-            ctx.font = titleSettings.startFont
-            ctx.fillStyle = titleSettings.startColor
-            ctx.fillText(titleSettings.startString, game.width/2, titleSettings.startY)
-            
-            if (titleSettings.startY === titleSettings.startCeiling) {
-                titleSettings.startFinished = true
+    if (titleSettings.startAnimate) {
+        if (titleSettings.startY > titleSettings.startCeiling) {
+        titleSettings.startY--
+        titleSettings.optionY--
+    }
+    
+    ctx.fillStyle = 'black'
+            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY-20, titleSettings.circleRadius*2, 30)
+            drawFillText('Play tutorial', titleSettings.optionX, titleSettings.optionY, 'white', 'serif', 20, 'center')
+            ctx.fillStyle = 'black'
+            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY+30, titleSettings.circleRadius*2, 30)
+            drawFillText('Play game', titleSettings.optionX, titleSettings.optionY+50, 'white', 'serif', 20, 'center')
+        
+            if (leftHandMode) {
+                ctx.fillStyle = 'black'
+                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY+80, titleSettings.circleRadius*2, 30)
+                drawFillText('Left-Handed Mode ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', 20, 'center')
+            } else {
+                ctx.fillStyle = 'white'
+                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY+80, titleSettings.circleRadius*2, 30)
+                drawFillText('Left-Handed Mode OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', 20, 'center')
             }
-    }  else if (titleSettings.startFinished) {
+        
             ctx.font = titleSettings.startFont
             ctx.fillStyle = titleSettings.startColor
             ctx.fillText(titleSettings.startString, titleSettings.startX, titleSettings.startY) 
-    } 
+    }
 }
 
 // Draw the dashed circle behind the text
@@ -1282,14 +1313,6 @@ function drawBackgroundScroll () {
         titleSettings.scrollIndex++
     }
     titleSettings.scrollIndex = 0
-}
-
-// Start game if clicked
-document.addEventListener('click', startClicked)
-
-function startClicked() {
-        document.removeEventListener('click', startClicked)
-        moveToNextRoom()
 }
 
 function titleLoop () {
@@ -1380,6 +1403,10 @@ let gameLoop = () => {
 
 function gameBegin() {
     ctx.font = '20px Fredoka One'
+    
+    spellWords = spellWordsRight
+
+    addClick()
     
     hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
