@@ -194,27 +194,17 @@ function drawTypo (obj, string1, string2, string3) {
 
 // Draw the current word-to-type above the enemy's head
 function drawName (obj, string1) {
-    let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
-    let floatValue = floatValueArray[obj.textFrameIndex]
-    
-    drawStrokeText(string1, obj.x+(obj.width/2), obj.y - 4 + floatValue, 'white', 'Bungee', 20, 'center')
-    drawFillText(string1, obj.x+(obj.width/2), obj.y - 5 + floatValue, 'black', 'Bungee', 20, 'center')
-    
-    obj.textFrameIndex++
-    if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
+    drawStrokeText(string1, obj.x+(obj.width/2), obj.y - 12, 'white', 'Bungee', 20, 'center')
+    drawFillText(string1, obj.x+(obj.width/2), obj.y - 14, 'black', 'Bungee', 20, 'center')
 }
 
 // Small function to simulate floating on objects directly
 function drawFloatAnim(obj) {
-    let floatValueArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
-    let floatValue = floatValueArray[obj.walkFrameIndex]
     if (obj.xdir > 0) {
-            ctx.drawImage(obj.sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY + floatValue)
+            ctx.drawImage(obj.sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY + getFloatPos(obj))
         } else {
-            ctx.drawImage(obj.spriteFlipped, obj.x + obj.hitboxX, obj.y + obj.hitboxY + floatValue)
+            ctx.drawImage(obj.spriteFlipped, obj.x + obj.hitboxX, obj.y + obj.hitboxY + getFloatPos(obj))
         }
-    obj.walkFrameIndex++
-    if (obj.walkFrameIndex ===  floatValueArray.length) {obj.walkFrameIndex = 0}
 }
 
 // Function to draw health
@@ -249,6 +239,8 @@ function drawSprite (obj) {
 function HeroConstructor(x, y) {
     this.x = x
     this.y = y
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = 0
     this.hitboxX = -20
     this.hitboxY = -20
     this.sprite = document.getElementById("madge")
@@ -275,6 +267,8 @@ function HeroConstructor(x, y) {
 function GhostConstructor(x, y) {
     this.x = x
     this.y = y
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = 0
     this.hitboxX = 0
     this.hitboxY = 0
     this.faceNum = 1
@@ -401,8 +395,12 @@ function DoorConstructor(x, y, leadsTo) {
     this.leadsTo = leadsTo,
     this.textFrameIndex = 0
     this.render = function() {
+        ctx.lineWidth = 6
+        ctx.strokeStyle = 'white'
+        ctx.strokeRect(this.x, this.y, this.width, this.height)
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
+        ctx.lineWidth = 2
     }
     this.activate = function() {
         // Check if door is locked
@@ -424,8 +422,10 @@ function DoorConstructor(x, y, leadsTo) {
             // Increment room index
             moveToNextRoom()
         } else {
+            circle(this.x+(this.width/2), this.y, 29, 'rgba(0,0,0,0)', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
             // Expand door as it's unlocked
             if (this.height < 90) {
+                emitParticles(this.x+(this.width/2), this.y+(this.height/2), 'black', 'grey', 1, 100)
                 this.height++
             }
         }
