@@ -910,10 +910,11 @@ let particleSettings = {
     particleSize: 5,
     startingX: 0,
     startingY: 0,
-    gravity: -.5,
-    maxLife: 150,
+    gravity: .5,
+    maxLife: 100,
     color: 'hotpink',
     undercolor: 'black',
+    opacity: 1,
     fontSize: '20',
     font: 'serif',
     groundLevel: game.height,
@@ -924,11 +925,12 @@ let particleSettings = {
 function Particle() {
         this.x = particleSettings.startingX
         this.y = particleSettings.startingY
+        this.groundLevel = this.y + randomRange(-100, 300)
         this.color = particleSettings.color
         this.undercolor = particleSettings.undercolor
         this.font = particleSettings.font
         this.fontSize = particleSettings.fontSize
-        this.vx = randomRange(-30, 30)
+        this.vx = randomRange(-5, 5)
         this.vy = randomRange(-5, -10)
         this.letter = selectRandom(letterArray)
         
@@ -945,21 +947,20 @@ Particle.prototype.draw = function() {
     this.y += this.vy
     this.life++
     
-    if (this.y + particleSettings.particleSize > particleSettings.groundLevel) {
+    if (this.y + particleSettings.particleSize > this.groundLevel) {
         this.vy *= -0.6
         this.vx *= 0.75
-        this.y = particleSettings.groundLevel - particleSettings.particleSize
+        this.y = this.groundLevel - particleSettings.particleSize
     }
 
     this.vy += particleSettings.gravity
     this.life++
-    this.opacity -= .02
-    
-    if (this.life >= this.maxLife) {
-        delete particles[this.id]
+    if (this.opacity > .02) {
+        this.opacity -= .02
     }
     
-    console.log(this.color)
+    console.log(this.opacity)
+    
     ctx.globalAlpha = this.opacity
     ctx.font = this.fontSize + 'px ' + this.font
     ctx.fillStyle = this.undercolor
@@ -967,6 +968,10 @@ Particle.prototype.draw = function() {
     ctx.fillStyle = this.color
     ctx.fillText(this.letter, this.x, this.y)
     ctx.globalAlpha = 1
+    
+    if (this.life >= this.maxLife) {
+        delete particles[this.id]
+    }
 }
 
 function emitParticles (x, y, color, undercolor, amount, size) {
