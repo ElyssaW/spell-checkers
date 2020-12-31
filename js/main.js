@@ -180,7 +180,7 @@ function drawTypo (obj, string1, string2, string3) {
     
     // Draw typo in the sentence
     drawStrokeText(string2, textCenter + ctx.measureText(string1).width, obj.y - 3 + floatValue, 'white', 'Fredoka One', 20, 'left')
-    drawFillText(string2, textCenter + ctx.measureText(string1).width, obj.y - 5 + floatValue, 'red', 'Fredoka One', 20, 'left')
+    drawFillText(string2, textCenter + ctx.measureText(string1).width, obj.y - 5 + floatValue, 'hotpink', 'Fredoka One', 20, 'left')
     
     // Draw second half of the sentence
     drawStrokeText(string3, textCenter + ctx.measureText(string1).width + ctx.measureText(string2).width, obj.y - 5 + floatValue, 'white', 'Fredoka One', 20, 'left')
@@ -258,6 +258,7 @@ function HeroConstructor(x, y) {
     this.wallDirection = 0
     this.textFrameIndex = 0
     this.walkFrameIndex = randomRange(0, 5)
+    this.dashArray = []
     this.render = function() {
         drawFloatAnim(this)
     }
@@ -425,7 +426,6 @@ function DoorConstructor(x, y, leadsTo) {
             circle(this.x+(this.width/2), this.y, 29, 'rgba(0,0,0,0)', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
             // Expand door as it's unlocked
             if (this.height < 90) {
-                emitParticles(this.x+(this.width/2), this.y+(this.height/2), 'black', 'grey', 1, 100)
                 this.height++
             }
         }
@@ -892,6 +892,20 @@ document.addEventListener('keydown', e => {
 // Listen for space bar, to teleport the player 
 document.addEventListener('keydown', e => {
     if (e.keyCode === 32) {
+        // Create trail between starting position and end position
+        if (hero.xdir > 0) {
+            console.log(hero.ydir)
+           for (let i = 0; i < 10; i++) {
+                ctx.drawImage(hero.sprite, hero.x + hero.hitboxX + (20 * i * hero.xdir), hero.y + hero.hitboxY + (20 * i * hero.ydir))
+            } 
+        } else {
+            console.log(hero.ydir)
+            for (let i = 0; i < 10; i++) {
+                ctx.drawImage(hero.spriteFlipped, hero.x + hero.hitboxX + (20 * i * hero.xdir), hero.y + hero.hitboxY + (20 * i * hero.ydir))
+            } 
+        } 
+        
+        // Move player
         hero.x = hero.x + (hero.xdir * 200)
         hero.y = hero.y + (hero.ydir * 200)
     }
@@ -958,8 +972,6 @@ Particle.prototype.draw = function() {
     if (this.opacity > .02) {
         this.opacity -= .02
     }
-    
-    console.log(this.opacity)
     
     ctx.globalAlpha = this.opacity
     ctx.font = this.fontSize + 'px ' + this.font
