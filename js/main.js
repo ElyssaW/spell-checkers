@@ -45,9 +45,10 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
 //                 {doorKey: 'magnificient', doorStart: 'But more than ', doorTypo: 'yanhingt', doorEnd: ', I would like to tell her...'}
 //                ]
 // Initialize array of objects containing the word puzzle key/locks
-let textArray = [{doorKey: 'Most', doorStart: 'Welcome to Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Magic'},
-                 {doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
-                  {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
+let textArray = [{doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
+                 {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
+                 {doorKey: 'typing', doorStart: 'Tame the wild quotation spirit by', doorTypo: 'tpying', doorEnd: ' their names'},
+                  {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' in earnest'},
                   {doorKey: 'back', doorStart: 'Okay fine, fine - ', doorTypo: 'bakc', doorEnd: ' to the topic of magic.'},
                   {doorKey: 'speaking', doorStart: 'Magic can be cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
                   {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
@@ -136,6 +137,7 @@ function drawStrokeText(string, x, y, color, font, size, align) {
     ctx.strokeStyle = color
     ctx.textAlign = align
     ctx.strokeText(string, x, y)
+    ctx.lineWidth = 1
 }
 
 // Generic function to draw a circle
@@ -411,13 +413,13 @@ function DoorConstructor(x, y, leadsTo) {
         ctx.strokeRect(this.x, this.y, this.width, this.height)
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.width, this.height)
-        ctx.lineWidth = 2
+        ctx.lineWidth = 1
     }
     this.activate = function() {
         // Check if door is locked
         if (this.locked) {
             //If door is locked, check if player is near
-            if (room.enemyCount === 0) {
+            if (room.enemyCount <= 0) {
                 // Display typo text
                 drawTypo(this, this.firstLock, this.typo, this.secondLock)
                 if (this.height < 10) {
@@ -457,7 +459,7 @@ function ChestConstructor(x, y, item) {
     this.textFrameIndex = 0
     this.walkFrameIndex = 0
     this.render = function() {
-        ctx.lineWidth = 2
+        ctx.lineWidth = 1
         circle(this.x, this.y + getFloatPos(this), 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
     }
     this.activate = function() {
@@ -496,6 +498,30 @@ function generateRoomContent(room) {
     let door = new DoorConstructor(570, 50, roomIndex)
     let chest = new ChestConstructor(280, 320)
     
+    // End the function pre-emptively if the player is still in the tutorial rooms
+    if (roomIndex <= 2) {
+        console.log(roomIndex)
+        
+        if(roomIndex === 2) {
+            array.push(door)
+            array.push(chest)
+            randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
+            array.push(randomItem)
+            return array
+            
+        } else if (roomIndex === 1) {
+            array.push(door)
+            return array
+            
+        } else if (roomIndex === 0) {
+            array.push(door)
+            return array
+        }
+    }
+    
+    console.log('no escape')
+    
+    // Otherwise, continue as normal, randomly generating content and pushing it to the room array
     array.push(door)
     array.push(chest)
     
@@ -709,7 +735,7 @@ function iframes () {
 // Function to play on player death
 function killPlayer() {
     clearInterval(gameInterval)
-    setTimeout(playerDead(), 1000)
+    setTimeout(playerDead, 500)
 }
 
 function damangePlayer (obj) {
@@ -1073,10 +1099,8 @@ function playerDead() {
     titleSettings.startAlpha = 0
     titleSettings.startAnimate = false
     titleSettings.startFinished = false
-    ctx.lineWidth = 2
     
     document.addEventListener('click', restartGame)
-    
     gameInterval = setInterval(gameOverLoop, 30)
 }
 
@@ -1203,6 +1227,7 @@ function drawStartText() {
 
 // Draw the dashed circle behind the text
 function drawCircle() {
+    ctx.lineWidth = 1
     circle(titleSettings.circleX, titleSettings.circleY, titleSettings.circleRadius, titleSettings.circleFill, titleSettings.circleStroke, 0 - frame, 2 * Math.PI + frame, [5, 5])
 }
 
