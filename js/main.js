@@ -48,7 +48,7 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
 let textArray = [{doorKey: 'Most', doorStart: 'Welcome to Her Highness\' Royal And ', doorTypo: 'Msot', doorEnd: ' Perfect Essay on The History of Magic'},
                  {doorKey: 'grand', doorStart: 'And here is the ', doorTypo: 'grnad', doorEnd: ' next sentence'},
                   {doorKey: 'Okay', doorStart: 'Have I hit word count yet? No? ', doorTypo: 'Kayo', doorEnd: ', here\'s another! Wow!'},
-                 {doorKey: 'back', doorStart: 'Okay fine, fine - ', doorTypo: 'bakc', doorEnd: ' to the topic of magic.'},
+                  {doorKey: 'back', doorStart: 'Okay fine, fine - ', doorTypo: 'bakc', doorEnd: ' to the topic of magic.'},
                   {doorKey: 'speaking', doorStart: 'Magic can be cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
                   {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
                   {doorKey: 'known', doorStart: 'Magic words have been ', doorTypo: 'nownk', doorEnd: ' to roam about and wreak havoc'},
@@ -200,11 +200,16 @@ function drawName (obj, string1) {
 
 // Small function to simulate floating on objects directly
 function drawFloatAnim(obj) {
-    if (obj.xdir > 0) {
-            ctx.drawImage(obj.sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY + getFloatPos(obj))
-        } else {
-            ctx.drawImage(obj.spriteFlipped, obj.x + obj.hitboxX, obj.y + obj.hitboxY + getFloatPos(obj))
-        }
+    ctx.drawImage(obj.sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY + getFloatPos(obj))
+}
+
+function getFloatPos(obj) {
+    let floatValue = obj.floatArray[obj.floatIndex] 
+    obj.floatIndex++
+    if (obj.floatIndex === obj.floatArray.length) {
+        obj.floatIndex = 0
+    }
+    return floatValue
 }
 
 // Function to draw health
@@ -221,12 +226,19 @@ function drawHealth() {
 }
 
 // Draw sprite without float value
-function drawSprite (obj) {
-    if (obj.xdir > 0) {
-            ctx.drawImage(obj.spriteRight, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
-        } else {
-            ctx.drawImage(obj.spriteLeft, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
-        }
+function drawSprite (obj, sprite) {
+    ctx.drawImage(sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
+}
+
+// This one's for ghosts only
+function spriteCheck(obj) {
+    if (obj.xdir < 0) {
+        obj.face = document.getElementById('ghost'+obj.faceNum+'Flipped')
+        obj.sprite = document.getElementById('ghostBlankFlipped')
+    } else if (obj.xdir > 0) {
+        obj.face = document.getElementById('ghost'+obj.faceNum)
+        obj.sprite = document.getElementById('ghostBlank')
+    }
 }
 
 //================================================
@@ -244,7 +256,6 @@ function HeroConstructor(x, y) {
     this.hitboxX = -20
     this.hitboxY = -20
     this.sprite = document.getElementById("madge")
-    this.spriteFlipped = document.getElementById("madgeFlipped")
     this.color = 'hotpink'
     this.width = 40
     this.height = 90
@@ -272,12 +283,9 @@ function GhostConstructor(x, y) {
     this.floatIndex = 0
     this.hitboxX = 0
     this.hitboxY = 0
-    this.faceNum = 1
     this.faceNum = randomRange(2, 5)
     this.sprite = document.getElementById('ghostBlank')
-    this.spriteFlipped = document.getElementById('ghostBlankFlipped')
-    this.spriteRight = document.getElementById('ghost'+this.faceNum)
-    this.spriteLeft = document.getElementById('ghost'+this.faceNum+'Flipped')
+    this.face = document.getElementById('ghost'+this.faceNum)
     this.color = 'grey'
     this.width = 120
     this.height = 120
@@ -292,17 +300,19 @@ function GhostConstructor(x, y) {
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
     this.render = function() {
+        // Check for direction on ghost
+        spriteCheck(this)
         // Draw sprite body
         drawFloatAnim(this)
         // Draw sprite face
-        drawSprite(this)
+        drawSprite(this, this.face)
     }
     // Define enemy behavior
     this.activate = function() {
         // Check if near player
         if(detectNear(this, 400)) {
             // Move to player
-            moveToPlayer(this)
+            moveToObject(this, hero)
             // Draw name to type
             drawName(this, this.spellWords[this.spellWordIndex])
             
@@ -432,41 +442,6 @@ function DoorConstructor(x, y, leadsTo) {
     }
 }
 
-// Function to move the player to the next room
-function moveToNextRoom() {
-    // Stop game loop
-    clearInterval(gameInterval)
-    // Clear canvas
-    ctx.clearRect(0, 0, game.width, game.height)
-    // Throw a view over the board
-    ctx.fillStyle = 'white'
-    ctx.fillRect(0, 0, game.width, game.height)
-    // Increment room index
-    roomIndex++
-    // Reset player input
-    playerInput = []
-    // Place the player at the bottom of the room
-    hero.x = game.width/2
-    hero.y = game.height/2 + 200
-    // Construct new room and pass it to the current index
-    room = new RoomConstructor(roomIndex)
-    // Push the newly constructed room to the main room array
-    roomArray.push(room)
-    // Set gameloop running again
-    setTimeout(() => {
-        gameInterval = setInterval(gameLoop, 30)
-    }, 1000)
-}
-
-function getFloatPos(obj) {
-    let floatValue = obj.floatArray[obj.floatIndex] 
-    obj.floatIndex++
-    if (obj.floatIndex === obj.floatArray.length) {
-        obj.floatIndex = 0
-    }
-    return floatValue
-}
-
 // Constructor function for new chests
 function ChestConstructor(x, y, item) {
     this.x = x
@@ -556,6 +531,32 @@ function generateRoomContent(room) {
     return array
 }
 
+// Function to move the player to the next room
+function moveToNextRoom() {
+    // Stop game loop
+    clearInterval(gameInterval)
+    // Clear canvas
+    ctx.clearRect(0, 0, game.width, game.height)
+    // Throw a view over the board
+    ctx.fillStyle = 'white'
+    ctx.fillRect(0, 0, game.width, game.height)
+    // Increment room index
+    roomIndex++
+    // Reset player input
+    playerInput = []
+    // Place the player at the bottom of the room
+    hero.x = game.width/2
+    hero.y = game.height/2 + 180
+    // Construct new room and pass it to the current index
+    room = new RoomConstructor(roomIndex)
+    // Push the newly constructed room to the main room array
+    roomArray.push(room)
+    // Set gameloop running again
+    setTimeout(() => {
+        gameInterval = setInterval(gameLoop, 30)
+    }, 1000)
+}
+
 //================================================
 //
 //          Movement functions
@@ -613,14 +614,14 @@ function randomWalk(obj) {
 }
 
 // Function to move closer to player
-function moveToPlayer (obj) {
+function moveToObject (obj, target) {
     
     // Grabs player's x/y and moves toward it. The initial funky if statements
     // help smooth the object's movement out - otherwise it jitters a little
     // trying to get precisely on the same value as the player's x/y
-    if (obj.x <= hero.x + 2 && obj.x >= hero.x - 2) {
-        obj.x = hero.x
-    } else if (obj.x < hero.x) {
+    if (obj.x <= target.x + 2 && obj.x >= target.x - 2) {
+        obj.x = target.x
+    } else if (obj.x < target.x) {
         obj.x += obj.speed
         obj.xdir = 1
     } else {
@@ -628,9 +629,9 @@ function moveToPlayer (obj) {
         obj.xdir = -1
     }
     
-    if (obj.y <= hero.y + 2 && obj.y >= hero.y - 2) {
-        obj.y = hero.y 
-    } else if (obj.y > hero.y) {
+    if (obj.y <= target.y + 2 && obj.y >= target.y - 2) {
+        obj.y = target.y 
+    } else if (obj.y > target.y) {
         obj.y -= obj.speed
         obj.ydir = -1
     } else {
@@ -771,7 +772,7 @@ function damageEnemy(obj, color, undercolor) {
     // Decrement enemy health
     obj.health--
     // Push enemy
-    pushObject(hero, obj, 4, 20, 200)
+    pushObject(hero, obj, 4, 30, 200)
     // Set particle emitter to player's location
     emitParticles(obj.x + (obj.width/2), obj.y + (obj.height/2), color, undercolor, 5, 20)
 }
@@ -792,22 +793,23 @@ function killEnemy(obj, color, undercolor) {
 // Checks which direction the player is trying to move in, and moves them there
 function movementHandler () {
     
-    if (moveObject.down === true) {
+    if (moveObject.down === true || moveObject.bottomleft === true || moveObject.bottomright === true) {
              hero.y += 5
              hero.ydir = 1
          } 
-    if (moveObject.up === true) {
+    if (moveObject.up === true || moveObject.topleft === true || moveObject.topright === true) {
              hero.y -= 5
              hero.ydir = -1
          } 
-    if (moveObject.right === true) {
+    if (moveObject.right === true || moveObject.topright === true || moveObject.bottomright === true) {
              hero.x += 5
              hero.xdir = 1
          } 
-    if (moveObject.left === true) {
+    if (moveObject.left === true || moveObject.topleft === true || moveObject.bottomleft === true) {
              hero.x -= 5
              hero.xdir = -1
          } 
+    
 }
 
 function submissionEvent() {
@@ -838,12 +840,38 @@ document.addEventListener('keydown', e => {
     if (e.key == 'ArrowLeft' || e.key == '4') {
              e.preventDefault()
              moveObject.left = true
+             hero.sprite = document.getElementById("madgeFlipped")
              hero.xdir = -1
          } 
     if (e.key == 'ArrowRight' || e.key == '6') {
              e.preventDefault()
              moveObject.right = true
+             hero.sprite = document.getElementById("madge")
              hero.xdir = 1
+         }
+    if (e.key == '3') {
+             e.preventDefault()
+             moveObject.bottomright = true
+             hero.ydir = 1
+             hero.xdir = 1
+         } 
+    if (e.key == '1') {
+             e.preventDefault()
+             moveObject.bottomleft = true
+             hero.ydir = 1
+             hero.xdir = -1
+         } 
+    if (e.key == '7') {
+             e.preventDefault()
+             moveObject.topleft = true
+             hero.ydir = -1
+             hero.xdir = -1
+         } 
+    if (e.key == '9') {
+             e.preventDefault()
+             moveObject.topright = true
+             hero.ydir = -1
+             hero.xdir =  1
          }
  })
 
@@ -869,6 +897,30 @@ document.addEventListener('keydown', e => {
              moveObject.right = false
              hero.xdir = 0
          }
+     if (e.key == '3') {
+             e.preventDefault()
+             moveObject.bottomright = false
+             hero.ydir = 0
+             hero.xdir = 0
+         } 
+    if (e.key == '1') {
+             e.preventDefault()
+             moveObject.bottomleft = false
+             hero.ydir = 0
+             hero.xdir = 0
+         } 
+    if (e.key == '7') {
+             e.preventDefault()
+             moveObject.topleft = false
+             hero.ydir = 0
+             hero.xdir = 0
+         } 
+    if (e.key == '9') {
+             e.preventDefault()
+             moveObject.topright = false
+             hero.ydir =  0
+             hero.xdir =  0
+         }
  })
 
 // Listen for letter or submission input from player
@@ -893,18 +945,9 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keydown', e => {
     if (e.keyCode === 32) {
         // Create trail between starting position and end position
-        if (hero.xdir > 0) {
-            console.log(hero.ydir)
-           for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 10; i++) {
                 ctx.drawImage(hero.sprite, hero.x + hero.hitboxX + (20 * i * hero.xdir), hero.y + hero.hitboxY + (20 * i * hero.ydir))
-            } 
-        } else {
-            console.log(hero.ydir)
-            for (let i = 0; i < 10; i++) {
-                ctx.drawImage(hero.spriteFlipped, hero.x + hero.hitboxX + (20 * i * hero.xdir), hero.y + hero.hitboxY + (20 * i * hero.ydir))
-            } 
-        } 
-        
+            }  
         // Move player
         hero.x = hero.x + (hero.xdir * 200)
         hero.y = hero.y + (hero.ydir * 200)
