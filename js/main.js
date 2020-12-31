@@ -708,7 +708,82 @@ function iframes () {
 
 // Function to play on player death
 function killPlayer() {
-    //clearInterval(gameInterval)
+    clearInterval(gameInterval)
+    setTimeout(startGameOver(), 1000)
+}
+
+function startGameOver() {
+    ctx.globalAlpha = 0
+    ctx.fillStyle = 'black'
+    ctx.fillRect(0, 0, game.width, game.height)
+    
+    let timer = setInterval(gameOverLoop, 30)
+}
+                            
+let gameOver = {backgroundFinished: false,
+               bigTextFinished: false,
+               bigTextY: game.height/2+100,
+               bigtextopacity: 0,
+               bigTextCeiling: game.width/2 - 100,
+               startOverFinished: false,
+               startOverOpacity: 0
+               }
+
+function gameOverLoop() {
+    if (!gameOver.backgroundFinished) {
+        ctx.globalAlpha += .1
+        ctx.fillRect(0, 0, game.width, game.height)
+        console.log(ctx.globalAlpha)
+        //drawFillText('Game Over', game.width/2, game.height/2, 'white', 'Londrina Solid', '30', 'center')
+        
+        if (ctx.globalAlpha >= .9) {
+            ctx.globalAlpha = 0
+            gameOver.backgroundFinished = true
+        }
+    }
+    
+    if(gameOver.backgroundFinished) {
+        ctx.clearRect(0, 0, game.width, game.height)
+        ctx.fillStyle = 'hotpink'
+        ctx.fillRect(0, 0, game.width, game.height)
+    }
+    
+    if (gameOver.backgroundFinished && !gameOver.bigTextFinished) {
+        ctx.globalAlpha = gameOver.bigtextopacity
+        drawFillText('Game Over', game.width/2, gameOver.bigTextY, 'white', 'Londrina Solid', '80', 'center')
+        gameOver.bigtextopacity += .2
+        gameOver.bigTextY -= 20
+        ctx.globalAlpha = 1
+        
+        if (gameOver.bigtextopacity >= .9 && gameOver.bigTextY <= gameOver.bigTextCeiling) {
+            drawFillText('Game Over', game.width/2, gameOver.bigTextY, 'white', 'Londrina Solid', '80', 'center')
+            gameOver.bigTextFinished = true
+        }
+    }
+    
+    if(gameOver.bigTextFinished) {
+        drawFillText('Game Over', game.width/2, gameOver.bigTextY, 'white', 'Londrina Solid', '80', 'center')
+    }
+                   
+    if(gameOver.bigTextFinished && !gameOver.startOverFinished) {
+        ctx.globalAlpha = gameOver.startOverOpacity
+        drawFillText('Restart?', game.width/2, gameOver.bigTextY+200, 'white', 'serif', '40', 'center')
+        ctx.fillStyle = 'black'
+        ctx.fillRect(game.width/2, gameOver.bigTextY+200, 50, 30)
+        gameOver.startOverOpacity += .2
+        ctx.globalAlpha = 1
+        
+        if (gameOver.startOverOpacity >= .9) {
+            drawFillText('Restart?', game.width/2, gameOver.bigTextY+200, 'white', 'serif', '40', 'center')
+            gameOver.startOverFinished = true
+        }
+    }
+    
+    if (gameOver.startOverOpacity >= .9) {
+            drawFillText('Restart?', game.width/2, gameOver.bigTextY+200, 'white', 'serif', '40', 'center')
+            ctx.fillStyle = 'black'
+            ctx.fillRect(game.width/2, gameOver.bigTextY+200, 50, 30)
+        }
 }
 
 function damangePlayer (obj) {
@@ -827,23 +902,23 @@ function submissionEvent() {
 // while the keyboard is being used for typing. 
 document.addEventListener('keydown', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-     if (e.key == 'ArrowUp' || e.key == '8') {
+     if (e.key == '8') {
              e.preventDefault()
              moveObject.up = true
              hero.ydir = -1
          } 
-    if (e.key == 'ArrowDown' || e.key == '2') {
+    if (e.key == '2') {
              e.preventDefault()
              moveObject.down = true
              hero.ydir = 1
          } 
-    if (e.key == 'ArrowLeft' || e.key == '4') {
+    if (e.key == '4') {
              e.preventDefault()
              moveObject.left = true
              hero.sprite = document.getElementById("madgeFlipped")
              hero.xdir = -1
          } 
-    if (e.key == 'ArrowRight' || e.key == '6') {
+    if (e.key == '6') {
              e.preventDefault()
              moveObject.right = true
              hero.sprite = document.getElementById("madge")
@@ -852,24 +927,28 @@ document.addEventListener('keydown', e => {
     if (e.key == '3') {
              e.preventDefault()
              moveObject.bottomright = true
+             hero.sprite = document.getElementById("madge")
              hero.ydir = 1
              hero.xdir = 1
          } 
     if (e.key == '1') {
              e.preventDefault()
              moveObject.bottomleft = true
+             hero.sprite = document.getElementById("madgeFlipped")
              hero.ydir = 1
              hero.xdir = -1
          } 
     if (e.key == '7') {
              e.preventDefault()
              moveObject.topleft = true
+             hero.sprite = document.getElementById("madgeFlipped")
              hero.ydir = -1
              hero.xdir = -1
          } 
     if (e.key == '9') {
              e.preventDefault()
              moveObject.topright = true
+             hero.sprite = document.getElementById("madge")
              hero.ydir = -1
              hero.xdir =  1
          }
@@ -1257,6 +1336,10 @@ let gameLoop = () => {
     //Write player input text above player
     drawStrokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'black', 'Fredoka One', 35, 'center')
     drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5, 'hotpink', 'Fredoka One', 35, 'center')
+    
+    if (playerInput === 'die') {
+        killPlayer()
+    }
 }
 
 function gameBegin() {
