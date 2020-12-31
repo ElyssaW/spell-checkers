@@ -709,18 +709,8 @@ function iframes () {
 // Function to play on player death
 function killPlayer() {
     clearInterval(gameInterval)
-    setTimeout(startGameOver(), 1000)
+    setTimeout(playerDead(), 1000)
 }
-
-function startGameOver() {
-    ctx.globalAlpha = 0
-    ctx.fillStyle = 'black'
-    ctx.fillRect(0, 0, game.width, game.height)
-    
-    let timer = setInterval(gameOverLoop, 30)
-}
-                            
-
 
 function damangePlayer (obj) {
     // Decrement player health
@@ -1032,7 +1022,7 @@ Particle.prototype.draw = function() {
     }
     
     ctx.globalAlpha = this.opacity
-    ctx.font = this.fontSize + 'px ' + this.font
+    ctx.font = '20px serif'
     ctx.fillStyle = this.undercolor
     ctx.fillText(this.letter, this.x, this.y+3)
     ctx.fillStyle = this.color
@@ -1053,6 +1043,73 @@ function emitParticles (x, y, color, undercolor, amount, size) {
     // Emit particles
     for (let i = 0; i < amount; i++) {
         new Particle()
+    }
+}
+
+//================================================
+//
+//          Game Over Functions
+//
+//================================================
+
+function playerDead() {
+    titleSettings.gradient1Red = 0
+    titleSettings.gradient1Green = 0
+    titleSettings.gradient1Blue = 0
+    titleSettings.gradient1Alpha = 0
+    titleSettings.gradient2Red = 0
+    titleSettings.gradient2Green = 0
+    titleSettings.gradient2Blue = 0
+    titleSettings.gradient2Alpha = 1
+    titleSettings.textColor = 'white'
+    titleSettings.textUndercolor = 'black'
+    titleSettings.textFont = '80px Londrina Solid'
+    titleSettings.titleString = 'GAME OVER'
+    titleSettings.circleFill = 'black'
+    titleSettings.circleStroke = 'white'
+    titleSettings.startString = '- Restart? -'
+    titleSettings.startColor = 'hotpink'
+    titleSettings.startY = 360
+    titleSettings.startAlpha = 0
+    titleSettings.startAnimate = false
+    titleSettings.startFinished = false
+    ctx.lineWidth = 2
+    
+    document.addEventListener('click', restartGame)
+    
+    gameInterval = setInterval(gameOverLoop, 30)
+}
+
+function restartGame() {
+    removeEventListener('click', restartGame)
+    location.reload()
+}
+
+function gameOverLoop() {
+    
+        frame++
+        //Clear board
+        ctx.clearRect(0, 0, game.width, game.height)
+    
+        ctx.fillStyle = 'black'
+        ctx.fillRect(0, 0, game.width, game.height)
+    
+        for (var i in particles) {
+          particles[i].draw();
+        }
+    
+        drawGradient()
+    
+    drawCircle()
+    
+    drawTitle()
+    
+    drawStartText()
+    
+    emitParticles(randomRange(0, game.width), randomRange(0, game.height), 'white', 'white', 2, 20)
+    
+    if (frame === 750) {
+        frame = 0
     }
 }
 
@@ -1104,7 +1161,7 @@ let titleSettings = {//Background gradient
                      scrollFont: '20px serif',
     
                      // Start text specific
-                     startString: '- Restart? -',
+                     startString: '- Start -',
                      startFont: '30px serif',
                      startColor: 'grey',
                      startX: game.width/2,
@@ -1203,11 +1260,12 @@ function drawBackgroundScroll () {
 }
 
 // Start game if clicked
-document.addEventListener('click', (e) => {
-    if (e.x > 560 && e.x < 870 && e.y > 200 && e.y < 518) {
-            moveToNextRoom()
-    }
-})
+document.addEventListener('click', startClicked)
+
+function startClicked() {
+        document.removeEventListener('click', startClicked)
+        moveToNextRoom()
+}
 
 function titleLoop () {
     frame++
