@@ -36,15 +36,19 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
 let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
                   {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
                   {doorKey: 'typing', doorStart: 'Tame the wild quotation spirit by', doorTypo: 'tpying', doorEnd: ' their names'},
-                  {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' in earnest'},
-                  {doorKey: 'back', doorStart: 'Okay fine, fine - ', doorTypo: 'bakc', doorEnd: ' to the topic of magic.'},
-                  {doorKey: 'speaking', doorStart: 'Magic can be cast by ', doorTypo: 'skeaping', doorEnd: ' magic words aloud.'},
-                  {doorKey: 'magic', doorStart: 'But occassionally, the ', doorTypo: 'mgaic', doorEnd: ' words develop a mind of their own'},
-                  {doorKey: 'known', doorStart: 'Magic words have been ', doorTypo: 'nownk', doorEnd: ' to roam about and wreak havoc'},
-                  {doorKey: 'fight', doorStart: 'But Spellcheckers ', doorTypo: 'fihgt', doorEnd: ' every day to keep them in line.'},
-                  {doorKey: 'protect', doorStart: 'Royal Spellcheckers ', doorTypo: 'teproct', doorEnd: ' all royal correspondance from wild magic.'},
-                  {doorKey: 'wrestle', doorStart: 'Spellcheckers ', doorTypo: 'sertwle', doorEnd: ' with typos, run-ons, and wild punctuation.'},
-                  {doorKey: 'invaluable', doorStart: 'This makes their service ', doorTypo: 'invalauble', doorEnd: ''}
+                  {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' earnest'},
+                  {doorKey: 'sidewalk', doorStart: 'There is a place where the ', doorTypo: 'sdielkaw', doorEnd: ' ends'},
+                  {doorKey: 'before', doorStart: 'And ', doorTypo: 'bforee', doorEnd: ' the street begins,'},
+                  {doorKey: 'soft', doorStart: 'And there the grass grows ', doorTypo: 'tofs', doorEnd: ' and white'},
+                  {doorKey: 'crimson', doorStart: 'And there the sun burns ', doorTypo: 'crimsin', doorEnd: ' bright'},
+                  {doorKey: 'rests', doorStart: 'And there the moon-bird ', doorTypo: 'ersts', doorEnd: ' from his flight'},
+                  {doorKey: 'peppermint', doorStart: 'To cool in the ', doorTypo: 'peperpmnit', doorEnd: ' wind.'},
+                  {doorKey: 'place', doorStart: 'Let us leave this ', doorTypo: 'palce', doorEnd: ' where the smoke blows black'},
+                  {doorKey: 'winds', doorStart: 'And the dark street ', doorTypo: 'wndis', doorEnd: ' and bends'},
+                  {doorKey: 'asphalt', doorStart: 'Past the pits where the ', doorTypo: 'ashalpt', doorEnd: ' flowers grow'},
+                  {doorKey: 'measured', doorStart: 'We shall walk with a walk this is ', doorTypo: 'mesarued', doorEnd: ' and slow'},
+                  {doorKey: 'chalk', doorStart: 'And watch where the ', doorTypo: 'chlak-', doorEnd: 'white arrows go'},
+                  {doorKey: 'ends', doorStart: 'To the place where the sidewalk ', doorTypo: 'edns', doorEnd: ''}
                 ]
 // Initialize array of enemy names
 let spellWords = []
