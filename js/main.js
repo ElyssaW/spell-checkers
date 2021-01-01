@@ -53,7 +53,9 @@ let spellWordsRight = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade
                   'craft', 'webcast', 'swagger', 'waste', 'cedar', 'brace', 'fast', 'stave',
                   'carve', 'caster', 'taxes', 'farts', 'sad', 'strafe', 'grace', 'raw', 'straw',
                   'water', 'craze', 'decaf', 'draft', 'bread', 'barf', 'grave', 'scare',
-                  'ersatz', 'great', 'grade', 'farce', 'after', 'extra', 'texas', 'swear'
+                  'ersatz', 'great', 'grade', 'farce', 'after', 'extra', 'texas', 'swear', 'ace',
+                  'vex', 'dab', 'west', 'feta', 'fear', 'date', 'cafe', 'brat', 'zebra', 'waxer',
+                  'tzars', 'drat', 'face'
 ]
 
 let spellWordsLeft = ['only', 'big', 'bug', 'king', 'junk', 'numb', 'punk', 'milk',
@@ -1181,6 +1183,7 @@ function emitParticles (x, y, color, undercolor, amount, size) {
 //================================================
 
 function playerDead() {
+    // Change title settings to the gameover menu
     titleSettings.gradient1Red = 0
     titleSettings.gradient1Green = 0
     titleSettings.gradient1Blue = 0
@@ -1198,6 +1201,11 @@ function playerDead() {
     titleSettings.startString = '- Restart? -'
     titleSettings.startColor = 'hotpink'
     
+    // Reset player
+    hero.maxhealth = 3
+    hero.health = hero.maxhealth
+    
+    // Start gameOver loop
     gameInterval = setInterval(gameOverLoop, 30)
 }
 
@@ -1352,7 +1360,7 @@ function addClick() {
         if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
             console.log('clicked2')
             setGradient()
-            roomIndex = 2
+            roomIndex = 3
             moveToNextRoom()
         }
         
@@ -1407,11 +1415,11 @@ function drawStartText() {
             if (leftHandMode) {
                 ctx.fillStyle = 'black'
                 ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
-                drawFillText('Left-Handed Mode ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', titleSettings.box3size, 'center')
+                drawFillText('Left-Handed Mode is ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', titleSettings.box3size, 'center')
             } else {
                 ctx.fillStyle = 'white'
                 ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
-                drawFillText('Left-Handed Mode OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', titleSettings.box3size, 'center')
+                drawFillText('Left-Handed Mode is OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', titleSettings.box3size, 'center')
             }
         
             ctx.font = titleSettings.startFont
@@ -1523,7 +1531,7 @@ let gameLoop = () => {
           particles[i].draw();
         }
     
-    Check if player is dead
+    //Check if player is dead
     if (hero.health === 0) {
         killPlayer()
     }
