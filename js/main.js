@@ -33,7 +33,7 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
                    't', 'u', 'v', 'w', 'x', 'y', 'z'
                   ]
 // Initialize array of objects containing the word puzzle key/locks
-let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
+let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
                   {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
                   {doorKey: 'typing', doorStart: 'Tame the wild quotation spirit by', doorTypo: 'tpying', doorEnd: ' their names'},
                   {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' in earnest'},
@@ -221,11 +221,11 @@ function drawSprite (obj, sprite) {
 // This one's for ghosts only
 function spriteCheck(obj) {
     if (obj.xdir < 0) {
-        obj.face = document.getElementById('ghost'+obj.faceNum+'Flipped')
-        obj.sprite = document.getElementById('ghostBlankFlipped')
+        obj.face = obj.faceLeft
+        obj.sprite = obj.spriteLeft
     } else if (obj.xdir > 0) {
-        obj.face = document.getElementById('ghost'+obj.faceNum)
-        obj.sprite = document.getElementById('ghostBlank')
+        obj.face = obj.faceRight
+        obj.sprite = obj.spriteRight
     }
 }
 
@@ -255,7 +255,6 @@ function HeroConstructor(x, y) {
     this.ydir = 0
     this.wallDirection = 0
     this.textFrameIndex = 0
-    this.walkFrameIndex = randomRange(0, 5)
     this.dashArray = []
     this.render = function() {
         drawFloatAnim(this)
@@ -273,6 +272,10 @@ function GhostConstructor(x, y) {
     this.faceNum = randomRange(2, 5)
     this.sprite = document.getElementById('ghostBlank')
     this.face = document.getElementById('ghost'+this.faceNum)
+    this.spriteRight = document.getElementById('ghostBlank')
+    this.faceRight = document.getElementById('ghost'+this.faceNum)
+    this.spriteLeft = document.getElementById('ghostBlankFlipped')
+    this.faceLeft = document.getElementById('ghost'+this.faceNum+'Flipped')
     this.color = 'grey'
     this.width = 120
     this.height = 120
@@ -283,7 +286,6 @@ function GhostConstructor(x, y) {
     this.speed = randomRange(1, 3)
     this.walkDirection = 0
     this.textFrameIndex = 0
-    this.walkFrameIndex = randomRange(0, 5)
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
     this.render = function() {
@@ -333,6 +335,127 @@ function GhostConstructor(x, y) {
     }
 }
 
+function PeriodConstructor(x, y) {
+    this.x = x
+    this.y = y
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = 0
+    this.hitboxX = 0
+    this.hitboxY = 0
+    this.faceNum = randomRange(2, 5)
+    this.sprite = document.getElementById('periodBlank')
+    this.face = document.getElementById('period')
+    this.spriteRight = document.getElementById('periodBlank')
+    this.faceRight = document.getElementById('period')
+    this.spriteLeft = document.getElementById('periodBlankFlipped')
+    this.faceLeft = document.getElementById('periodFlipped')
+    this.color = 'grey'
+    this.width = 120
+    this.height = 120
+    this.health = 3
+    this.alive = true
+    this.xdir = 0
+    this.ydir = 0
+    this.speed = randomRange(1, 3)
+    this.walkDirection = 0
+    this.bulletTimer = 0
+    this.textFrameIndex = 0
+    this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
+    this.spellWordIndex = 0
+    this.render = function() {
+        // Check for direction on ghost
+        spriteCheck(this)
+        // Draw sprite body
+        drawFloatAnim(this)
+        // Draw sprite face
+        drawSprite(this, this.face)
+    }
+    this.activate = function() {
+            // Move to player
+            moveToObject(this, hero)
+            // Increase bullet timer
+            this.bulletTimer++
+            // Every 60 frames, release bullets
+            if (this.bulletTimer === 60) {
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, 1))
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, 1))
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, -1))
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, -1))
+            }
+        
+            if (this.bulletTimer === 120) {
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, 1))
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, -1))
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, 0))
+                room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, 0))
+                this.bulletTimer = 0
+            }
+            // Draw name to type
+            drawName(this, this.spellWords[this.spellWordIndex])
+            
+            // If player input matches name, decrement health
+            if (playerInput == this.spellWords[this.spellWordIndex]) {
+                damageEnemy(this, 'white', 'lightgrey')
+                    // If health is depeleted, kill enemy
+                    if (this.health === 0) {
+                        killEnemy(this, 'white', 'lightgrey')
+                        this.alive = false
+                    }
+                // Move onto the next spell word
+                this.spellWordIndex++
+            }
+            // Decrement player health if hit
+            if (detectHit(this)) {
+                if (!hero.justHit) {
+                    
+                    damangePlayer(this)
+                    
+                    // Set iframes running
+                    setTimeout(iframes, 1500)
+                }
+            }
+        // Chck if bumping against the wall
+        wallCheck(this)
+    }
+}
+
+function bulletConstructor(x, y, xdir, ydir) {
+    this.x = x
+    this.y = y
+    this.color = 'black'
+    this.width = 10
+    this.height = 10
+    this.alive = true
+    this.xdir = xdir
+    this.ydir = ydir
+    this.speed = 20
+    this.render = function() {
+            // Draw sprite
+            circle(this.x, this.y, this.width, this.color)
+        }
+    this.activate = function() {
+        // Move x/y position
+        this.x += this.xdir * this.speed
+        this.y += this.ydir * this.speed
+        
+        // Check if the player is hit
+        if (detectHit(this)) {
+            // Kill enemy if hit
+            this.alive = false
+            // Decrement health
+            if (!hero.justHit) {
+                this.xdir = this.xdir * -1
+                this.ydir = this.ydir * -1
+                damangePlayer(this)
+            }
+        }
+        // Check if bullet has left the viewable map
+        if (this.x < 0 || this.x > game.width || this.y < 0 || this.y > game.height) {
+            this.alive = false
+        }
+    }
+}
+
 // Constructor function for new enemies
 function ExclaimerConstructor(x, y) {
     this.x = x
@@ -348,8 +471,6 @@ function ExclaimerConstructor(x, y) {
     this.xdir = randomRange(20, 30)
     this.ydir = randomRange(20, 30)
     this.speed = 5
-    this.walkDirection = 0
-    this.textFrameIndex = 0
     this.render = function() {
             // Draw sprite
             ctx.drawImage(this.sprite, this.x, this.y)
@@ -442,7 +563,6 @@ function ChestConstructor(x, y, item) {
     this.alive = true
     this.item = item,
     this.textFrameIndex = 0
-    this.walkFrameIndex = 0
     this.render = function() {
         ctx.lineWidth = 1
         circle(this.x, this.y + getFloatPos(this), 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
@@ -483,6 +603,9 @@ function generateRoomContent(room) {
     let door = new DoorConstructor(570, 50, roomIndex)
     let chest = new ChestConstructor(280, 320)
     
+    
+    array.push(enemy)
+    
     // End the function pre-emptively if the player is still in the tutorial rooms
     if (roomIndex <= 2) {
         
@@ -514,27 +637,28 @@ function generateRoomContent(room) {
         switch(random) {
             case 1:
                 // Add in exclaimer if random num is 1
-                randomItem = new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
+                array.push(new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
+                array.push(new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 break;
             case 2:
                 // Add in ghost if random num is 2
-                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
+                array.push(new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 room.enemyCount++
                 break;
             case 3:
-                // Ad in ghost if random num is 3
-                randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
+                // Add in ghost if random num is 3
+                array.push(new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 room.enemyCount++
+                break;
+                // Add in period if random num is 4
+            case 4: 
+                array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 break;
                 // Add in nothing if none are met
             default:
                 randomItem = null
                 break;
         }
-        // Push the generated item to the room contents array if it is not null
-        if (randomItem !== null) {
-            array.push(randomItem)
-        }   
     }
     return array
 }
@@ -1077,8 +1201,6 @@ function playerDead() {
     titleSettings.circleStroke = 'white'
     titleSettings.startString = '- Restart? -'
     titleSettings.startColor = 'hotpink'
-    titleSettings.startAnimate = false
-    titleSettings.startFinished = false
     
     gameInterval = setInterval(gameOverLoop, 30)
 }
@@ -1173,14 +1295,14 @@ let titleSettings = {//Background gradient
                      optionX: game.width/2,
                      optionY: 500,
                      box1Height: 30,
+                     box1size: 20,
                      box1y: 470,
-                     box1hover: false,
                      box2Height: 30,
+                     box2size: 20,
                      box2y: 520,
-                     box2hover: false,
                      box3Height: 30,
+                     box3size: 20,
                      box3y: 570,
-                     box3hover: false,
 }
 
 let leftHandMode = false
@@ -1281,19 +1403,19 @@ function drawStartText() {
     
     ctx.fillStyle = 'black'
             ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box1y, titleSettings.circleRadius*2, titleSettings.box1Height)
-            drawFillText('Play tutorial', titleSettings.optionX, titleSettings.optionY, 'white', 'serif', 20, 'center')
+            drawFillText('Play tutorial', titleSettings.optionX, titleSettings.optionY, 'white', 'serif', titleSettings.box1size, 'center')
             ctx.fillStyle = 'black'
             ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box2y, titleSettings.circleRadius*2, titleSettings.box2Height)
-            drawFillText('Play game', titleSettings.optionX, titleSettings.optionY+50, 'white', 'serif', 20, 'center')
+            drawFillText('Play game', titleSettings.optionX, titleSettings.optionY+50, 'white', 'serif', titleSettings.box2size, 'center')
         
             if (leftHandMode) {
                 ctx.fillStyle = 'black'
                 ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
-                drawFillText('Left-Handed Mode ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', 20, 'center')
+                drawFillText('Left-Handed Mode ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', titleSettings.box3size, 'center')
             } else {
                 ctx.fillStyle = 'white'
                 ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
-                drawFillText('Left-Handed Mode OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', 20, 'center')
+                drawFillText('Left-Handed Mode OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', titleSettings.box3size, 'center')
             }
         
             ctx.font = titleSettings.startFont
@@ -1406,9 +1528,9 @@ let gameLoop = () => {
         }
     
     //Check if player is dead
-    if (hero.health === 0) {
-        killPlayer()
-    }
+//    if (hero.health === 0) {
+//        killPlayer()
+//    }
     
     // Increment frame
     frame++
@@ -1441,10 +1563,6 @@ let gameLoop = () => {
     //Write player input text above player
     drawStrokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'black', 'Fredoka One', 35, 'center')
     drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5, 'hotpink', 'Fredoka One', 35, 'center')
-    
-    if (playerInput === 'die') {
-        killPlayer()
-    }
 }
 
 function gameBegin() {
