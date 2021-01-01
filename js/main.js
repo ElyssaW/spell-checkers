@@ -603,9 +603,6 @@ function generateRoomContent(room) {
     let door = new DoorConstructor(570, 50, roomIndex)
     let chest = new ChestConstructor(280, 320)
     
-    
-    array.push(enemy)
-    
     // End the function pre-emptively if the player is still in the tutorial rooms
     if (roomIndex <= 2) {
         
@@ -942,7 +939,6 @@ function movementHandler () {
              hero.x -= 5
              hero.xdir = -1
          } 
-    
 }
 
 function submissionEvent() {
@@ -1014,22 +1010,22 @@ document.addEventListener('keydown', e => {
 
  document.addEventListener('keyup', e => {
      // Prevent default, so that arrow keys do not interrupt typing or move the cursor
-     if (e.key == 'ArrowUp' || e.key == '8') {
+     if (e.key == '8') {
              e.preventDefault()
              moveObject.up = false
              hero.ydir = 0
          } 
-    if (e.key == 'ArrowDown' || e.key == '2') {
+    if (e.key == '2') {
              e.preventDefault()
              moveObject.down = false
              hero.ydir = 0
          } 
-    if (e.key == 'ArrowLeft' || e.key == '4') {
+    if (e.key == '4') {
              e.preventDefault()
              moveObject.left = false
              hero.xdir = 0
          } 
-    if (e.key == 'ArrowRight' || e.key == '6') {
+    if (e.key == '6') {
              e.preventDefault()
              moveObject.right = false
              hero.xdir = 0
@@ -1527,10 +1523,10 @@ let gameLoop = () => {
           particles[i].draw();
         }
     
-    //Check if player is dead
-//    if (hero.health === 0) {
-//        killPlayer()
-//    }
+    Check if player is dead
+    if (hero.health === 0) {
+        killPlayer()
+    }
     
     // Increment frame
     frame++
