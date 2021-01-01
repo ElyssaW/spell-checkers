@@ -396,7 +396,7 @@ function DoorConstructor(x, y, leadsTo) {
         ctx.lineWidth = 6
         ctx.strokeStyle = 'white'
         ctx.strokeRect(this.x, this.y, this.width, this.height)
-        ctx.fillStyle = this.color
+        ctx.fillStyle = 'black'
         ctx.fillRect(this.x, this.y, this.width, this.height)
         ctx.lineWidth = 1
     }
@@ -1077,18 +1077,10 @@ function playerDead() {
     titleSettings.circleStroke = 'white'
     titleSettings.startString = '- Restart? -'
     titleSettings.startColor = 'hotpink'
-    titleSettings.startY = 360
-    titleSettings.startAlpha = 0
     titleSettings.startAnimate = false
     titleSettings.startFinished = false
     
-    document.addEventListener('click', restartGame)
     gameInterval = setInterval(gameOverLoop, 30)
-}
-
-function restartGame() {
-    removeEventListener('click', restartGame)
-    location.reload()
 }
 
 function gameOverLoop() {
@@ -1167,7 +1159,7 @@ let titleSettings = {//Background gradient
                      scrollFont: '20px serif',
     
                      // Start text specific
-                     startString: '- Start -',
+                     startString: '- Welcome! -',
                      startFont: '30px serif',
                      startColor: 'grey',
                      startX: game.width/2,
@@ -1180,29 +1172,73 @@ let titleSettings = {//Background gradient
                      // Option bank
                      optionX: game.width/2,
                      optionY: 500,
-                     optionAlpha: 0
+                     box1Height: 30,
+                     box1y: 470,
+                     box1hover: false,
+                     box2Height: 30,
+                     box2y: 520,
+                     box2hover: false,
+                     box3Height: 30,
+                     box3y: 570,
+                     box3hover: false,
 }
 
 let leftHandMode = false
+
+function addHover() {
+    game.addEventListener('mousemove', (e) => {
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
+            if (titleSettings.box1Height < 40) {
+                titleSettings.box1Height++
+                titleSettings.box1y -= .5
+            } 
+        } else if (titleSettings.box1Height > 30){
+                titleSettings.box1Height--
+                titleSettings.box1y += .5
+        }
+        
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
+            if (titleSettings.box2Height < 40) {
+                titleSettings.box2Height++
+                titleSettings.box2y -= .5
+            } 
+        } else if (titleSettings.box2Height > 30){
+                titleSettings.box2Height--
+                titleSettings.box2y += .5
+        }
+        
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 560 && e.offsetY < 600) {
+            if (titleSettings.box3Height < 40) {
+                titleSettings.box3Height++
+                titleSettings.box3y -= .5
+            } 
+        } else if (titleSettings.box3Height > 30){
+                titleSettings.box3Height--
+                titleSettings.box3y += .5
+        } 
+    })
+}
 
 function addClick() {
    // Start game if clicked
     game.addEventListener('click', (e) => {
         
-        console.log(e.offsetY)
-        console.log(e.offsetX)
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 500) {
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
             console.log('clicked1')
+            setGradient()
+            roomIndex = -1
             moveToNextRoom()
+            
         }
         
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 520 && e.offsetY < 550) {
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
             console.log('clicked2')
+            setGradient()
             roomIndex = 2
             moveToNextRoom()
         }
         
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 570 && e.offsetY < 600) {
+        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 560 && e.offsetY < 600) {
             if (leftHandMode) {
                 spellWords = spellWordsRight
                 leftHandMode = false
@@ -1225,6 +1261,16 @@ game.addEventListener('mousemove', (e) => {
     } 
 })
 
+function setGradient() {
+    titleSettings.gradient1Red = 255
+    titleSettings.gradient1Green = 255
+    titleSettings.gradient1Blue = 255
+    titleSettings.gradient1Alpha = 0
+    titleSettings.gradient2Red = 255
+    titleSettings.gradient2Green = 255
+    titleSettings.gradient2Blue = 255
+}
+
 // Draw the "Start game!" which flies up when the mouse hovers over the title area
 function drawStartText() {
     if (titleSettings.startAnimate) {
@@ -1234,19 +1280,19 @@ function drawStartText() {
     }
     
     ctx.fillStyle = 'black'
-            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY-20, titleSettings.circleRadius*2, 30)
+            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box1y, titleSettings.circleRadius*2, titleSettings.box1Height)
             drawFillText('Play tutorial', titleSettings.optionX, titleSettings.optionY, 'white', 'serif', 20, 'center')
             ctx.fillStyle = 'black'
-            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY+30, titleSettings.circleRadius*2, 30)
+            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box2y, titleSettings.circleRadius*2, titleSettings.box2Height)
             drawFillText('Play game', titleSettings.optionX, titleSettings.optionY+50, 'white', 'serif', 20, 'center')
         
             if (leftHandMode) {
                 ctx.fillStyle = 'black'
-                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY+80, titleSettings.circleRadius*2, 30)
+                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
                 drawFillText('Left-Handed Mode ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', 20, 'center')
             } else {
                 ctx.fillStyle = 'white'
-                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.optionY+80, titleSettings.circleRadius*2, 30)
+                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
                 drawFillText('Left-Handed Mode OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', 20, 'center')
             }
         
@@ -1407,6 +1453,7 @@ function gameBegin() {
     spellWords = spellWordsRight
 
     addClick()
+    addHover()
     
     hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
