@@ -66,7 +66,8 @@ let spellWordsLeft = ['only', 'big', 'bug', 'king', 'junk', 'numb', 'punk', 'mil
                   'limp', 'jump', 'lingo', 'bingo', 'gumbo', 'ghoul', 'himbo', 'pylon',
                   'hokum', 'limbo', 'plumb', 'vinyl', 'goblin', 'unholy', 'joking', 'joy', 'poking',
                   'boil', 'puking', 'kingly', 'hulk', 'bump', 'buoy', 'moghul', 'gluon',
-                  'glyph', 'bunko', 'young', 'hunk', 'gulp', 'bijou', 'blimp', 'glib'
+                  'glyph', 'bunko', 'young', 'hunk', 'gulp', 'bijou', 'blimp', 'glib', 'pop',
+                  'lollipop', 'polk', 'lol', 'pink', 'mill', 'pill'
 ]
 
 // Set canvas width/height
@@ -650,7 +651,6 @@ function generateRoomContent(room) {
             case 3:
                 if (roomIndex > 10) {
                     array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
-                    room.enemyCount++
                 } else {
                     array.push(new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 }
