@@ -46,7 +46,7 @@ let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker trainin
                   {doorKey: 'place', doorStart: 'Let us leave this ', doorTypo: 'palce', doorEnd: ' where the smoke blows black'},
                   {doorKey: 'winds', doorStart: 'And the dark street ', doorTypo: 'wndis', doorEnd: ' and bends'},
                   {doorKey: 'asphalt', doorStart: 'Past the pits where the ', doorTypo: 'ashalpt', doorEnd: ' flowers grow'},
-                  {doorKey: 'measured', doorStart: 'We shall walk with a walk this is ', doorTypo: 'mesarued', doorEnd: ' and slow'},
+                  {doorKey: 'measured', doorStart: 'We shall walk with a walk that is ', doorTypo: 'mesarued', doorEnd: ' and slow'},
                   {doorKey: 'chalk', doorStart: 'And watch where the ', doorTypo: 'chlak-', doorEnd: 'white arrows go'},
                   {doorKey: 'ends', doorStart: 'To the place where the sidewalk ', doorTypo: 'edns', doorEnd: ''}
                 ]
@@ -640,7 +640,6 @@ function generateRoomContent(room) {
         switch(random) {
             case 1:
                 // Add in exclaimer if random num is 1
-                array.push(new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 array.push(new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 break;
             case 2:
