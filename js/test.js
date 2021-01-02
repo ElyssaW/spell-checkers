@@ -458,8 +458,9 @@ function circle(x, y, radius, fill, stroke, start, end, dash) {
 }
 
 fieldSettings = {
-    spacingX: 20,
-    spacingY: 20,
+    array: [],
+    spacingX: 30,
+    spacingY: 30,
     cursorRadius: 100,
     size: 20,
     speed: .2,
@@ -470,9 +471,9 @@ function titleLoop () {
         //Clear board
         ctx.clearRect(0, 0, game.width, game.height)
 
-        for (let i =0; i < partiArray.length; i++) {
-            partiArray[i].render()
-            partiArray[i].draw()
+        for (let i =0; i < fieldSettings.array.length; i++) {
+            fieldSettings.array[i].render()
+            fieldSettings.array[i].draw()
         }
     
         drawGradient()
@@ -501,7 +502,7 @@ function calcDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
 }
 
-function Particle(x, y) {
+function gridParticle(x, y) {
     this.x = x,
     this.y = y,
     this.letter = selectRandom(letterArray)
@@ -522,7 +523,6 @@ function Particle(x, y) {
     }
     this.draw = function() {
         if (calcDistance(this.x, this.y, mouseX, mouseY) < fieldSettings.cursorRadius) {
-//        if (this.x >= mouseX-fieldSettings.cursorRadius && this.x <= mouseX+fieldSettings.cursorRadius && this.y >= mouseY-fieldSettings.cursorRadius && this.y <= mouseY+fieldSettings.cursorRadius) {
             this.x = this.x + ((this.x - mouseX)) * this.speed
             this.y = this.y + ((this.y - mouseY)) * this.speed
         } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || this.y >= mouseY+fieldSettings.cursorRadius+fieldSettings.size) &&
@@ -539,12 +539,10 @@ function Particle(x, y) {
     }
 }
 
-let partiArray = []
-
 for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
     for (let j = 0; j < (game.height/fieldSettings.spacingY); j++) {
-        let parti = new Particle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
-            partiArray.push(parti)
+            let parti = new gridParticle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
+            fieldSettings.array.push(parti)  
     }
 }
 

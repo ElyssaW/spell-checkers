@@ -35,7 +35,7 @@ let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
 // Initialize array of objects containing the word puzzle key/locks
 let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
                   {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
-                  {doorKey: 'typing', doorStart: 'Tame the wild quotation spirit by', doorTypo: 'tpying', doorEnd: ' their names'},
+                  {doorKey: 'typing', doorStart: 'Wrangle the wild comma by', doorTypo: 'tpying', doorEnd: ' their names'},
                   {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' earnest'},
                   {doorKey: 'sidewalk', doorStart: 'There is a place where the ', doorTypo: 'sdielkaw', doorEnd: ' ends'},
                   {doorKey: 'before', doorStart: 'And ', doorTypo: 'bforee', doorEnd: ' the street begins,'},
@@ -1189,6 +1189,97 @@ function emitParticles (x, y, color, undercolor, amount, size) {
 
 //================================================
 //
+//          Victory Screen Function
+//
+//================================================
+
+fieldSettings = {
+    array: [],
+    spacingX: 30,
+    spacingY: 30,
+    cursorRadius: 100,
+    size: 20,
+    speed: .2,
+}
+
+let mouseX
+let mouseY
+game.addEventListener('mousemove', (e)=> {
+    mouseX = e.offsetX
+    mouseY = e.offsetY
+})
+
+function calcDistance(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
+}
+
+function gridParticle(x, y) {
+    this.x = x,
+    this.y = y,
+    this.letter = selectRandom(letterArray)
+    this.vx = 0,
+    this.vy = 0,
+    this.speed = fieldSettings.speed
+    this.color = 'black'
+    this.returnX = x,
+    this.returnY = y
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = randomRange(0, this.floatArray.length)
+    this.frame = 0
+    this.render = function() {
+        drawFillText(this.letter, this.x, this.y + this.floatArray[this.floatIndex], this.color, 'serif', fieldSettings.size, 'center')
+        //circle(this.x, this.y, 10, this.color)
+    }
+    this.draw = function() {
+        if (calcDistance(this.x, this.y, mouseX, mouseY) < fieldSettings.cursorRadius) {
+            this.x = this.x + ((this.x - mouseX)) * this.speed
+            this.y = this.y + ((this.y - mouseY)) * this.speed
+        } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || this.y >= mouseY+fieldSettings.cursorRadius+fieldSettings.size) &&
+                   (this.x !== this.returnX || this.y !== this.returnY)) {
+            this.x = this.x + ((this.returnX - this.x)*this.speed)
+            this.y = this.y + ((this.returnY - this.y)*this.speed)
+        } 
+    
+        if (this.floatIndex === this.floatArray.length-1) {
+            this.floatIndex = 0
+        } else {
+            this.floatIndex++
+        }
+    }
+}
+
+for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
+    for (let j = 0; j < (game.height/fieldSettings.spacingY); j++) {
+            let parti = new gridParticle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
+            fieldSettings.array.push(parti)  
+    }
+}
+
+function endGameLoop () {
+        frame++
+        //Clear board
+        ctx.clearRect(0, 0, game.width, game.height)
+
+        for (let i =0; i < fieldSettings.array.length; i++) {
+            fieldSettings.array[i].render()
+            fieldSettings.array[i].draw()
+        }
+    
+        drawGradient()
+    
+        drawCircle()
+
+        drawTitle()
+
+        if (frame === 750) {
+            frame = 0
+        }
+    }
+
+//================================================
+//
 //          Game Over Functions
 //
 //================================================
@@ -1578,6 +1669,13 @@ let gameLoop = () => {
     //Write player input text above player
     drawStrokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'black', 'Fredoka One', 35, 'center')
     drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5, 'hotpink', 'Fredoka One', 35, 'center')
+    
+    if (playerInput === 'winner') {
+        clearInterval(gameInterval)
+        titleSettings.textFont = '80px Londrina Solid'
+        titleSettings.titleString = 'THE END'
+        gameInterval = setInterval(endGameLoop, 30)
+    }
 }
 
 function gameBegin() {
