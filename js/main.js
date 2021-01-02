@@ -602,8 +602,8 @@ function generateRoomContent(room) {
     let array = []
     // Initialize random value
     let random
-    // Initialize value to hold the item
-    let randomItem
+    // Value to check whether the array already has a Period, for game balance reasons
+    let includesPeriod = false
     
     // Each room must contain a door and a chest, so they're generated here
     let door = new DoorConstructor(570, 50, roomIndex)
@@ -648,13 +648,21 @@ function generateRoomContent(room) {
                 room.enemyCount++
                 break;
             case 3:
-                // Add in ghost if random num is 3
-                array.push(new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
+                if (roomIndex > 10) {
+                    array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
+                    room.enemyCount++
+                } else {
+                    array.push(new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
+                }
                 room.enemyCount++
                 break;
                 // Add in period if random num is 4
             case 4: 
-                array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
+                if ((!includesPeriod && roomIndex > 6) || roomArray > 12) {
+                    array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
+                    includesPeriod = true
+                    room.enemyCount++
+                } 
                 break;
                 // Add in nothing if none are met
             default:

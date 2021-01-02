@@ -457,6 +457,14 @@ function circle(x, y, radius, fill, stroke, start, end, dash) {
     ctx.setLineDash([])
 }
 
+fieldSettings = {
+    spacingX: 20,
+    spacingY: 20,
+    cursorRadius: 100,
+    size: 20,
+    speed: .2,
+}
+
 function titleLoop () {
         frame++
         //Clear board
@@ -487,7 +495,11 @@ game.addEventListener('mousemove', (e)=> {
 //    console.log(mouseY)
 })
 
-let radius = 60
+let radius = 100
+
+function calcDistance(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
+}
 
 function Particle(x, y) {
     this.x = x,
@@ -495,7 +507,7 @@ function Particle(x, y) {
     this.letter = selectRandom(letterArray)
     this.vx = 0,
     this.vy = 0,
-    this.speed = .1
+    this.speed = fieldSettings.speed
     this.color = 'black'
     this.returnX = x,
     this.returnY = y
@@ -505,16 +517,15 @@ function Particle(x, y) {
     this.floatIndex = randomRange(0, this.floatArray.length)
     this.frame = 0
     this.render = function() {
-        drawFillText(this.letter, this.x, this.y + this.floatArray[this.floatIndex], this.color, 'serif', 30, 'center')
+        drawFillText(this.letter, this.x, this.y + this.floatArray[this.floatIndex], this.color, 'serif', fieldSettings.size, 'center')
         //circle(this.x, this.y, 10, this.color)
     }
     this.draw = function() {
-        if (this.x >= mouseX-radius && this.x <= mouseX+radius && this.y >= mouseY-radius && this.y <= mouseY+radius) {
-            if (this.x < mouseX) {
-                this.x = this.x + ((this.x - mouseX)) * this.speed
-                this.y = this.y + ((this.y - mouseY)) * this.speed
-            }
-        } else if ((this.x <= mouseX-radius-20 || this.x >= mouseX+radius+20 || this.y <= mouseY-radius-20 || this.y >= mouseY+radius+20) &&
+        if (calcDistance(this.x, this.y, mouseX, mouseY) < fieldSettings.cursorRadius) {
+//        if (this.x >= mouseX-fieldSettings.cursorRadius && this.x <= mouseX+fieldSettings.cursorRadius && this.y >= mouseY-fieldSettings.cursorRadius && this.y <= mouseY+fieldSettings.cursorRadius) {
+            this.x = this.x + ((this.x - mouseX)) * this.speed
+            this.y = this.y + ((this.y - mouseY)) * this.speed
+        } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || this.y >= mouseY+fieldSettings.cursorRadius+fieldSettings.size) &&
                    (this.x !== this.returnX || this.y !== this.returnY)) {
             this.x = this.x + ((this.returnX - this.x)*this.speed)
             this.y = this.y + ((this.returnY - this.y)*this.speed)
@@ -530,10 +541,10 @@ function Particle(x, y) {
 
 let partiArray = []
 
-for (let i = 0; i < (game.width/40); i++) {
-    for (let j = 0; j < (game.height/40); j++) {
-        let parti = new Particle(40*i, 40*j)
-        partiArray.push(parti)
+for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
+    for (let j = 0; j < (game.height/fieldSettings.spacingY); j++) {
+        let parti = new Particle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
+            partiArray.push(parti)
     }
 }
 
