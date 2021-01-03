@@ -466,37 +466,12 @@ fieldSettings = {
     speed: .2,
 }
 
-function titleLoop () {
-        frame++
-        //Clear board
-        ctx.clearRect(0, 0, game.width, game.height)
-
-        for (let i =0; i < fieldSettings.array.length; i++) {
-            fieldSettings.array[i].render()
-            fieldSettings.array[i].draw()
-        }
-    
-        drawGradient()
-    
-        drawCircle()
-
-        drawTitle()
-
-        if (frame === 750) {
-            frame = 0
-        }
-    }
-
 let mouseX
 let mouseY
 game.addEventListener('mousemove', (e)=> {
     mouseX = e.offsetX
     mouseY = e.offsetY
-//    console.log(mouseX)
-//    console.log(mouseY)
 })
-
-let radius = 100
 
 function calcDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
@@ -545,6 +520,27 @@ for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
             fieldSettings.array.push(parti)  
     }
 }
+
+function endGameLoop () {
+        frame++
+        //Clear board
+        ctx.clearRect(0, 0, game.width, game.height)
+
+        for (let i =0; i < fieldSettings.array.length; i++) {
+            fieldSettings.array[i].render()
+            fieldSettings.array[i].draw()
+        }
+    
+        drawGradient()
+    
+        drawCircle()
+
+        drawTitle()
+
+        if (frame === 750) {
+            frame = 0
+        }
+    }
 
 
 function gameBegin() {

@@ -679,24 +679,29 @@ function moveToNextRoom() {
     clearInterval(gameInterval)
     // Clear canvas
     ctx.clearRect(0, 0, game.width, game.height)
-    // Throw a view over the board
-    ctx.fillStyle = 'white'
-    ctx.fillRect(0, 0, game.width, game.height)
-    // Increment room index
-    roomIndex++
-    // Reset player input
-    playerInput = []
-    // Place the player at the bottom of the room
-    hero.x = game.width/2
-    hero.y = game.height/2 + 180
-    // Construct new room and pass it to the current index
-    room = new RoomConstructor(roomIndex)
-    // Push the newly constructed room to the main room array
-    roomArray.push(room)
-    // Set gameloop running again
-    setTimeout(() => {
-        gameInterval = setInterval(gameLoop, 30)
-    }, 1000)
+    
+    if (roomIndex === textArray.length) {
+        gameInterval = setInterval(endGameLoop, 30)
+    } else {
+        // Throw a view over the board
+        ctx.fillStyle = 'white'
+        ctx.fillRect(0, 0, game.width, game.height)
+        // Increment room index
+        roomIndex++
+        // Reset player input
+        playerInput = []
+        // Place the player at the bottom of the room
+        hero.x = game.width/2
+        hero.y = game.height/2 + 180
+        // Construct new room and pass it to the current index
+        room = new RoomConstructor(roomIndex)
+        // Push the newly constructed room to the main room array
+        roomArray.push(room)
+        // Set gameloop running again
+        setTimeout(() => {
+            gameInterval = setInterval(gameLoop, 30)
+        }, 1000)
+    }
 }
 
 //================================================
@@ -804,21 +809,10 @@ function wallCheck(obj) {
 
 // Four corner collision detection
 let detectHit = (obj) => {
-        // Check top left corner
-    if (((hero.x >= obj.x && hero.x < obj.x+obj.width) &&
-        (hero.y >= obj.y && hero.y < obj.y+obj.height)) ||
-        
-        // Check top right corner
-        ((hero.x+hero.width >= obj.x && hero.x < obj.x) &&
-        (hero.y >= obj.y && hero.y < obj.y+obj.height)) ||
-        
-        // Check bottom right corner
-        ((hero.x <= obj.x && hero.x+hero.width > obj.x) &&
-        (hero.y+hero.height >= obj.y && hero.y < obj.y)) ||
-        
-        // Check bottom left corner
-        ((hero.x >= obj.x && hero.x < obj.x+obj.width) &&
-        (hero.y <= obj.y && hero.y+hero.height > obj.y))) {
+    if (hero.x + hero.width >= obj.x &&
+        hero.x <= obj.x + obj.width &&
+        hero.y <= obj.y + obj.height &&
+        hero.y + hero.height >= obj.y) {
             return true
         } else {
             return false
