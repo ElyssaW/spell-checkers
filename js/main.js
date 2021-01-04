@@ -578,7 +578,6 @@ function ChestConstructor(x, y, item) {
                 emitParticles(this.x, this.y, 'white', 'pink', 10, 5)
                 hero.health++
                 this.alive = false
-                chestIndex++
             }
         } 
     }
