@@ -1,42 +1,37 @@
-console.log('Hello!')
-
 // Initial variables
 let ctx = game.getContext('2d')
+// Set canvas width/height
+game.setAttribute('width', 1200)
+game.setAttribute('height', 700)
 // Curent frame of the game
 let frame = 0
 // Current room
 let roomIndex = -1
-// Current chest
-let chestIndex = 0
-// Expected String Input
-let compString
 // Player's submitted input
 let playerInput
 // Game Loop Interval
 let gameInterval
 // Checks if game is on
 let gameStart = false
-// Initialize movement object to allow continuous/diagonal movement
-let moveObject = {up: false,
-                  down: false,
-                  left: false,
-                  right: false
-                 }
 // Initializes array to store player's text input letter by letter
 let playerText = []
 // Initialize array of objects containing room data
 let roomArray = []
-// Letter array
-let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
-                    'h', 'i', 'j', 'k', 'l', 'm',
-                   'n', 'o', 'p', 'q', 'r', 's',
-                   't', 'u', 'v', 'w', 'x', 'y', 'z'
-                  ]
+// Initialize movement object to allow continuous/diagonal movement
+let moveObject = {up: false,
+                  down: false,
+                  left: false,
+                  right: false,
+                  topleft: false,
+                  topright: false,
+                  bottomleft: false,
+                  bottomright: false
+                 }
 // Initialize array of objects containing the word puzzle key/locks
 let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
                   {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
                   {doorKey: 'typing', doorStart: 'Wrangle the wild comma by', doorTypo: 'tpying', doorEnd: ' their names'},
-                  {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' earnest'},
+                  {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' properly'},
                   {doorKey: 'sidewalk', doorStart: 'There is a place where the ', doorTypo: 'sdielkaw', doorEnd: ' ends'},
                   {doorKey: 'before', doorStart: 'And ', doorTypo: 'bforee', doorEnd: ' the street begins,'},
                   {doorKey: 'soft', doorStart: 'And there the grass grows ', doorTypo: 'tofs', doorEnd: ' and white'},
@@ -53,6 +48,9 @@ let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker trainin
 // Initialize array of enemy names
 let spellWords = []
 
+// These two arrays hold words containing letters from ONLY the right or left sides of the keyboard, respectively
+// If left-handed mode is on, it will pass the Left words to the spellwords array. If it is not, the game defaults
+// to right
 let spellWordsRight = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
                   'craft', 'webcast', 'swagger', 'waste', 'cedar', 'brace', 'fast', 'stave',
                   'carve', 'caster', 'taxes', 'farts', 'sad', 'strafe', 'grace', 'raw', 'straw',
@@ -70,13 +68,6 @@ let spellWordsLeft = ['only', 'big', 'bug', 'king', 'junk', 'numb', 'punk', 'mil
                   'lollipop', 'polk', 'lol', 'pink', 'mill', 'pill'
 ]
 
-// Set canvas width/height
-// Set attribute and get computed style make the game more
-// responsive, allowing for clicks and computer graphics to still
-// display properly when set
-game.setAttribute('width', 1200)
-game.setAttribute('height', 700)
-
 //===============================================
 //
 //              Basic functions
@@ -92,28 +83,6 @@ function selectRandom (randomArray) {
 function randomRange(min, max) {
   return Math.floor(Math.random() * (max - min) + min)
 }
-
-// Write text above object
-function drawText (string, obj) {
-    ctx.fillStyle = 'red'
-    ctx.fillText(string, obj.x, obj.y-5)
-}
-
-// If input matches expected string, unlock door
-function compareString(input, compString) {
-    if (input === compString) {
-        return true
-    } else {
-    // If string input is not correct, deduct health
-        return false
-    }
-}
-
-//================================================
-//
-//          Draw Functions
-//
-//================================================
 
 // Function to draw text
 function drawFillText(string, x, y, color, font, size, align) {
@@ -153,6 +122,28 @@ function circle(x, y, radius, fill, stroke, start, end, dash) {
     ctx.stroke()
     ctx.setLineDash([])
 }
+
+// Write text above object
+function drawText (string, obj) {
+    ctx.fillStyle = 'red'
+    ctx.fillText(string, obj.x, obj.y-5)
+}
+
+// If input matches expected string, return true
+function compareString(input, compString) {
+    if (input === compString) {
+        return true
+    } else {
+    // If string input is not correct, deduct health
+        return false
+    }
+}
+
+//================================================
+//
+//          Draw Functions
+//
+//================================================
 
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
@@ -198,6 +189,7 @@ function drawFloatAnim(obj) {
     ctx.drawImage(obj.sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY + getFloatPos(obj))
 }
 
+// A more discreet, modular function to grab the index/array from an object to determine float animation
 function getFloatPos(obj) {
     let floatValue = obj.floatArray[obj.floatIndex] 
     obj.floatIndex++
@@ -207,7 +199,7 @@ function getFloatPos(obj) {
     return floatValue
 }
 
-// Function to draw health
+// Function to draw health for the player
 function drawHealth() {
     ctx.lineWidth = 1
     // Draw empty health circles
@@ -225,7 +217,7 @@ function drawSprite (obj, sprite) {
     ctx.drawImage(sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
 }
 
-// This one's for ghosts only
+// This one's for ghosts only. Or any sprite that has separate animations on two different components of its body
 function spriteCheck(obj) {
     if (obj.xdir < 0) {
         obj.face = obj.faceLeft
@@ -260,8 +252,6 @@ function HeroConstructor(x, y) {
     this.justHit = false
     this.xdir = 0
     this.ydir = 0
-    this.wallDirection = 0
-    this.textFrameIndex = 0
     this.dashArray = []
     this.render = function() {
         drawFloatAnim(this)
@@ -272,10 +262,9 @@ function HeroConstructor(x, y) {
 function GhostConstructor(x, y) {
     this.x = x
     this.y = y
-    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
-    this.floatIndex = 0
     this.hitboxX = 0
     this.hitboxY = 0
+    // Information to handle this particular instance's face
     this.faceNum = randomRange(2, 5)
     this.sprite = document.getElementById('ghostBlank')
     this.face = document.getElementById('ghost'+this.faceNum)
@@ -283,6 +272,7 @@ function GhostConstructor(x, y) {
     this.faceRight = document.getElementById('ghost'+this.faceNum)
     this.spriteLeft = document.getElementById('ghostBlankFlipped')
     this.faceLeft = document.getElementById('ghost'+this.faceNum+'Flipped')
+    // General information
     this.color = 'grey'
     this.width = 120
     this.height = 120
@@ -292,9 +282,13 @@ function GhostConstructor(x, y) {
     this.ydir = 0
     this.speed = randomRange(1, 3)
     this.walkDirection = 0
-    this.textFrameIndex = 0
+    // Variables to handle which name the player should type
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
+    // Handles float animation frame
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = 0
+    // Renders sprite
     this.render = function() {
         // Check for direction on ghost
         spriteCheck(this)
@@ -311,7 +305,6 @@ function GhostConstructor(x, y) {
             moveToObject(this, hero)
             // Draw name to type
             drawName(this, this.spellWords[this.spellWordIndex])
-            
             // If player input matches name, decrement health
             if (playerInput == this.spellWords[this.spellWordIndex]) {
                 damageEnemy(this, 'white', 'lightgrey')
@@ -326,9 +319,8 @@ function GhostConstructor(x, y) {
             // Decrement player health if hit
             if (detectHit(this)) {
                 if (!hero.justHit) {
-                    
+                    // Run function to decrement player health and run hit animation
                     damangePlayer(this)
-                    
                     // Set iframes running
                     setTimeout(iframes, 1500)
                 }
@@ -342,13 +334,13 @@ function GhostConstructor(x, y) {
     }
 }
 
+// This is a new enemy type similar to the ghost, except it spits out bullets periodically
 function PeriodConstructor(x, y) {
     this.x = x
     this.y = y
-    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
-    this.floatIndex = 0
     this.hitboxX = 0
     this.hitboxY = 0
+    // Information to handle the enemy's face
     this.faceNum = randomRange(2, 5)
     this.sprite = document.getElementById('periodBlank')
     this.face = document.getElementById('period')
@@ -356,6 +348,7 @@ function PeriodConstructor(x, y) {
     this.faceRight = document.getElementById('period')
     this.spriteLeft = document.getElementById('periodBlankFlipped')
     this.faceLeft = document.getElementById('periodFlipped')
+    // General information
     this.color = 'grey'
     this.width = 120
     this.height = 120
@@ -365,10 +358,14 @@ function PeriodConstructor(x, y) {
     this.ydir = 0
     this.speed = randomRange(1, 3)
     this.walkDirection = 0
+    // Tracks when enemy should fire bullets
     this.bulletTimer = 0
-    this.textFrameIndex = 0
+    // Handles which word the player should type
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
+    // Handles float animation
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = 0
     this.render = function() {
         // Check for direction on ghost
         spriteCheck(this)
@@ -384,6 +381,7 @@ function PeriodConstructor(x, y) {
             this.bulletTimer++
             // Every 60 frames, release bullets
             if (this.bulletTimer === 60) {
+                // Fires diagonally
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, -1))
@@ -391,6 +389,7 @@ function PeriodConstructor(x, y) {
             }
         
             if (this.bulletTimer === 120) {
+                // Fires up/down and left/right
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, -1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, 0))
@@ -568,8 +567,6 @@ function ChestConstructor(x, y, item) {
     this.height = 60
     this.locked = true
     this.alive = true
-    this.item = item,
-    this.textFrameIndex = 0
     this.render = function() {
         ctx.lineWidth = 1
         circle(this.x, this.y + getFloatPos(this), 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
@@ -631,6 +628,7 @@ function generateRoomContent(room) {
     }
     
     // Otherwise, continue as normal, randomly generating content and pushing it to the room array
+    // Every room should contain a door and a chest, so those are always generated
     array.push(door)
     array.push(chest)
     
@@ -649,6 +647,7 @@ function generateRoomContent(room) {
                 room.enemyCount++
                 break;
             case 3:
+                // Checks which room the player is currently on, and populates in harder enemies if they're further along
                 if (roomIndex > 10) {
                     array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 } else {
@@ -656,8 +655,9 @@ function generateRoomContent(room) {
                 }
                 room.enemyCount++
                 break;
-                // Add in period if random num is 4
             case 4: 
+                // Add in period if random num is 4 and the room doesn't already include a period (Or if the room DOES include a
+                // a period, but the player is further along)
                 if ((!includesPeriod && roomIndex > 6) || roomArray > 12) {
                     array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                     includesPeriod = true
@@ -666,7 +666,6 @@ function generateRoomContent(room) {
                 break;
                 // Add in nothing if none are met
             default:
-                randomItem = null
                 break;
         }
     }
@@ -679,7 +678,7 @@ function moveToNextRoom() {
     clearInterval(gameInterval)
     // Clear canvas
     ctx.clearRect(0, 0, game.width, game.height)
-    
+    // End the game if the player has reached the end of the key/door text array
     if (roomIndex === textArray.length) {
         gameInterval = setInterval(endGameLoop, 30)
     } else {
@@ -821,7 +820,6 @@ let detectHit = (obj) => {
 
 // Detects nearness
 let detectNear = (obj, threshold) => {
-        // Check top left corner
     if ((hero.x+hero.width >= obj.x - threshold && hero.x < obj.x+obj.width + threshold) &&
         (hero.y+hero.height >= obj.y - threshold && hero.y < obj.y+obj.height + threshold)) {
             return true
@@ -848,6 +846,7 @@ function killPlayer() {
     setTimeout(playerDead, 500)
 }
 
+// Function to damage the player, and fire all accompanying animations
 function damangePlayer (obj) {
     // Decrement player health
     hero.health--
@@ -866,23 +865,23 @@ function damangePlayer (obj) {
     for (let i = 0; i < 5; i++) {
         new Particle()
     }
-    
+    // push that loser
     pushObject(obj, hero, 4, 10, 100)
 }
 
 // Function to push an object
 function pushObject (pusher, pushed, force, speed, length) {
-    
+    // Get the center of the pusher object
     let pushPointX = pusher.x + pusher.width/2
     let pushPointY = pusher.y + pusher.height/2
     // Grab object's current speed
     let oldSpeed = pushed.speed
-    // Set speed to 0
+    // Set speed to 0, to prevent them from moving on their own
     pushed.speed = 0
     
-    // Push player
+    // Push object, set inside an interval function so that it pushes gradually, rather than
+    // just teleporting the object
     let pushInterval = setInterval(() => {
-        
         if (pushed.x + (pushed.width/2) < pushPointX) {
             pushed.x -= force
         } else {
@@ -895,6 +894,7 @@ function pushObject (pusher, pushed, force, speed, length) {
         }  
     }, speed)
     
+    // Time out to end the interval
     setTimeout(() => {
         setTimeout(() => {
             // Set old speed back to the object
@@ -1074,7 +1074,7 @@ document.addEventListener('keypress', e => {
     }
 })
 
-// Listen for backspace
+// Listen for backspace, to delete text from player input array
 document.addEventListener('keydown', e => {
     if (e.keyCode === 8) {
         playerText.pop()
@@ -1100,8 +1100,17 @@ document.addEventListener('keydown', e => {
 //
 //================================================
 
+// Letter array, for particle generation
+let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
+                    'h', 'i', 'j', 'k', 'l', 'm',
+                   'n', 'o', 'p', 'q', 'r', 's',
+                   't', 'u', 'v', 'w', 'x', 'y', 'z'
+                  ]
+// Create object array to hold the particles, because I'm a child entertained by pretty lights
 let particles = {}
+// Create current index to keep track of how many particles currently exist, and assign IDs to new ones
 let particleIndex = 0
+// Particle settings, to easily alter particle behavior/appearence
 let particleSettings = {
     density: 5,
     particleSize: 5,
@@ -1119,10 +1128,13 @@ let particleSettings = {
     rightwall: game.width
 }
 
+// constructor function for new Particles
 function Particle() {
         this.x = particleSettings.startingX
         this.y = particleSettings.startingY
+        // Sets a different "ground Y" randomly for each particle, to simulate falling across a flat plane
         this.groundLevel = this.y + randomRange(-100, 300)
+        // Various settings, grabbed from the settings object
         this.color = particleSettings.color
         this.undercolor = particleSettings.undercolor
         this.font = particleSettings.font
@@ -1131,6 +1143,7 @@ function Particle() {
         this.vy = randomRange(-5, -10)
         this.letter = selectRandom(letterArray)
         
+        // Increment particle index and push particle to object-array
         particleIndex++
         particles[particleIndex] = this
         this.id = particleIndex
@@ -1140,22 +1153,28 @@ function Particle() {
 }
 
 Particle.prototype.draw = function() {
+    // Change x, y, vx, and vy
     this.x += this.vx
     this.y += this.vy
+    // Age the particle
     this.life++
     
+    // Bounce on ground
     if (this.y + particleSettings.particleSize > this.groundLevel) {
         this.vy *= -0.6
         this.vx *= 0.75
         this.y = this.groundLevel - particleSettings.particleSize
     }
 
+    // Alter vy based on gravity
     this.vy += particleSettings.gravity
-    this.life++
+    
+    // Decrement opacity
     if (this.opacity > .02) {
         this.opacity -= .02
     }
     
+    // Draw particle
     ctx.globalAlpha = this.opacity
     ctx.font = '20px serif'
     ctx.fillStyle = this.undercolor
@@ -1164,11 +1183,13 @@ Particle.prototype.draw = function() {
     ctx.fillText(this.letter, this.x, this.y)
     ctx.globalAlpha = 1
     
+    // Delete if particle is old and grody (And its life has reached the cap)
     if (this.life >= this.maxLife) {
         delete particles[this.id]
     }
 }
 
+// function to slap particles down whenever and wherever I choose, in whatever colors I want
 function emitParticles (x, y, color, undercolor, amount, size) {
     particleSettings.font = size + 'px'
     particleSettings.startingX = x
@@ -1178,158 +1199,6 @@ function emitParticles (x, y, color, undercolor, amount, size) {
     // Emit particles
     for (let i = 0; i < amount; i++) {
         new Particle()
-    }
-}
-
-//================================================
-//
-//          Victory Screen Function
-//
-//================================================
-
-fieldSettings = {
-    array: [],
-    spacingX: 30,
-    spacingY: 30,
-    cursorRadius: 100,
-    size: 20,
-    speed: .2,
-}
-
-let mouseX
-let mouseY
-game.addEventListener('mousemove', (e)=> {
-    mouseX = e.offsetX
-    mouseY = e.offsetY
-})
-
-function calcDistance(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
-}
-
-function gridParticle(x, y) {
-    this.x = x,
-    this.y = y,
-    this.letter = selectRandom(letterArray)
-    this.vx = 0,
-    this.vy = 0,
-    this.speed = fieldSettings.speed
-    this.color = 'black'
-    this.returnX = x,
-    this.returnY = y
-    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
-    this.floatIndex = randomRange(0, this.floatArray.length)
-    this.frame = 0
-    this.render = function() {
-        drawFillText(this.letter, this.x, this.y + this.floatArray[this.floatIndex], this.color, 'serif', fieldSettings.size, 'center')
-        //circle(this.x, this.y, 10, this.color)
-    }
-    this.draw = function() {
-        if (calcDistance(this.x, this.y, mouseX, mouseY) < fieldSettings.cursorRadius) {
-            this.x = this.x + ((this.x - mouseX)) * this.speed
-            this.y = this.y + ((this.y - mouseY)) * this.speed
-        } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || this.y >= mouseY+fieldSettings.cursorRadius+fieldSettings.size) &&
-                   (this.x !== this.returnX || this.y !== this.returnY)) {
-            this.x = this.x + ((this.returnX - this.x)*this.speed)
-            this.y = this.y + ((this.returnY - this.y)*this.speed)
-        } 
-    
-        if (this.floatIndex === this.floatArray.length-1) {
-            this.floatIndex = 0
-        } else {
-            this.floatIndex++
-        }
-    }
-}
-
-for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
-    for (let j = 0; j < (game.height/fieldSettings.spacingY); j++) {
-            let parti = new gridParticle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
-            fieldSettings.array.push(parti)  
-    }
-}
-
-function endGameLoop () {
-        frame++
-        //Clear board
-        ctx.clearRect(0, 0, game.width, game.height)
-
-        for (let i =0; i < fieldSettings.array.length; i++) {
-            fieldSettings.array[i].render()
-            fieldSettings.array[i].draw()
-        }
-    
-        drawGradient()
-    
-        drawCircle()
-
-        drawTitle()
-
-        if (frame === 750) {
-            frame = 0
-        }
-    }
-
-//================================================
-//
-//          Game Over Functions
-//
-//================================================
-
-function playerDead() {
-    // Change title settings to the gameover menu
-    titleSettings.gradient1Red = 0
-    titleSettings.gradient1Green = 0
-    titleSettings.gradient1Blue = 0
-    titleSettings.gradient1Alpha = 0
-    titleSettings.gradient2Red = 0
-    titleSettings.gradient2Green = 0
-    titleSettings.gradient2Blue = 0
-    titleSettings.gradient2Alpha = 1
-    titleSettings.textColor = 'white'
-    titleSettings.textUndercolor = 'black'
-    titleSettings.textFont = '80px Londrina Solid'
-    titleSettings.titleString = 'GAME OVER'
-    titleSettings.circleFill = 'black'
-    titleSettings.circleStroke = 'white'
-    titleSettings.startString = '- Restart? -'
-    titleSettings.startColor = 'hotpink'
-    
-    // Reset player
-    hero.maxhealth = 3
-    hero.health = hero.maxhealth
-    
-    // Start gameOver loop
-    gameInterval = setInterval(gameOverLoop, 30)
-}
-
-function gameOverLoop() {
-    
-        frame++
-        //Clear board
-        ctx.clearRect(0, 0, game.width, game.height)
-    
-        ctx.fillStyle = 'black'
-        ctx.fillRect(0, 0, game.width, game.height)
-    
-        for (var i in particles) {
-          particles[i].draw();
-        }
-    
-        drawGradient()
-    
-    drawCircle()
-    
-    drawTitle()
-    
-    drawStartText()
-    
-    emitParticles(randomRange(0, game.width), randomRange(0, game.height), 'white', 'white', 2, 20)
-    
-    if (frame === 750) {
-        frame = 0
     }
 }
 
@@ -1605,6 +1474,174 @@ function titleLoop () {
 
 //================================================
 //
+//          Victory Screen Function
+//
+//================================================
+
+// Makes a grid of letters because I continue to be a child who is entertained by scattering particles
+fieldSettings = {
+    array: [],
+    spacingX: 30,
+    spacingY: 30,
+    cursorRadius: 100,
+    size: 20,
+    speed: .2,
+}
+
+// Grab mouseX and mouseY so that the grid particles can react to it
+let mouseX
+let mouseY
+game.addEventListener('mousemove', (e)=> {
+    mouseX = e.offsetX
+    mouseY = e.offsetY
+})
+
+// Function to calculate distance between two points, which for this will be the mouse and the particle
+function calcDistance(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
+}
+
+// constructor function for new grid particles
+function gridParticle(x, y) {
+    this.x = x,
+    this.y = y,
+    this.letter = selectRandom(letterArray)
+    this.vx = 0,
+    this.vy = 0,
+    this.speed = fieldSettings.speed
+    this.color = 'black'
+    // X and Y the particle will try to return to if displaced
+    this.returnX = x,
+    this.returnY = y
+    // Float animation array/index! The sizeable 0's in the middle create a little pause between jumps
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    // This is set to random so that the particles all jump at different times
+    this.floatIndex = randomRange(0, this.floatArray.length)
+    this.frame = 0
+    // Draws particle
+    this.render = function() {
+        drawFillText(this.letter, this.x, this.y + this.floatArray[this.floatIndex], this.color, 'serif', fieldSettings.size, 'center')
+    }
+    // Function to find distance between the mouse and the particle, and displace it
+    this.draw = function() {
+        // Calculates distance between particle and mouse
+        if (calcDistance(this.x, this.y, mouseX, mouseY) < fieldSettings.cursorRadius) {
+            // Moves particle's x/y
+            this.x = this.x + ((this.x - mouseX)) * this.speed
+            this.y = this.y + ((this.y - mouseY)) * this.speed
+        // Checks if the particle is on the edge of the mouse's radius, so that it doesn't continually jump into the
+        // mouse's radius only to be pushed back out, making the particle "jump" a lot
+        } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || this.y >= mouseY+fieldSettings.cursorRadius+fieldSettings.size) &&
+            // And this part of the if statement checks if the particle is not currently at it's preferred x/y
+            (this.x !== this.returnX || this.y !== this.returnY)) {
+            // Moves the particle to it's preferred x/y
+            this.x = this.x + ((this.returnX - this.x)*this.speed)
+            this.y = this.y + ((this.returnY - this.y)*this.speed)
+        } 
+        // Resets float animation index if it has reached the end of the array
+        if (this.floatIndex === this.floatArray.length-1) {
+            this.floatIndex = 0
+        } else {
+            this.floatIndex++
+        }
+    }
+}
+
+// Draw particles based on how much area it needs to cover (The entire canvas) and how much space should be between them
+for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
+    for (let j = 0; j < (game.height/fieldSettings.spacingY); j++) {
+            let parti = new gridParticle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
+            fieldSettings.array.push(parti)  
+    }
+}
+
+// Run victory screen
+function endGameLoop () {
+        frame++
+        //Clear board
+        ctx.clearRect(0, 0, game.width, game.height)
+
+        for (let i =0; i < fieldSettings.array.length; i++) {
+            fieldSettings.array[i].render()
+            fieldSettings.array[i].draw()
+        }
+    
+        drawGradient()
+    
+        drawCircle()
+
+        drawTitle()
+
+        if (frame === 750) {
+            frame = 0
+        }
+    }
+
+//================================================
+//
+//          Game Over Functions
+//
+//================================================
+
+function playerDead() {
+    // Change title settings to the gameover menu
+    titleSettings.gradient1Red = 0
+    titleSettings.gradient1Green = 0
+    titleSettings.gradient1Blue = 0
+    titleSettings.gradient1Alpha = 0
+    titleSettings.gradient2Red = 0
+    titleSettings.gradient2Green = 0
+    titleSettings.gradient2Blue = 0
+    titleSettings.gradient2Alpha = 1
+    titleSettings.textColor = 'white'
+    titleSettings.textUndercolor = 'black'
+    titleSettings.textFont = '80px Londrina Solid'
+    titleSettings.titleString = 'GAME OVER'
+    titleSettings.circleFill = 'black'
+    titleSettings.circleStroke = 'white'
+    titleSettings.startString = '- Restart? -'
+    titleSettings.startColor = 'hotpink'
+    
+    // Reset player
+    hero.maxhealth = 3
+    hero.health = hero.maxhealth
+    
+    // Start gameOver loop
+    gameInterval = setInterval(gameOverLoop, 30)
+}
+
+function gameOverLoop() {
+    
+        frame++
+        //Clear board
+        ctx.clearRect(0, 0, game.width, game.height)
+    
+        ctx.fillStyle = 'black'
+        ctx.fillRect(0, 0, game.width, game.height)
+    
+        for (var i in particles) {
+          particles[i].draw();
+        }
+    
+        drawGradient()
+    
+    drawCircle()
+    
+    drawTitle()
+    
+    drawStartText()
+    
+    emitParticles(randomRange(0, game.width), randomRange(0, game.height), 'white', 'white', 2, 20)
+    
+    if (frame === 750) {
+        frame = 0
+    }
+}
+
+//================================================
+//
 //          Game Loop
 //
 //================================================
@@ -1623,6 +1660,7 @@ let gameLoop = () => {
     // Draw room map
     ctx.drawImage(document.getElementById('dungeoncontinue'), 30, 20)
     
+    // Draw particles if any exist
     for (var i in particles) {
           particles[i].draw();
         }
@@ -1664,7 +1702,8 @@ let gameLoop = () => {
     drawStrokeText(playerText.join(''), hero.x+(hero.width/2), hero.y - 3, 'black', 'Fredoka One', 35, 'center')
     drawFillText(playerText.join(''), hero.x+(hero.width/2), hero.y - 5, 'hotpink', 'Fredoka One', 35, 'center')
     
-    if (playerInput === 'winner') {
+    // Cheat code to teleport you to the victory screen
+    if (playerInput === 'chickendinner') {
         clearInterval(gameInterval)
         titleSettings.textFont = '80px Londrina Solid'
         titleSettings.titleString = 'THE END'

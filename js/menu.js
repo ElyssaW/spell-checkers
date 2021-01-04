@@ -1,112 +1,95 @@
-console.log('Hello!')
 
-// Initial variables
-let ctx = game.getContext('2d')
-// Curent frame of the game
-let frame = 0
-// Current room
-let roomIndex = -1
-// Current chest
-let chestIndex = 0
-// Expected String Input
-let compString
-// Player's submitted input
-let playerInput
-// Game Loop Interval
-let gameInterval
-// Checks if game is on
-let gameStart = false
-// Initialize movement object to allow continuous/diagonal movement
-let moveObject = {up: false,
-                  down: false,
-                  left: false,
-                  right: false
-                 }
-// Initializes array to store player's text input letter by letter
-let playerText = []
-// Initialize array of objects containing room data
-let roomArray = []
-// Letter array
-let letterArray = ['a', 'b', 'c', 'd', 'e', 'g',
-                    'h', 'i', 'j', 'k', 'l', 'm',
-                   'n', 'o', 'p', 'q', 'r', 's',
-                   't', 'u', 'v', 'w', 'x', 'y', 'z'
-                  ]
-// Initialize array of objects containing the word puzzle key/locks
-let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
-                  {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
-                  {doorKey: 'typing', doorStart: 'Tame the wild quotation spirit by', doorTypo: 'tpying', doorEnd: ' their names'},
-                  {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' earnest'},
-                  {doorKey: 'sidewalk', doorStart: 'There is a place where the ', doorTypo: 'sdielkaw', doorEnd: ' ends'},
-                  {doorKey: 'before', doorStart: 'And ', doorTypo: 'bforee', doorEnd: ' the street begins,'},
-                  {doorKey: 'soft', doorStart: 'And there the grass grows ', doorTypo: 'tofs', doorEnd: ' and white'},
-                  {doorKey: 'crimson', doorStart: 'And there the sun burns ', doorTypo: 'crimsin', doorEnd: ' bright'},
-                  {doorKey: 'rests', doorStart: 'And there the moon-bird ', doorTypo: 'ersts', doorEnd: ' from his flight'},
-                  {doorKey: 'peppermint', doorStart: 'To cool in the ', doorTypo: 'peperpmnit', doorEnd: ' wind.'},
-                  {doorKey: 'place', doorStart: 'Let us leave this ', doorTypo: 'palce', doorEnd: ' where the smoke blows black'},
-                  {doorKey: 'winds', doorStart: 'And the dark street ', doorTypo: 'wndis', doorEnd: ' and bends'},
-                  {doorKey: 'asphalt', doorStart: 'Past the pits where the ', doorTypo: 'ashalpt', doorEnd: ' flowers grow'},
-                  {doorKey: 'measured', doorStart: 'We shall walk with a walk that is ', doorTypo: 'mesarued', doorEnd: ' and slow'},
-                  {doorKey: 'chalk', doorStart: 'And watch where the ', doorTypo: 'chlak-', doorEnd: 'white arrows go'},
-                  {doorKey: 'ends', doorStart: 'To the place where the sidewalk ', doorTypo: 'edns', doorEnd: ''}
-                ]
-// Initialize array of enemy names
-let spellWords = []
-
-let spellWordsRight = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
-                  'craft', 'webcast', 'swagger', 'waste', 'cedar', 'brace', 'fast', 'stave',
-                  'carve', 'caster', 'taxes', 'farts', 'sad', 'strafe', 'grace', 'raw', 'straw',
-                  'water', 'craze', 'decaf', 'draft', 'bread', 'barf', 'grave', 'scare',
-                  'ersatz', 'great', 'grade', 'farce', 'after', 'extra', 'texas', 'swear', 'ace',
-                  'vex', 'dab', 'west', 'feta', 'fear', 'date', 'cafe', 'brat', 'zebra', 'waxer',
-                  'tzars', 'drat', 'face'
-]
-
-let spellWordsLeft = ['only', 'big', 'bug', 'king', 'junk', 'numb', 'punk', 'milk',
-                  'limp', 'jump', 'lingo', 'bingo', 'gumbo', 'ghoul', 'himbo', 'pylon',
-                  'hokum', 'limbo', 'plumb', 'vinyl', 'goblin', 'unholy', 'joking', 'joy', 'poking',
-                  'boil', 'puking', 'kingly', 'hulk', 'bump', 'buoy', 'moghul', 'gluon',
-                  'glyph', 'bunko', 'young', 'hunk', 'gulp', 'bijou', 'blimp', 'glib'
-]
-
-// Set canvas width/height
-// Set attribute and get computed style make the game more
-// responsive, allowing for clicks and computer graphics to still
-// display properly when set
-game.setAttribute('width', 1200)
-game.setAttribute('height', 700)
-
-//===============================================
+//================================================
 //
-//              Basic functions
+//          Victory Screen Function
 //
-//===============================================
+//================================================
 
-// Select random item from given array
-function selectRandom (randomArray) {
-    return randomArray[Math.floor(Math.random() * randomArray.length)]
+fieldSettings = {
+    array: [],
+    spacingX: 30,
+    spacingY: 30,
+    cursorRadius: 100,
+    size: 20,
+    speed: .2,
 }
 
-// Select random number from given range
-function randomRange(min, max) {
-  return Math.floor(Math.random() * (max - min) + min)
+let mouseX
+let mouseY
+game.addEventListener('mousemove', (e)=> {
+    mouseX = e.offsetX
+    mouseY = e.offsetY
+})
+
+function calcDistance(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
 }
 
-// Write text above object
-function drawText (string, obj) {
-    ctx.fillStyle = 'red'
-    ctx.fillText(string, obj.x, obj.y-5)
-}
-
-// If input matches expected string, unlock door
-function compareString(input, compString) {
-    if (input === compString) {
-        return true
-    } else {
-    // If string input is not correct, deduct health
-        return false
+function gridParticle(x, y) {
+    this.x = x,
+    this.y = y,
+    this.letter = selectRandom(letterArray)
+    this.vx = 0,
+    this.vy = 0,
+    this.speed = fieldSettings.speed
+    this.color = 'black'
+    this.returnX = x,
+    this.returnY = y
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = randomRange(0, this.floatArray.length)
+    this.frame = 0
+    this.render = function() {
+        drawFillText(this.letter, this.x, this.y + this.floatArray[this.floatIndex], this.color, 'serif', fieldSettings.size, 'center')
+        //circle(this.x, this.y, 10, this.color)
+    }
+    this.draw = function() {
+        if (calcDistance(this.x, this.y, mouseX, mouseY) < fieldSettings.cursorRadius) {
+            this.x = this.x + ((this.x - mouseX)) * this.speed
+            this.y = this.y + ((this.y - mouseY)) * this.speed
+        } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || this.y >= mouseY+fieldSettings.cursorRadius+fieldSettings.size) &&
+                   (this.x !== this.returnX || this.y !== this.returnY)) {
+            this.x = this.x + ((this.returnX - this.x)*this.speed)
+            this.y = this.y + ((this.returnY - this.y)*this.speed)
+        } 
+    
+        if (this.floatIndex === this.floatArray.length-1) {
+            this.floatIndex = 0
+        } else {
+            this.floatIndex++
+        }
     }
 }
+
+for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
+    for (let j = 0; j < (game.height/fieldSettings.spacingY); j++) {
+            let parti = new gridParticle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
+            fieldSettings.array.push(parti)  
+    }
+}
+
+function endGameLoop () {
+        frame++
+        //Clear board
+        ctx.clearRect(0, 0, game.width, game.height)
+
+        for (let i =0; i < fieldSettings.array.length; i++) {
+            fieldSettings.array[i].render()
+            fieldSettings.array[i].draw()
+        }
+    
+        drawGradient()
+    
+        drawCircle()
+
+        drawTitle()
+
+        if (frame === 750) {
+            frame = 0
+        }
+    }
+
 
 //================================================
 //
@@ -201,7 +184,7 @@ let titleSettings = {//Background gradient
                      textColor: 'black',
                      textUndercolor: 'white',
                      textFont: '50px Londrina Solid',
-                     titleString: 'THE END',
+                     titleString: 'SPELL CHECKERS',
                     
                      // Background circles specific
                      circleX: game.width/2,
@@ -217,7 +200,7 @@ let titleSettings = {//Background gradient
                      scrollFont: '20px serif',
     
                      // Start text specific
-                     startString: '- You won! -',
+                     startString: '- Welcome! -',
                      startFont: '30px serif',
                      startColor: 'grey',
                      startX: game.width/2,
@@ -281,28 +264,32 @@ function addClick() {
    // Start game if clicked
     game.addEventListener('click', (e) => {
         
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
+        if (mouseInput) {
+            if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
             console.log('clicked1')
             setGradient()
             roomIndex = -1
+            mouseInput = false
             moveToNextRoom()
             
-        }
-        
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
-            console.log('clicked2')
-            setGradient()
-            roomIndex = 3
-            moveToNextRoom()
-        }
-        
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 560 && e.offsetY < 600) {
-            if (leftHandMode) {
-                spellWords = spellWordsRight
-                leftHandMode = false
-            } else {
-                spellWords = spellWordsLeft
-                leftHandMode = true
+            }
+
+            if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
+                console.log('clicked2')
+                setGradient()
+                roomIndex = 3
+                mouseInput = false
+                moveToNextRoom()
+            }
+
+            if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 560 && e.offsetY < 600) {
+                if (leftHandMode) {
+                    spellWords = spellWordsRight
+                    leftHandMode = false
+                } else {
+                    spellWords = spellWordsLeft
+                    leftHandMode = true
+                }
             }
         }
     }) 
@@ -419,140 +406,22 @@ function drawBackgroundScroll () {
     titleSettings.scrollIndex = 0
 }
 
-function drawFillText(string, x, y, color, font, size, align) {
-    ctx.font = size+'px '+font
-    ctx.fillStyle = color
-    ctx.textAlign = align
-    ctx.fillText(string, x, y)
-}
-
-// Function to draw stroke text
-function drawStrokeText(string, x, y, color, font, size, align) {
-    ctx.lineWidth = 10
-    ctx.font = size+'px '+font
-    ctx.strokeStyle = color
-    ctx.textAlign = align
-    ctx.strokeText(string, x, y)
-    ctx.lineWidth = 1
-}
-
-// Generic function to draw a circle
-function circle(x, y, radius, fill, stroke, start, end, dash) {
-    if (typeof start === 'undefined') {
-        start = 0
-    }
-    if (typeof end === 'undefined') {
-        end = 2 * Math.PI
-    }
-    ctx.fillStyle = fill
-    ctx.strokeStyle = stroke
-    if (typeof dash !== 'undefined') {
-        ctx.setLineDash(dash)
-    }
-    ctx.beginPath()
-    ctx.arc(x, y, radius, start, end)
-    ctx.closePath()
-    ctx.fill()
-    ctx.stroke()
-    ctx.setLineDash([])
-}
-
-fieldSettings = {
-    array: [],
-    spacingX: 30,
-    spacingY: 30,
-    cursorRadius: 100,
-    size: 20,
-    speed: .2,
-}
-
-let mouseX
-let mouseY
-game.addEventListener('mousemove', (e)=> {
-    mouseX = e.offsetX
-    mouseY = e.offsetY
-})
-
-function calcDistance(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow((x1-x2), 2) + Math.pow((y1 - y2), 2))
-}
-
-function gridParticle(x, y) {
-    this.x = x,
-    this.y = y,
-    this.letter = selectRandom(letterArray)
-    this.vx = 0,
-    this.vy = 0,
-    this.speed = fieldSettings.speed
-    this.color = 'black'
-    this.returnX = x,
-    this.returnY = y
-    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
-    this.floatIndex = randomRange(0, this.floatArray.length)
-    this.frame = 0
-    this.render = function() {
-        drawFillText(this.letter, this.x, this.y + this.floatArray[this.floatIndex], this.color, 'serif', fieldSettings.size, 'center')
-        //circle(this.x, this.y, 10, this.color)
-    }
-    this.draw = function() {
-        if (calcDistance(this.x, this.y, mouseX, mouseY) < fieldSettings.cursorRadius) {
-            this.x = this.x + ((this.x - mouseX)) * this.speed
-            this.y = this.y + ((this.y - mouseY)) * this.speed
-        } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || this.y >= mouseY+fieldSettings.cursorRadius+fieldSettings.size) &&
-                   (this.x !== this.returnX || this.y !== this.returnY)) {
-            this.x = this.x + ((this.returnX - this.x)*this.speed)
-            this.y = this.y + ((this.returnY - this.y)*this.speed)
-        } 
+function titleLoop () {
+    frame++
+    //Clear board
+    ctx.clearRect(0, 0, game.width, game.height)
     
-        if (this.floatIndex === this.floatArray.length-1) {
-            this.floatIndex = 0
-        } else {
-            this.floatIndex++
-        }
+    drawBackgroundScroll()
+    
+    drawGradient()
+    
+    drawCircle()
+    
+    drawTitle()
+    
+    drawStartText()
+    
+    if (frame === 750) {
+        frame = 0
     }
 }
-
-for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
-    for (let j = 0; j < (game.height/fieldSettings.spacingY); j++) {
-            let parti = new gridParticle(fieldSettings.spacingX*i, fieldSettings.spacingY*j)
-            fieldSettings.array.push(parti)  
-    }
-}
-
-function endGameLoop () {
-        frame++
-        //Clear board
-        ctx.clearRect(0, 0, game.width, game.height)
-
-        for (let i =0; i < fieldSettings.array.length; i++) {
-            fieldSettings.array[i].render()
-            fieldSettings.array[i].draw()
-        }
-    
-        drawGradient()
-    
-        drawCircle()
-
-        drawTitle()
-
-        if (frame === 750) {
-            frame = 0
-        }
-    }
-
-
-function gameBegin() {
-    ctx.font = '20px Fredoka One'
-    
-    spellWords = spellWordsRight
-
-    addClick()
-    addHover()
-    
-    gameInterval = setInterval(titleLoop, 30)
-    gameStart = true
-}
-
-gameBegin()
