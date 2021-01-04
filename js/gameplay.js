@@ -41,11 +41,14 @@ function damangePlayer (obj) {
 
 // Function to push an object
 function pushObject (pusher, pushed, force, speed, length) {
+    
     // Get the center of the pusher object
     let pushPointX = pusher.x + pusher.width/2
     let pushPointY = pusher.y + pusher.height/2
+    
     // Grab object's current speed
     let oldSpeed = pushed.speed
+    
     // Set speed to 0, to prevent them from moving on their own
     pushed.speed = 0
     
@@ -67,6 +70,7 @@ function pushObject (pusher, pushed, force, speed, length) {
     // Time out to end the interval
     setTimeout(() => {
         setTimeout(() => {
+            
             // Set old speed back to the object
             pushed.speed = oldSpeed
         }, 500)
@@ -78,15 +82,19 @@ function pushObject (pusher, pushed, force, speed, length) {
 function damageEnemy(obj, color, undercolor) {
     // Decrement enemy health
     obj.health--
+    
     // Push enemy
     pushObject(hero, obj, 4, 30, 200)
+    
     // Set particle emitter to player's location
     emitParticles(obj.x + (obj.width/2), obj.y + (obj.height/2), color, undercolor, 5, 20)
 }
 
 function killEnemy(obj, color, undercolor) {
+    
     // Decrement enemy room count
     room.enemyCount--
+    
     // Set particle emitter to player's location
     emitParticles(obj.x + (obj.width/2), obj.y + (obj.height/2), color, undercolor, 20, 40)
 }
@@ -96,26 +104,35 @@ function killEnemy(obj, color, undercolor) {
 function moveToNextRoom() {
     // Stop game loop
     clearInterval(gameInterval)
+    
     // Clear canvas
     ctx.clearRect(0, 0, game.width, game.height)
+    
     // End the game if the player has reached the end of the key/door text array
     if (roomIndex === textArray.length) {
-        gameInterval = setInterval(endGameLoop, 30)
+        moveToWin()
+        
     } else {
         // Throw a view over the board
         ctx.fillStyle = 'white'
         ctx.fillRect(0, 0, game.width, game.height)
+        
         // Increment room index
         roomIndex++
+        
         // Reset player input
         playerInput = []
+        
         // Place the player at the bottom of the room
         hero.x = game.width/2
         hero.y = game.height/2 + 180
+        
         // Construct new room and pass it to the current index
         room = new RoomConstructor(roomIndex)
+        
         // Push the newly constructed room to the main room array
         roomArray.push(room)
+        
         // Set gameloop running again
         setTimeout(() => {
             gameInterval = setInterval(gameLoop, 30)

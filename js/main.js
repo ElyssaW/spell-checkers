@@ -437,6 +437,16 @@ for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
     }
 }
 
+// Function to set the player on the victory screen
+function moveToWin () {
+    clearInterval(gameInterval)
+    
+    titleSettings.textFont = '80px Londrina Solid'
+    titleSettings.titleString = 'THE END'
+    
+    gameInterval = setInterval(endGameLoop, 30)
+}
+
 // Run victory screen
 function endGameLoop () {
         frame++
@@ -558,14 +568,6 @@ let gameLoop = () => {
         killPlayer()
     }
     
-    // Increment frame
-    frame++
-    
-    // Reset frame if it reaches 750, to preserve looping on the background scrool
-    if (frame === 750) {
-        frame = 0
-    }
-    
     // Draw player's health
     drawHealth()
     
@@ -592,10 +594,15 @@ let gameLoop = () => {
     
     // Cheat code to teleport you to the victory screen
     if (playerInput === 'chickendinner') {
-        clearInterval(gameInterval)
-        titleSettings.textFont = '80px Londrina Solid'
-        titleSettings.titleString = 'THE END'
-        gameInterval = setInterval(endGameLoop, 30)
+        moveToWin()
+    }
+    
+    // Increment frame
+    frame++
+    
+    // Reset frame if it reaches 750, to preserve looping on the background scrool
+    if (frame === 750) {
+        frame = 0
     }
 }
 
@@ -604,9 +611,11 @@ function gameBegin() {
     
     spellWords = spellWordsRight
 
+    // Add event listeners to check for input on the menu options
     addClick()
     addHover()
     
+    // Create hero
     hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
     
     gameInterval = setInterval(titleLoop, 30)
