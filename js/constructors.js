@@ -321,6 +321,8 @@ function DoorConstructor(x, y) {
         // If door is unlocked, watch for collision
         } else if (detectHit(this)) {
             // Increment room index
+            roomIndex++
+            // Increment room index
             moveToNextRoom()
         } else {
             circle(this.x+(this.width/2), this.y, 29, 'rgba(0,0,0,0)', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
@@ -437,7 +439,7 @@ function generateRoomContent(room) {
             case 4: 
                 // Add in period if random num is 4 and the room doesn't already include a period (Or if the room DOES include a
                 // a period, but the player is further along)
-                if ((!includesPeriod && roomIndex > 6) || roomArray > 12) {
+                if ((!includesPeriod && roomIndex > 6) || roomIndex > 12) {
                     array.push(new PeriodConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                     includesPeriod = true
                     room.enemyCount++

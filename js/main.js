@@ -6,7 +6,7 @@ game.setAttribute('height', 700)
 // Curent frame of the game
 let frame = 0
 // Current room
-let roomIndex = -1
+let roomIndex
 // Player's submitted input
 let playerInput
 // Game Loop Interval
@@ -15,8 +15,6 @@ let gameInterval
 let gameStart = false
 // Initializes array to store player's text input letter by letter
 let playerText = []
-// Initialize array of objects containing room data
-let roomArray = []
 // Initialize array of objects containing the word puzzle key/locks
 let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
                   {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
@@ -60,7 +58,7 @@ let spellWordsLeft = ['only', 'big', 'bug', 'king', 'junk', 'numb', 'punk', 'mil
 
 //================================================
 //
-//          Title functions/loop
+//          Title Screen functions/loop
 //
 //================================================
 
@@ -189,7 +187,7 @@ function addClick() {
             // Check if click was on the Play Tutorial button
             if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
                 setGradient()
-                roomIndex = -1
+                roomIndex = 0
                 menuClick = false
                 moveToNextRoom()
             }
@@ -197,7 +195,7 @@ function addClick() {
             // Check if click was on the Play Game button
             if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
                 setGradient()
-                roomIndex = 3
+                roomIndex = 4
                 menuClick = false
                 moveToNextRoom()
             }
@@ -339,7 +337,7 @@ function titleLoop () {
 
 //================================================
 //
-//          Victory Screen Function
+//          Victory Screen 
 //
 //================================================
 
@@ -472,36 +470,6 @@ function endGameLoop () {
 //          Game Over Functions
 //
 //================================================
-
-function playerDead() {
-    // Change title settings to the gameover menu
-    titleSettings.gradient1Red = 0
-    titleSettings.gradient1Green = 0
-    titleSettings.gradient1Blue = 0
-    titleSettings.gradient1Alpha = 0
-    titleSettings.gradient2Red = 0
-    titleSettings.gradient2Green = 0
-    titleSettings.gradient2Blue = 0
-    titleSettings.gradient2Alpha = 1
-    titleSettings.textColor = 'white'
-    titleSettings.textUndercolor = 'black'
-    titleSettings.textFont = '80px Londrina Solid'
-    titleSettings.titleString = 'GAME OVER'
-    titleSettings.circleFill = 'black'
-    titleSettings.circleStroke = 'white'
-    titleSettings.startString = '- Restart? -'
-    titleSettings.startColor = 'hotpink'
-    
-    // Reset menu options to accept input
-    menuClick = true
-    
-    // Reset player
-    hero.maxhealth = 3
-    hero.health = hero.maxhealth
-    
-    // Start gameOver loop
-    gameInterval = setInterval(gameOverLoop, 30)
-}
 
 function gameOverLoop() {
     

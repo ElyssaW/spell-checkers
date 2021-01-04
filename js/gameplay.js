@@ -13,6 +13,35 @@ function iframes () {
 // Function to play on player death
 function killPlayer() {
     clearInterval(gameInterval)
+    
+    // Change title settings to the gameover menu
+    titleSettings.gradient1Red = 0
+    titleSettings.gradient1Green = 0
+    titleSettings.gradient1Blue = 0
+    titleSettings.gradient1Alpha = 0
+    titleSettings.gradient2Red = 0
+    titleSettings.gradient2Green = 0
+    titleSettings.gradient2Blue = 0
+    titleSettings.gradient2Alpha = 1
+    titleSettings.textColor = 'white'
+    titleSettings.textUndercolor = 'black'
+    titleSettings.textFont = '80px Londrina Solid'
+    titleSettings.titleString = 'GAME OVER'
+    titleSettings.circleFill = 'black'
+    titleSettings.circleStroke = 'white'
+    titleSettings.startString = '- Restart? -'
+    titleSettings.startColor = 'hotpink'
+    
+    // Reset menu options to accept input
+    menuClick = true
+    
+    // Reset player
+    hero.maxhealth = 3
+    hero.health = hero.maxhealth
+    
+    // Start gameOver loop
+    gameInterval = setInterval(gameOverLoop, 30)
+    
     setTimeout(playerDead, 500)
 }
 
@@ -26,15 +55,8 @@ function damangePlayer (obj) {
     setTimeout(iframes, 1500)
     
     // Set particle emitter to player's location
-    particleSettings.font = '40px'
-    particleSettings.startingX = hero.x
-    particleSettings.startingY = hero.y
-    particleSettings.color = 'hotpink',
-    particleSettings.undercolor = 'black'
-    // Emit particles
-    for (let i = 0; i < 5; i++) {
-        new Particle()
-    }
+    emitParticles(hero.x + (hero.width/2), hero.y + (hero.height/2), 'hotpink', 'black', 20, 40)
+    
     // push that loser
     pushObject(obj, hero, 4, 10, 100)
 }
@@ -109,16 +131,13 @@ function moveToNextRoom() {
     ctx.clearRect(0, 0, game.width, game.height)
     
     // End the game if the player has reached the end of the key/door text array
-    if (roomIndex === textArray.length-1) {
+    if (roomIndex === textArray.length) {
         room = {}
         moveToWin()
     } else {
         // Throw a view over the board
         ctx.fillStyle = 'white'
         ctx.fillRect(0, 0, game.width, game.height)
-        
-        // Increment room index
-        roomIndex++
         
         // Reset player input
         playerInput = []
@@ -129,9 +148,6 @@ function moveToNextRoom() {
         
         // Construct new room and pass it to the current index
         room = new RoomConstructor(roomIndex)
-        
-        // Push the newly constructed room to the main room array
-        roomArray.push(room)
         
         // Set gameloop running again
         setTimeout(() => {
