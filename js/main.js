@@ -189,6 +189,7 @@ function addClick() {
                 setGradient()
                 roomIndex = 0
                 menuClick = false
+                playerInput = []
                 moveToNextRoom()
             }
 
@@ -197,6 +198,7 @@ function addClick() {
                 setGradient()
                 roomIndex = 4
                 menuClick = false
+                playerInput = []
                 moveToNextRoom()
             }
 
