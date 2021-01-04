@@ -273,7 +273,7 @@ function ExclaimerConstructor(x, y) {
 }
 
 // Constructor function for new doors
-function DoorConstructor(x, y, leadsTo) {
+function DoorConstructor(x, y) {
     this.x = x
     this.y = y
     this.hitboxX = 0
@@ -287,7 +287,6 @@ function DoorConstructor(x, y, leadsTo) {
     this.key = textArray[roomIndex].doorKey
     this.locked = true
     this.alive = true
-    this.leadsTo = leadsTo,
     this.textFrameIndex = 0
     this.render = function() {
         ctx.lineWidth = 6
@@ -335,7 +334,6 @@ function ChestConstructor(x, y, item) {
     this.color = 'yellow'
     this.width = 60
     this.height = 60
-    this.locked = true
     this.alive = true
     this.render = function() {
         ctx.lineWidth = 1
@@ -373,7 +371,7 @@ function generateRoomContent(room) {
     let includesPeriod = false
     
     // Each room must contain a door and a chest, so they're generated here
-    let door = new DoorConstructor(570, 50, roomIndex)
+    let door = new DoorConstructor(570, 50)
     let chest = new ChestConstructor(280, 320)
     
     // End the function pre-emptively if the player is still in the tutorial rooms
@@ -403,18 +401,22 @@ function generateRoomContent(room) {
     
     // Iterate through a loop three times, picking a random option each time to populate into the room
     for (let i = 0; i < 3; i++) {
+        
         // Set random number
         random = Math.floor(Math.random() * 5)
+        
         switch(random) {
             case 1:
                 // Add in exclaimer if random num is 1
                 array.push(new ExclaimerConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 break;
+                
             case 2:
                 // Add in ghost if random num is 2
                 array.push(new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300)))
                 room.enemyCount++
                 break;
+                
             case 3:
                 // Checks which room the player is currently on, and populates in harder enemies if they're further along
                 if (roomIndex > 10) {
@@ -424,6 +426,7 @@ function generateRoomContent(room) {
                 }
                 room.enemyCount++
                 break;
+                
             case 4: 
                 // Add in period if random num is 4 and the room doesn't already include a period (Or if the room DOES include a
                 // a period, but the player is further along)
@@ -433,10 +436,8 @@ function generateRoomContent(room) {
                     room.enemyCount++
                 } 
                 break;
-                // Add in nothing if none are met
-            default:
-                break;
         }
     }
+    // Return array of enemies/objects
     return array
 }

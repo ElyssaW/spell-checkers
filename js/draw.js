@@ -4,18 +4,27 @@
 //
 //================================================
 
+// Draw sprite without float value
+function drawSprite (obj, sprite) {
+    ctx.drawImage(sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
+}
+
 // Write typo text for doors/chests. This functions breaks a sentence
 // up into three strings, so that the typo part can be highlighted in red
 function drawTypo (obj, string1, string2, string3) {
+    
     // Creates an array of numbers to modify y position with, to simulate floating
     let floatValueArray = [0, 0, -1, -1, -2, -2, -3, -4, -5, -5, -4, -3, -2, -2, -1, -1]
+    
     // Passes the current index value to the modifier variable
     let floatValue = floatValueArray[obj.textFrameIndex]
     
     // Set font/size
     ctx.font = '20px Fredoka One'
+    
     // Get total width of the text, so that the text can be centered above the object generating it
     let textLength = ctx.measureText(string1).width + ctx.measureText(string2).width + ctx.measureText(string3).width
+    
     // Find the center of the total width
     let textCenter = (obj.x+(obj.width/2)) - (textLength/2)
     
@@ -33,6 +42,7 @@ function drawTypo (obj, string1, string2, string3) {
     
     // Increment float array index, so as to move the text into the next position when it is drawn
     obj.textFrameIndex++
+    
     // Reset the index if it has reached the end of the array
     if (obj.textFrameIndex ===  floatValueArray.length) {obj.textFrameIndex = 0}
 }
@@ -69,11 +79,6 @@ function drawHealth() {
     for (let i = hero.health; i > 0; i--) {
         circle(20+(30*i), 50, 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
     }
-}
-
-// Draw sprite without float value
-function drawSprite (obj, sprite) {
-    ctx.drawImage(sprite, obj.x + obj.hitboxX, obj.y + obj.hitboxY)
 }
 
 // This one's for ghosts only. Or any sprite that has separate animations on two different components of its body

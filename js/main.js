@@ -497,18 +497,24 @@ function playerDead() {
 
 function gameOverLoop() {
     
-        frame++
-        //Clear board
-        ctx.clearRect(0, 0, game.width, game.height)
+    // Increment frame
+    frame++
     
-        ctx.fillStyle = 'black'
-        ctx.fillRect(0, 0, game.width, game.height)
+    //Clear board
+    ctx.clearRect(0, 0, game.width, game.height)
     
-        for (var i in particles) {
-          particles[i].draw();
-        }
+    // Fill background. The gradient in this loop will be overlapping the
+    // particles, so it cannot be solid black or go behind them
+    ctx.fillStyle = 'black'
+    ctx.fillRect(0, 0, game.width, game.height)
     
-        drawGradient()
+    // Draw particles
+    for (var i in particles) {
+        particles[i].draw();
+    }
+    
+    // Draw gradient to vignette the edges
+    drawGradient()
     
     drawCircle()
     
@@ -536,7 +542,6 @@ let gameLoop = () => {
     ctx.clearRect(0, 0, game.width, game.height)
     
    // Draw background text/gradient
-    let index = 0
     drawBackgroundScroll()
     drawGradient()
     
