@@ -18,12 +18,12 @@ let playerText = []
 // Initialize array of objects containing the word puzzle key/locks
 let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
                   {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
-                  {doorKey: 'typing', doorStart: 'Wrangle the wild comma by', doorTypo: 'tpying', doorEnd: ' their names'},
+                  {doorKey: 'typing', doorStart: 'Wrangle the wild comma by ', doorTypo: 'tpying', doorEnd: ' their name'},
                   {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' properly'},
                   {doorKey: 'sidewalk', doorStart: 'There is a place where the ', doorTypo: 'sdielkaw', doorEnd: ' ends'},
                   {doorKey: 'before', doorStart: 'And ', doorTypo: 'bforee', doorEnd: ' the street begins,'},
                   {doorKey: 'soft', doorStart: 'And there the grass grows ', doorTypo: 'tofs', doorEnd: ' and white'},
-                  {doorKey: 'crimson', doorStart: 'And there the sun burns ', doorTypo: 'crimsin', doorEnd: ' bright'},
+                  {doorKey: 'crimson', doorStart: 'And there the sun burns ', doorTypo: 'cromsin', doorEnd: ' bright'},
                   {doorKey: 'rests', doorStart: 'And there the moon-bird ', doorTypo: 'ersts', doorEnd: ' from his flight'},
                   {doorKey: 'peppermint', doorStart: 'To cool in the ', doorTypo: 'peperpmnit', doorEnd: ' wind.'},
                   {doorKey: 'place', doorStart: 'Let us leave this ', doorTypo: 'palce', doorEnd: ' where the smoke blows black'},
@@ -36,7 +36,7 @@ let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker trainin
 // Initialize array of enemy names
 let spellWords = []
 
-// These two arrays hold words containing letters from ONLY the right or left sides of the keyboard, respectively
+// These two arrays hold words containing letters from ONLY the left or right sides of the keyboard, respectively
 // If left-handed mode is on, it will pass the Left words to the spellwords array. If it is not, the game defaults
 // to right
 let spellWordsRight = ['adverb', 'badger', 'bravest', 'dwarves', 'trace', 'trade', 'cart', 'bare',
