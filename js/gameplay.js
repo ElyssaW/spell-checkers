@@ -109,9 +109,9 @@ function moveToNextRoom() {
     ctx.clearRect(0, 0, game.width, game.height)
     
     // End the game if the player has reached the end of the key/door text array
-    if (roomIndex === textArray.length) {
+    if (roomIndex === textArray.length-1) {
+        room = {}
         moveToWin()
-        
     } else {
         // Throw a view over the board
         ctx.fillStyle = 'white'

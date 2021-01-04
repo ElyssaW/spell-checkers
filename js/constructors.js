@@ -252,6 +252,10 @@ function ExclaimerConstructor(x, y) {
             ctx.drawImage(this.sprite, this.x, this.y)
         }
     this.activate = function() {
+        // Kill the exclaimer if no other enemies persist
+        if (room.enemyCount === 0) {
+            this.alive = false
+        }
         // Move x/y position
         this.x += this.xdir
         this.y += this.ydir
@@ -281,6 +285,7 @@ function DoorConstructor(x, y) {
     this.color = 'black'
     this.width = 60
     this.height = 0
+    
     this.firstLock = textArray[roomIndex].doorStart
     this.secondLock = textArray[roomIndex].doorEnd
     this.typo = textArray[roomIndex].doorTypo
@@ -288,6 +293,7 @@ function DoorConstructor(x, y) {
     this.locked = true
     this.alive = true
     this.textFrameIndex = 0
+    
     this.render = function() {
         ctx.lineWidth = 6
         ctx.strokeStyle = 'white'
@@ -296,6 +302,7 @@ function DoorConstructor(x, y) {
         ctx.fillRect(this.x, this.y, this.width, this.height)
         ctx.lineWidth = 1
     }
+    
     this.activate = function() {
         // Check if door is locked
         if (this.locked) {

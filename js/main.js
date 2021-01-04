@@ -188,7 +188,6 @@ function addClick() {
         if (menuClick) {
             // Check if click was on the Play Tutorial button
             if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
-                console.log('clicked1')
                 setGradient()
                 roomIndex = -1
                 menuClick = false
@@ -197,7 +196,6 @@ function addClick() {
 
             // Check if click was on the Play Game button
             if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
-                console.log('clicked2')
                 setGradient()
                 roomIndex = 3
                 menuClick = false
