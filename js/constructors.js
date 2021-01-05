@@ -190,6 +190,7 @@ function PeriodConstructor(x, y) {
     this.ydir = 0
     this.speed = randomRange(1, 3)
     this.frame = 0
+    this.bulletDir = 0
     // Handles which word the player should type
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
@@ -210,21 +211,20 @@ function PeriodConstructor(x, y) {
             // Move to player
             moveToObject(this, hero)
             // Every 60 frames, release bullets
-            if (this.frame % 60 === 0) {
+            if (this.frame % 60 === 0 && this.bulletDir === 0) {
                 // Fires diagonally
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, -1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, -1))
-            }
-        
-            if (this.frame % 120 === 0) {
+                this.bulletDir = 1
+            } else if (this.frame % 60 === 0 && this.bulletDir === 1) {
                 // Fires up/down and left/right
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, -1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, 0))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, 0))
-                this.bulletTimer = 0
+                this.bulletDir = 0
             }
             // Draw name to type
             drawName(this, this.spellWords[this.spellWordIndex])
