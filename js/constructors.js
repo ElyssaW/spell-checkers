@@ -18,7 +18,6 @@ function HeroConstructor(x, y) {
     this.height = 90
     this.health = 3
     this.maxhealth = 3
-    this.alive = true
     this.justHit = false
     this.xdir = 0
     this.ydir = 0
