@@ -115,8 +115,9 @@ let detectHit = (obj) => {
 
 // Detects nearness
 let detectNear = (obj, threshold) => {
-    if ((hero.x+hero.width >= obj.x - threshold && hero.x < obj.x+obj.width + threshold) &&
-        (hero.y+hero.height >= obj.y - threshold && hero.y < obj.y+obj.height + threshold)) {
+    let dist = Math.sqrt(Math.pow((hero.x-obj.x), 2) + Math.pow((hero.y - obj.y), 2))
+    
+    if (dist < threshold) {
             return true
         } else {
             return false

@@ -28,6 +28,67 @@ function HeroConstructor(x, y) {
     }
 }
 
+// Constructor function that creates a version of the Common Comma enemy, but for the tutorial
+function TutorialConstructor(x, y) {
+    this.x = x
+    this.y = y
+    this.hitboxX = 0
+    this.hitboxY = 0
+    // Information to handle this particular instance's face
+    this.faceNum = randomRange(2, 5)
+    this.sprite = document.getElementById('ghostBlank')
+    this.face = document.getElementById('ghost'+this.faceNum)
+    this.spriteRight = document.getElementById('ghostBlank')
+    this.faceRight = document.getElementById('ghost'+this.faceNum)
+    this.spriteLeft = document.getElementById('ghostBlankFlipped')
+    this.faceLeft = document.getElementById('ghost'+this.faceNum+'Flipped')
+    // General information
+    this.color = 'grey'
+    this.width = 120
+    this.height = 120
+    this.health = 3
+    this.alive = true
+    this.xdir = 0
+    this.ydir = 0
+    this.speed = randomRange(1, 3)
+    this.walkDirection = 0
+    // Variables to handle which name the player should type
+    this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
+    this.spellWordIndex = 0
+    // Handles float animation frame
+    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
+    this.floatIndex = 0
+    // Renders sprite
+    this.render = function() {
+        // Check for direction on ghost
+        spriteCheck(this)
+        // Draw sprite body
+        drawFloatAnim(this)
+        // Draw sprite face
+        drawSprite(this, this.face)
+    }
+    // Define enemy behavior
+    this.activate = function() {
+        // Move to player
+            moveToObject(this, hero)
+            // Draw name to type
+            drawName(this, this.spellWords[this.spellWordIndex])
+            // If player input matches name, decrement health
+            if (playerInput == this.spellWords[this.spellWordIndex]) {
+                damageEnemy(this, 'white', 'lightgrey')
+                    // If health is depeleted, kill enemy
+                    if (this.health === 0) {
+                        killEnemy(this, 'white', 'lightgrey')
+                        this.alive = false
+                    }
+                // Move onto the next spell word
+                this.spellWordIndex++
+            }
+        // Chck if bumping against the wall
+        wallCheck(this)
+    }
+}
+
 // Constructor function for new enemies
 function GhostConstructor(x, y) {
     this.x = x
@@ -389,7 +450,7 @@ function generateRoomContent(room) {
         if(roomIndex === 2) {
             array.push(door)
             array.push(chest)
-            randomItem = new GhostConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
+            randomItem = new TutorialConstructor(randomRange(100, game.width-100), randomRange(100, game.height-300))
             array.push(randomItem)
             return array
             

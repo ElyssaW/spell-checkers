@@ -17,8 +17,8 @@ let gameStart = false
 let playerText = []
 // Initialize array of objects containing the word puzzle key/locks
 let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
-                  {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'scpae', doorEnd: ' bar to dash.'},
-                  {doorKey: 'typing', doorStart: 'Wrangle the wild comma by ', doorTypo: 'tpying', doorEnd: ' their name'},
+                  {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'spcae', doorEnd: ' bar to dash.'},
+                  {doorKey: 'typing', doorStart: 'Wrangle the wild comma by ', doorTypo: 'typnig', doorEnd: ' their name'},
                   {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' properly'},
                   {doorKey: 'sidewalk', doorStart: 'There is a place where the ', doorTypo: 'sdielkaw', doorEnd: ' ends'},
                   {doorKey: 'before', doorStart: 'And ', doorTypo: 'bforee', doorEnd: ' the street begins,'},
