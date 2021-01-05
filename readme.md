@@ -1,12 +1,12 @@
-### Read Me Test
+### Introduction
 
-Game Idea:
+Welcome to SPELL CHECKERS, a typing game/dungeon crawler crossover. You play Madge the Mage, trapped inside of the most devious torture known to humanity: an obtuse typo-ridden poem. Fix the spelling, wrangle the grammar, and escape your line-editing hell by the ~sin~ skin of your teeth!
 
-A dungeon crawler/typing test crossover. You play a Spell Checker mage trapped in an essay dungeon, consisting
-of small (Canvas-sized, even) rooms chained together into a larger dungeon. Each room is locked with a "typo door,"
-a door associated with a word (Like "razzmatazz," as an example). The player has to type the word correctly to unlock the door,
-proceeding to the next room. If they incorrectly type the word three times, they lose. Typing is through keyboard, player movement
-is through the arrow pad.
+- [ ] Use the numpad to move. (Ensure numlock is off)
+- [ ] Use the keyboard to type, and hit enter to input text
+- [ ] Tap the spacebar while moving to dash
+- [ ] Unlock doors by detangling the typos in the sentences above them.
+- [ ] Dodge enemies and type their names to not die!
 
 ### Tech Stack
 
@@ -45,3 +45,7 @@ Will the game be fun and easy to play? Is it too tiresome to split play between 
 
 - [ ] How to handle the dungeon. Would it be possible to hold all the rooms in an array of objects? Would a new room need to be generated each time? Is it possible to 
 have retain memory of past rooms and keep a consistent layout between them?
+
+### Credits
+
+Poem "Where the Sidewalk Ends" by Shel Silverstein. Shoutout to MDN for general Javascript knowledge, and Sarah King for the excellant Canvas Crawler tutorial this was based on.
