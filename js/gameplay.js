@@ -10,41 +10,6 @@ function iframes () {
     hero.justHit = false
 }
 
-// Function to play on player death
-function killPlayer() {
-    clearInterval(gameInterval)
-    
-    // Change title settings to the gameover menu
-    titleSettings.gradient1Red = 0
-    titleSettings.gradient1Green = 0
-    titleSettings.gradient1Blue = 0
-    titleSettings.gradient1Alpha = 0
-    titleSettings.gradient2Red = 0
-    titleSettings.gradient2Green = 0
-    titleSettings.gradient2Blue = 0
-    titleSettings.gradient2Alpha = 1
-    titleSettings.textColor = 'white'
-    titleSettings.textUndercolor = 'black'
-    titleSettings.textFont = '80px Londrina Solid'
-    titleSettings.titleString = 'GAME OVER'
-    titleSettings.circleFill = 'black'
-    titleSettings.circleStroke = 'white'
-    titleSettings.startString = '- Restart? -'
-    titleSettings.startColor = 'hotpink'
-    
-    // Reset menu options to accept input
-    menuClick = true
-    
-    // Reset player
-    hero.maxhealth = 3
-    hero.health = hero.maxhealth
-    
-    // Start gameOver loop
-    gameInterval = setInterval(gameOverLoop, 30)
-    
-    setTimeout(playerDead, 500)
-}
-
 // Function to damage the player, and fire all accompanying animations
 function damangePlayer (obj) {
     // Decrement player health
@@ -71,7 +36,7 @@ function pushObject (pusher, pushed, force, speed, length) {
     // Grab object's current speed
     let oldSpeed = pushed.speed
     
-    // Set speed to 0, to prevent them from moving on their own
+    // Set speed to 0, to prevent them from moving on their own. Helps the pushed object appear "dazed" brief;y
     pushed.speed = 0
     
     // Push object, set inside an interval function so that it pushes gradually, rather than
@@ -92,7 +57,6 @@ function pushObject (pusher, pushed, force, speed, length) {
     // Time out to end the interval
     setTimeout(() => {
         setTimeout(() => {
-            
             // Set old speed back to the object
             pushed.speed = oldSpeed
         }, 500)

@@ -4,46 +4,14 @@
 //
 //================================================
 
-// Make object walk in random direction
-function pickDirection (obj) {
-    // Pick random direction value - +x, -x, +y, -y
-    let randDir = Math.floor(Math.random() * 5)
-    
-    // Set object's x/y direction to zero
-    obj.xdir = 0
-    obj.ydir = 0
-    
-    // Assign object's current direction based on
-    // the random value received above
-     switch(randDir) {
-        case 1:
-            obj.ydir -= obj.speed
-            break;
-        case 2:
-            obj.xdir -= obj.speed
-            break
-        case 3:
-            obj.ydir += obj.speed
-            break
-        case 4:
-            obj.xdir += obj.speed
-            break
-        default:
-        
-    }
-}
-
-// Function to make object move around canvas. Passes the object to be moved
-// and the pattern to move the object in (Random, set, move to player, etc.)
+// Function to make object move randomly around the canvas
 function randomWalk(obj) {
-    // Every 30 frames, assign the
+    // Every 60 frames, assign the
     // object a new direction
-    if (obj.walkDirection === 30) {
-        obj.walkDirection = 0
-        pickDirection(obj)
-    } else {
-        obj.walkDirection++
-    }
+    if (obj.frame % 60 === 0) {
+        obj.xdir = randomRange(-2, 2)
+        obj.ydir = randomRange(-2, 2)
+    } 
     
     // Take object's x/y direction
     // Add x/y direction to object's x/y

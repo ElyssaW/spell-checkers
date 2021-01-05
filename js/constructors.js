@@ -22,7 +22,6 @@ function HeroConstructor(x, y) {
     this.justHit = false
     this.xdir = 0
     this.ydir = 0
-    this.dashArray = []
     this.render = function() {
         drawFloatAnim(this)
     }
@@ -51,7 +50,7 @@ function TutorialConstructor(x, y) {
     this.xdir = 0
     this.ydir = 0
     this.speed = randomRange(1, 3)
-    this.walkDirection = 0
+    this.frame = 0
     // Variables to handle which name the player should type
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
@@ -112,7 +111,7 @@ function GhostConstructor(x, y) {
     this.xdir = 0
     this.ydir = 0
     this.speed = randomRange(1, 3)
-    this.walkDirection = 0
+    this.frame = 0
     // Variables to handle which name the player should type
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
@@ -130,6 +129,8 @@ function GhostConstructor(x, y) {
     }
     // Define enemy behavior
     this.activate = function() {
+        // Increment frame
+        this.frame++
         // Check if near player
         if(detectNear(this, 400)) {
             // Move to player
@@ -188,9 +189,7 @@ function PeriodConstructor(x, y) {
     this.xdir = 0
     this.ydir = 0
     this.speed = randomRange(1, 3)
-    this.walkDirection = 0
-    // Tracks when enemy should fire bullets
-    this.bulletTimer = 0
+    this.frame = 0
     // Handles which word the player should type
     this.spellWords = [selectRandom(spellWords), selectRandom(spellWords), selectRandom(spellWords)]
     this.spellWordIndex = 0
@@ -206,12 +205,12 @@ function PeriodConstructor(x, y) {
         drawSprite(this, this.face)
     }
     this.activate = function() {
+            // Increment frame
+            this.frame++
             // Move to player
             moveToObject(this, hero)
-            // Increase bullet timer
-            this.bulletTimer++
             // Every 60 frames, release bullets
-            if (this.bulletTimer === 60) {
+            if (this.frame % 60 === 0) {
                 // Fires diagonally
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 1, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, 1))
@@ -219,7 +218,7 @@ function PeriodConstructor(x, y) {
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, -1, -1))
             }
         
-            if (this.bulletTimer === 120) {
+            if (this.frame % 120 === 0) {
                 // Fires up/down and left/right
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, 1))
                 room.contents.push(new bulletConstructor(this.x + this.width/2, this.y + this.height/2, 0, -1))
@@ -281,8 +280,6 @@ function bulletConstructor(x, y, xdir, ydir) {
             this.alive = false
             // Decrement health
             if (!hero.justHit) {
-                this.xdir = this.xdir * -1
-                this.ydir = this.ydir * -1
                 damangePlayer(this)
             }
         }
@@ -297,17 +294,13 @@ function bulletConstructor(x, y, xdir, ydir) {
 function ExclaimerConstructor(x, y) {
     this.x = x
     this.y = y
-    this.hitboxX = 0
-    this.hitboxY = 0
     this.sprite = document.getElementById("exclaimer")
     this.color = 'black'
     this.width = 20
     this.height = 20
-    this.health = 1
     this.alive = true
     this.xdir = randomRange(20, 30)
     this.ydir = randomRange(20, 30)
-    this.speed = 5
     this.render = function() {
             // Draw sprite
             ctx.drawImage(this.sprite, this.x, this.y)
@@ -341,8 +334,6 @@ function ExclaimerConstructor(x, y) {
 function DoorConstructor(x, y) {
     this.x = x
     this.y = y
-    this.hitboxX = 0
-    this.hitboxY = 0
     this.color = 'black'
     this.width = 60
     this.height = 0
@@ -366,26 +357,24 @@ function DoorConstructor(x, y) {
     
     this.activate = function() {
         // Check if door is locked
-        if (this.locked) {
-            //If door is locked, check if player is near
-            if (room.enemyCount <= 0) {
+        if (this.locked && room.enemyCount <= 0) {
                 // Display typo text
                 drawTypo(this, this.firstLock, this.typo, this.secondLock)
+                // Only show the door once all enemies are gone
                 if (this.height < 10) {
                     this.height++
                 }
                 // Unlock door
                 if (playerInput == this.key) {
                     this.locked = false
-                }
-            } 
+                } 
         // If door is unlocked, watch for collision
-        } else if (detectHit(this)) {
+        } else if (!this.locked && detectHit(this)) {
             // Increment room index
             roomIndex++
             // Increment room index
             moveToNextRoom()
-        } else {
+        } else if (!this.locked) {
             circle(this.x+(this.width/2), this.y, 29, 'rgba(0,0,0,0)', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
             // Expand door as it's unlocked
             if (this.height < 90) {
@@ -399,15 +388,13 @@ function DoorConstructor(x, y) {
 function ChestConstructor(x, y, item) {
     this.x = x
     this.y = y
-    this.floatIndex = 0
-    this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
     this.color = 'yellow'
     this.width = 60
     this.height = 60
     this.alive = true
     this.render = function() {
         ctx.lineWidth = 1
-        circle(this.x, this.y + getFloatPos(this), 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
+        circle(this.x, this.y, 30, 'hotpink', 'black', 0 - frame, 2 * Math.PI + frame, [5, 5])
     }
     this.activate = function() {
         // Increment the player's health and erase chest

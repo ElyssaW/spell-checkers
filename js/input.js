@@ -24,19 +24,25 @@ function movementHandler () {
     if (moveObject.down === true || moveObject.bottomleft === true || moveObject.bottomright === true) {
              hero.y += 5
              hero.ydir = 1
-         } 
-    if (moveObject.up === true || moveObject.topleft === true || moveObject.topright === true) {
+    } else if (moveObject.up === true || moveObject.topleft === true || moveObject.topright === true) {
              hero.y -= 5
              hero.ydir = -1
-         } 
+    } else {
+             hero.ydir = 0
+    }
+    
     if (moveObject.right === true || moveObject.topright === true || moveObject.bottomright === true) {
+             hero.sprite = document.getElementById("madge")
              hero.x += 5
              hero.xdir = 1
-         } 
-    if (moveObject.left === true || moveObject.topleft === true || moveObject.bottomleft === true) {
+             console.log(hero.xdir)
+    } else if (moveObject.left === true || moveObject.topleft === true || moveObject.bottomleft === true) {
+             hero.sprite = document.getElementById("madgeFlipped")
              hero.x -= 5
              hero.xdir = -1
-         } 
+    } else {
+             hero.xdir = 0
+    }
 }
 
 // This duo of functions essentially replicates the keypress events for the arrow keys.
@@ -65,7 +71,6 @@ document.addEventListener('keydown', e => {
         switch (e.key) {
             case '1':
                 moveObject.bottomleft = true
-                hero.sprite = document.getElementById("madgeFlipped")
                 break;
                 
             case '2':
@@ -74,22 +79,18 @@ document.addEventListener('keydown', e => {
                 
             case '3':
                 moveObject.bottomright = true
-                hero.sprite = document.getElementById("madge")
                 break;
                 
             case '4':
                 moveObject.left = true
-                hero.sprite = document.getElementById("madgeFlipped")
                 break;
                 
             case '6':
                 moveObject.right = true
-                hero.sprite = document.getElementById("madge")
                 break;
                 
             case '7':
                 moveObject.topleft = true
-                hero.sprite = document.getElementById("madgeFlipped")
                 break;
                 
             case '8':
@@ -98,7 +99,6 @@ document.addEventListener('keydown', e => {
                 
             case '9':
                 moveObject.topright = true
-                hero.sprite = document.getElementById("madge")
                 break;
             }
     }
@@ -110,52 +110,34 @@ document.addEventListener('keydown', e => {
         switch (e.key) {
             case '1':
                 moveObject.bottomleft = false
-                hero.sprite = document.getElementById("madgeFlipped")
-                hero.ydir = 0
-                hero.xdir = 0
                 break;
                 
             case '2':
                 moveObject.down = false
-                hero.ydir = 0
                 break;
                 
             case '3':
                 moveObject.bottomright = false
-                hero.sprite = document.getElementById("madge")
-                hero.ydir = 0
-                hero.xdir = 0
                 break;
                 
             case '4':
                 moveObject.left = false
-                hero.sprite = document.getElementById("madgeFlipped")
-                hero.xdir = 0
                 break;
                 
             case '6':
                 moveObject.right = false
-                hero.sprite = document.getElementById("madge")
-                hero.xdir = 0
                 break;
                 
             case '7':
                 moveObject.topleft = false
-                hero.sprite = document.getElementById("madgeFlipped")
-                hero.ydir = 0
-                hero.xdir = 0
                 break;
                 
             case '8':
                 moveObject.up = false
-                hero.ydir = 0
                 break;
                 
             case '9':
                 moveObject.topright = false
-                hero.sprite = document.getElementById("madge")
-                hero.ydir = 0
-                hero.xdir = 0
                 break;
             }
  })

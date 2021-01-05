@@ -64,8 +64,6 @@ let spellWordsLeft = ['only', 'big', 'bug', 'king', 'junk', 'numb', 'punk', 'mil
 
 // Initialize gradient
 let gradient
-// Initialize mouseover
-let mouseover
 // Initialize variable to hold left-handed mode
 let leftHandMode = false
 // Prevents clicking on the menu options if the player is not currently on the menu
@@ -132,10 +130,62 @@ let titleSettings = {//Background gradient
                      box3y: 570,
 }
 
-function addHover() {
-    game.addEventListener('mousemove', (e) => {
-        // Add hover effect for the Play Tutortial button
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
+// Grab mouseX and mouseY so that the menu can react to it
+let mouseX
+let mouseY
+
+game.addEventListener('mousemove', (e)=> {
+    mouseX = e.offsetX
+    mouseY = e.offsetY
+})
+
+game.addEventListener('click', (e) => {
+        mouseX = e.offsetX
+        mouseY = e.offsetY
+        if (menuClick) {
+            // Check if click was on the Play Tutorial button
+            if(mouseX > 450 && mouseX < 750 && mouseY > 470 && mouseY < 510) {
+                setGradient()
+                roomIndex = 0
+                menuClick = false
+                playerText = []
+                moveToNextRoom()
+            }
+
+            // Check if click was on the Play Game button
+            if(mouseX > 450 && mouseX < 750 && mouseY > 510 && mouseY < 560) {
+                setGradient()
+                roomIndex = 4
+                menuClick = false
+                playerText = []
+                moveToNextRoom()
+            }
+
+            // Check if click was on the left-handed mode button
+            if(mouseX > 450 && mouseX < 750 && mouseY > 560 && mouseY < 600) {
+                if (leftHandMode) {
+                    spellWords = spellWordsRight
+                    leftHandMode = false
+                } else {
+                    spellWords = spellWordsLeft
+                    leftHandMode = true
+                }
+            }
+        }
+    })
+
+function checkHover() {
+    // Bring up start menu if player hovers over it
+    if (mouseX > titleSettings.circleX - titleSettings.circleRadius
+        && mouseX < titleSettings.circleX + titleSettings.circleRadius 
+        && mouseY > titleSettings.circleY - titleSettings.circleRadius 
+        && mouseY < titleSettings.circleY + titleSettings.circleRadius 
+        && !titleSettings.startFinished) {
+            titleSettings.startAnimate = true
+    }
+    
+    // Add hover effect for the Play Tutortial button
+        if(mouseX > 450 && mouseX < 750 && mouseY > 470 && mouseY < 510) {
             if (titleSettings.box1Height < 40) {
                 titleSettings.box1Height++
                 titleSettings.box1y -= .5
@@ -146,7 +196,7 @@ function addHover() {
         }
         
         // Add hover effect for the Play Game button
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
+        if(mouseX > 450 && mouseX < 750 && mouseY > 510 && mouseY < 560) {
             if (titleSettings.box2Height < 40) {
                 titleSettings.box2Height++
                 titleSettings.box2y -= .5
@@ -157,7 +207,7 @@ function addHover() {
         }
         
         // Add hover effect for the Left Handed Mode button
-        if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 560 && e.offsetY < 600) {
+        if(mouseX > 450 && mouseX < 750 && mouseY > 560 && mouseY < 600) {
             if (titleSettings.box3Height < 40) {
                 titleSettings.box3Height++
                 titleSettings.box3y -= .5
@@ -165,8 +215,7 @@ function addHover() {
         } else if (titleSettings.box3Height > 30){
                 titleSettings.box3Height--
                 titleSettings.box3y += .5
-        } 
-    })
+        }
 }
 
 // This resets the background gradient to the white fade, which is needed when moving off the game over screen
@@ -180,53 +229,6 @@ function setGradient() {
     titleSettings.gradient2Blue = 255
 }
 
-function addClick() {
-   // Start game if clicked
-    game.addEventListener('click', (e) => {
-        if (menuClick) {
-            // Check if click was on the Play Tutorial button
-            if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 470 && e.offsetY < 510) {
-                setGradient()
-                roomIndex = 0
-                menuClick = false
-                playerText = []
-                moveToNextRoom()
-            }
-
-            // Check if click was on the Play Game button
-            if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 510 && e.offsetY < 560) {
-                setGradient()
-                roomIndex = 4
-                menuClick = false
-                playerText = []
-                moveToNextRoom()
-            }
-
-            // Check if click was on the left-handed mode button
-            if(e.offsetX > 450 && e.offsetX < 750 && e.offsetY > 560 && e.offsetY < 600) {
-                if (leftHandMode) {
-                    spellWords = spellWordsRight
-                    leftHandMode = false
-                } else {
-                    spellWords = spellWordsLeft
-                    leftHandMode = true
-                }
-            }
-        }
-    }) 
-}
-
-// Function to listen for a mouseover on the title text
-game.addEventListener('mousemove', (e) => {
-    if (e.x > titleSettings.circleX - titleSettings.circleRadius
-        && e.x < titleSettings.circleX + titleSettings.circleRadius 
-        && e.y > titleSettings.circleY - titleSettings.circleRadius 
-        && e.y < titleSettings.circleY + titleSettings.circleRadius 
-        && !titleSettings.startFinished) {
-            titleSettings.startAnimate = true
-    } 
-})
-
 // Draw the "Welcome!" and options menu which fly up when the mouse hovers over the title area
 function drawStartText() {
     if (titleSettings.startAnimate) {
@@ -236,25 +238,25 @@ function drawStartText() {
     }
     
     ctx.fillStyle = 'black'
-            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box1y, titleSettings.circleRadius*2, titleSettings.box1Height)
-            drawFillText('Play tutorial', titleSettings.optionX, titleSettings.optionY, 'white', 'serif', titleSettings.box1size, 'center')
-            ctx.fillStyle = 'black'
-            ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box2y, titleSettings.circleRadius*2, titleSettings.box2Height)
-            drawFillText('Play game', titleSettings.optionX, titleSettings.optionY+50, 'white', 'serif', titleSettings.box2size, 'center')
+    ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box1y, titleSettings.circleRadius*2, titleSettings.box1Height)
+    drawFillText('Play tutorial', titleSettings.optionX, titleSettings.optionY, 'white', 'serif', titleSettings.box1size, 'center')
+    
+    ctx.fillStyle = 'black'
+    ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box2y, titleSettings.circleRadius*2, titleSettings.box2Height)
+    drawFillText('Play game', titleSettings.optionX, titleSettings.optionY+50, 'white', 'serif', titleSettings.box2size, 'center')
         
-            if (leftHandMode) {
-                ctx.fillStyle = 'black'
-                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
-                drawFillText('Left-Handed Mode is ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', titleSettings.box3size, 'center')
-            } else {
-                ctx.fillStyle = 'white'
-                ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
-                drawFillText('Left-Handed Mode is OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', titleSettings.box3size, 'center')
-            }
+    if (leftHandMode) {
+        ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
+        drawFillText('Left-Handed Mode is ON', titleSettings.optionX, titleSettings.optionY+100, 'white', 'serif', titleSettings.box3size, 'center')
+    } else {
+        ctx.fillStyle = 'white'
+        ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box3y, titleSettings.circleRadius*2, titleSettings.box3Height)
+        drawFillText('Left-Handed Mode is OFF', titleSettings.optionX, titleSettings.optionY+100, 'black', 'serif', titleSettings.box3size, 'center')
+    }
         
-            ctx.font = titleSettings.startFont
-            ctx.fillStyle = titleSettings.startColor
-            ctx.fillText(titleSettings.startString, titleSettings.startX, titleSettings.startY) 
+        ctx.font = titleSettings.startFont
+        ctx.fillStyle = titleSettings.startColor
+        ctx.fillText(titleSettings.startString, titleSettings.startX, titleSettings.startY) 
     }
 }
 
@@ -275,12 +277,8 @@ function drawGradient() {
 
 // Draw title text
 function drawTitle() {
-    ctx.font = titleSettings.textFont
-    ctx.textAlign = 'center'
-    ctx.fillStyle = titleSettings.textUndercolor
-    ctx.fillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY + 5)
-    ctx.fillStyle = titleSettings.textColor
-    ctx.fillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY)
+    drawFillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY + 5, titleSettings.textUndercolor, 'Londrina Solid', '50', 'center')
+    drawFillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY, titleSettings.textColor, 'Londrina Solid', '50', 'center')
     
     // Animate the text bounce
     if (titleSettings.textY === titleSettings.textFloor) {
@@ -322,6 +320,8 @@ function titleLoop () {
     //Clear board
     ctx.clearRect(0, 0, game.width, game.height)
     
+    checkHover()
+    
     drawBackgroundScroll()
     
     drawGradient()
@@ -352,14 +352,6 @@ fieldSettings = {
     size: 20,
     speed: .2,
 }
-
-// Grab mouseX and mouseY so that the grid particles can react to it
-let mouseX
-let mouseY
-game.addEventListener('mousemove', (e)=> {
-    mouseX = e.offsetX
-    mouseY = e.offsetY
-})
 
 // Function to calculate distance between two points, which for this will be the mouse and the particle
 function calcDistance(x1, y1, x2, y2) {
@@ -405,7 +397,7 @@ function gridParticle(x, y) {
             this.y = this.y + ((this.y - mouseY)) * this.speed
             
         // Checks if the particle is on the edge of the mouse's radius, so that it doesn't continually jump into the
-        // mouse's radius only to be pushed back out, making the particle "jump" a lot
+        // mouse's radius only to be pushed back out, which makes the particle "jump" a lot
         } else if ((this.x <= mouseX-fieldSettings.cursorRadius-fieldSettings.size || 
                     this.x >= mouseX+fieldSettings.cursorRadius+fieldSettings.size || 
                     this.y <= mouseY-fieldSettings.cursorRadius-fieldSettings.size || 
@@ -472,6 +464,41 @@ function endGameLoop () {
 //          Game Over Functions
 //
 //================================================
+
+// Function to play on player death
+function killPlayer() {
+    clearInterval(gameInterval)
+    
+    // Change title settings to the gameover menu
+    titleSettings.gradient1Red = 0
+    titleSettings.gradient1Green = 0
+    titleSettings.gradient1Blue = 0
+    titleSettings.gradient1Alpha = 0
+    titleSettings.gradient2Red = 0
+    titleSettings.gradient2Green = 0
+    titleSettings.gradient2Blue = 0
+    titleSettings.gradient2Alpha = 1
+    titleSettings.textColor = 'white'
+    titleSettings.textUndercolor = 'black'
+    titleSettings.textFont = '80px Londrina Solid'
+    titleSettings.titleString = 'GAME OVER'
+    titleSettings.circleFill = 'black'
+    titleSettings.circleStroke = 'white'
+    titleSettings.startString = '- You died -'
+    titleSettings.startColor = 'hotpink'
+    
+    // Reset menu options to accept input
+    menuClick = true
+    
+    // Reset player
+    hero.maxhealth = 3
+    hero.health = hero.maxhealth
+    
+    // Start gameOver loop
+    gameInterval = setInterval(gameOverLoop, 30)
+    
+    setTimeout(playerDead, 500)
+}
 
 function gameOverLoop() {
     
@@ -578,10 +605,6 @@ function gameBegin() {
     ctx.font = '20px Fredoka One'
     
     spellWords = spellWordsRight
-
-    // Add event listeners to check for input on the menu options
-    addClick()
-    addHover()
     
     // Create hero
     hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
