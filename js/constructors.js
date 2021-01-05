@@ -131,23 +131,23 @@ function GhostConstructor(x, y) {
     this.activate = function() {
         // Increment frame
         this.frame++
+        // Draw name to type
+        drawName(this, this.spellWords[this.spellWordIndex])
+        // If player input matches name, decrement health
+        if (playerInput == this.spellWords[this.spellWordIndex]) {
+            damageEnemy(this, 'white', 'lightgrey')
+                // If health is depeleted, kill enemy
+                if (this.health === 0) {
+                    killEnemy(this, 'white', 'lightgrey')
+                    this.alive = false
+                }
+            // Move onto the next spell word
+            this.spellWordIndex++
+            }
         // Check if near player
         if(detectNear(this, 400)) {
             // Move to player
             moveToObject(this, hero)
-            // Draw name to type
-            drawName(this, this.spellWords[this.spellWordIndex])
-            // If player input matches name, decrement health
-            if (playerInput == this.spellWords[this.spellWordIndex]) {
-                damageEnemy(this, 'white', 'lightgrey')
-                    // If health is depeleted, kill enemy
-                    if (this.health === 0) {
-                        killEnemy(this, 'white', 'lightgrey')
-                        this.alive = false
-                    }
-                // Move onto the next spell word
-                this.spellWordIndex++
-            }
             // Decrement player health if hit
             if (detectHit(this)) {
                 if (!hero.justHit) {

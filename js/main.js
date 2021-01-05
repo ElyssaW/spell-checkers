@@ -16,9 +16,9 @@ let gameStart = false
 // Initializes array to store player's text input letter by letter
 let playerText = []
 // Initialize array of objects containing the word puzzle key/locks
-let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move around with the numpad. Correct this ', doorTypo: 'tpyo', doorEnd: ' to open the door.'},
-                  {doorKey: 'space', doorStart: 'Need some space? Move and tap the ', doorTypo: 'spcae', doorEnd: ' bar to dash.'},
-                  {doorKey: 'typing', doorStart: 'Wrangle the wild comma by ', doorTypo: 'typnig', doorEnd: ' their name'},
+let textArray = [ {doorKey: 'typo', doorStart: 'Welcome to Spell Checker training! Move with the numpad. Type to correct this ', doorTypo: 'tpyo', doorEnd: ' and open the door'},
+                  {doorKey: 'space', doorStart: 'Need some space? Move while tapping the ', doorTypo: 'spcae', doorEnd: ' bar to dash'},
+                  {doorKey: 'typing', doorStart: 'Defeat the wild comma by ', doorTypo: 'typnig', doorEnd: ' the word above their head'},
                   {doorKey: 'begin', doorStart: 'Well done! Now we can ', doorTypo: 'beign', doorEnd: ' properly'},
                   {doorKey: 'sidewalk', doorStart: 'There is a place where the ', doorTypo: 'sdielkaw', doorEnd: ' ends'},
                   {doorKey: 'before', doorStart: 'And ', doorTypo: 'bforee', doorEnd: ' the street begins,'},
@@ -89,7 +89,8 @@ let titleSettings = {//Background gradient
                      textIncrease: false,
                      textColor: 'black',
                      textUndercolor: 'white',
-                     textFont: '50px Londrina Solid',
+                     textSize: 50,
+                     textFont: 'Londrina Solid',
                      titleString: 'SPELL CHECKERS',
                     
                      // Background circles specific
@@ -110,15 +111,13 @@ let titleSettings = {//Background gradient
                      startFont: '30px serif',
                      startColor: 'grey',
                      startX: game.width/2,
-                     startY: 360,
+                     startY: 350,
                      startAlpha: 0,
-                     startAnimate: false,
-                     startFinished: false,
                      startCeiling: 350,
     
                      // Option bank
                      optionX: game.width/2,
-                     optionY: 500,
+                     optionY: 490,
                      box1Height: 30,
                      box1size: 20,
                      box1y: 470,
@@ -175,14 +174,6 @@ game.addEventListener('click', (e) => {
     })
 
 function checkHover() {
-    // Bring up start menu if player hovers over it
-    if (mouseX > titleSettings.circleX - titleSettings.circleRadius
-        && mouseX < titleSettings.circleX + titleSettings.circleRadius 
-        && mouseY > titleSettings.circleY - titleSettings.circleRadius 
-        && mouseY < titleSettings.circleY + titleSettings.circleRadius 
-        && !titleSettings.startFinished) {
-            titleSettings.startAnimate = true
-    }
     
     // Add hover effect for the Play Tutortial button
         if(mouseX > 450 && mouseX < 750 && mouseY > 470 && mouseY < 510) {
@@ -231,11 +222,6 @@ function setGradient() {
 
 // Draw the "Welcome!" and options menu which fly up when the mouse hovers over the title area
 function drawStartText() {
-    if (titleSettings.startAnimate) {
-        if (titleSettings.startY > titleSettings.startCeiling) {
-        titleSettings.startY--
-        titleSettings.optionY--
-    }
     
     ctx.fillStyle = 'black'
     ctx.fillRect(titleSettings.optionX-titleSettings.circleRadius, titleSettings.box1y, titleSettings.circleRadius*2, titleSettings.box1Height)
@@ -257,7 +243,6 @@ function drawStartText() {
         ctx.font = titleSettings.startFont
         ctx.fillStyle = titleSettings.startColor
         ctx.fillText(titleSettings.startString, titleSettings.startX, titleSettings.startY) 
-    }
 }
 
 // Draw the dashed circle behind the text
@@ -277,8 +262,8 @@ function drawGradient() {
 
 // Draw title text
 function drawTitle() {
-    drawFillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY + 5, titleSettings.textUndercolor, 'Londrina Solid', '50', 'center')
-    drawFillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY, titleSettings.textColor, 'Londrina Solid', '50', 'center')
+    drawFillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY + 5, titleSettings.textUndercolor, titleSettings.textFont, titleSettings.textSize, 'center')
+    drawFillText(titleSettings.titleString, titleSettings.textX, titleSettings.textY, titleSettings.textColor, titleSettings.textFont, titleSettings.textSize, 'center')
     
     // Animate the text bounce
     if (titleSettings.textY === titleSettings.textFloor) {
@@ -431,7 +416,8 @@ for (let i = 0; i < (game.width/fieldSettings.spacingX); i++) {
 function moveToWin () {
     clearInterval(gameInterval)
     
-    titleSettings.textFont = '80px Londrina Solid'
+    titleSettings.textSize = 80
+    titleSettings.textFont = 'Londrina Solid'
     titleSettings.titleString = 'THE END'
     
     gameInterval = setInterval(endGameLoop, 30)
@@ -478,9 +464,10 @@ function killPlayer() {
     titleSettings.gradient2Green = 0
     titleSettings.gradient2Blue = 0
     titleSettings.gradient2Alpha = 1
+    titleSettings.textSize = '80'
+    titleSettings.textFont = 'Londrina Solid'
     titleSettings.textColor = 'white'
     titleSettings.textUndercolor = 'black'
-    titleSettings.textFont = '80px Londrina Solid'
     titleSettings.titleString = 'GAME OVER'
     titleSettings.circleFill = 'black'
     titleSettings.circleStroke = 'white'
@@ -496,8 +483,6 @@ function killPlayer() {
     
     // Start gameOver loop
     gameInterval = setInterval(gameOverLoop, 30)
-    
-    setTimeout(playerDead, 500)
 }
 
 function gameOverLoop() {
