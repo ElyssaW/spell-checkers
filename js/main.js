@@ -593,7 +593,7 @@ function gameBegin() {
     spellWords = spellWordsRight
     
     // Create hero
-    hero = new HeroConstructor(580, 500, 'hotpink', 60, 60)
+    hero = new Hero(580, 500, 30, 80, 'hotpink', -20, -20)
     
     gameInterval = setInterval(titleLoop, 30)
     gameStart = true
