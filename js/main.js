@@ -541,6 +541,8 @@ let gameLoop = () => {
     
     // Draw particles if any exist
     for (var i in particles) {
+          //console.log(Particle)
+          console.log(Particle.prototype)
           particles[i].draw();
         }
     

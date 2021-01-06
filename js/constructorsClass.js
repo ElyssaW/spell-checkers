@@ -199,7 +199,9 @@ class Bullet extends Mover {
             circle(this.x, this.y, this.height, this.color, 'white')
         }
         this.collide = function () {
-            this.alive = false
+            if (this.x <= 0 || this.x >= game.width || this.y <= 0 || this.y >= game.height) {
+                this.alive = false
+            }
         }
         this.activate = function() {
             // Move x/y position
@@ -216,9 +218,7 @@ class Bullet extends Mover {
                 }
             }
             // Check if bullet has left the viewable map
-            if (this.x <= 0 || this.x >= game.width || this.y <= 0 || this.y >= game.height) {
-                this.collide()
-            }
+            this.collide()
         }
     }
 }
@@ -227,6 +227,8 @@ class Exclaimer extends Bullet {
     constructor(x, y, width, height, color, xdir, ydir) {
         super(x, y, width, height, color)
         
+        this.xdir = (randomRange(-10, 10) >= 0 ) ? -1 : 1
+        this.ydir = (randomRange(-10, 10) >= 0 ) ? -1 : 1
         this.sprite = document.getElementById("exclaimer")
         this.render = function () {
             ctx.drawImage(this.sprite, this.x, this.y)
@@ -337,9 +339,7 @@ function generateRoomContent(room) {
         
         if(roomIndex === 2) {
             array.push(door)
-            array.push(chest)
-            randomItem = new TutComma(randomRange(100, game.width-100), randomRange(100, game.height-300), 120, 120, 'grey')
-            array.push(randomItem)
+            array.push(new TutComma(randomRange(100, game.width-100), randomRange(100, game.height-300), 120, 120, 'grey'))
             return array
             
         } else if (roomIndex === 1) {

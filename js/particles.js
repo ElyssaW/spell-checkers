@@ -54,42 +54,43 @@ function Particle() {
         this.life = 0
         this.maxLife = particleSettings.maxLife
         this.opacity = 1
-}
+    
+        // Draw function
+        this.draw = function() {
+            // Change x, y, vx, and vy
+            this.x += this.vx
+            this.y += this.vy
+            // Age the particle
+            this.life++
 
-Particle.prototype.draw = function() {
-    // Change x, y, vx, and vy
-    this.x += this.vx
-    this.y += this.vy
-    // Age the particle
-    this.life++
-    
-    // Bounce on ground
-    if (this.y + particleSettings.particleSize > this.groundLevel) {
-        this.vy *= -0.6
-        this.vx *= 0.75
-        this.y = this.groundLevel - particleSettings.particleSize
-    }
+            // Bounce on ground
+            if (this.y + particleSettings.particleSize > this.groundLevel) {
+                this.vy *= -0.6
+                this.vx *= 0.75
+                this.y = this.groundLevel - particleSettings.particleSize
+            }
 
-    // Alter vy based on gravity
-    this.vy += particleSettings.gravity
-    
-    // Decrement opacity
-    if (this.opacity > .02) {
-        this.opacity -= .02
-    }
-    
-    // Draw particle
-    ctx.globalAlpha = this.opacity
-    ctx.font = '20px serif'
-    ctx.fillStyle = this.undercolor
-    ctx.fillText(this.letter, this.x, this.y+3)
-    ctx.fillStyle = this.color
-    ctx.fillText(this.letter, this.x, this.y)
-    ctx.globalAlpha = 1
-    
-    // Delete if particle is old and grody (And its life has reached the cap)
-    if (this.life >= this.maxLife) {
-        delete particles[this.id]
+            // Alter vy based on gravity
+            this.vy += particleSettings.gravity
+
+            // Decrement opacity
+            if (this.opacity > .02) {
+                this.opacity -= .02
+            }
+
+            // Draw particle
+            ctx.globalAlpha = this.opacity
+            ctx.font = '20px serif'
+            ctx.fillStyle = this.undercolor
+            ctx.fillText(this.letter, this.x, this.y+3)
+            ctx.fillStyle = this.color
+            ctx.fillText(this.letter, this.x, this.y)
+            ctx.globalAlpha = 1
+
+            // Delete if particle is old and grody (And its life has reached the cap)
+            if (this.life >= this.maxLife) {
+                delete particles[this.id]
+        }
     }
 }
 
