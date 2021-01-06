@@ -35,7 +35,6 @@ function movementHandler () {
              hero.sprite = document.getElementById("madge")
              hero.x += 5
              hero.xdir = 1
-             console.log(hero.xdir)
     } else if (moveObject.left === true || moveObject.topleft === true || moveObject.bottomleft === true) {
              hero.sprite = document.getElementById("madgeFlipped")
              hero.x -= 5
@@ -60,6 +59,7 @@ document.addEventListener('keydown', e => {
     } else if (e.keyCode === 32) {
         // Create trail between starting position and end position
         for (let i = 0; i < 10; i++) {
+                console.log('d-d-dash')
                 ctx.drawImage(hero.sprite, hero.x + hero.hitboxX + (20 * i * hero.xdir), hero.y + hero.hitboxY + (20 * i * hero.ydir))
             }  
         // Move player

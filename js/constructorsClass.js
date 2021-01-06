@@ -27,9 +27,11 @@ class Mover extends Construct {
 }
 
 class Hero extends Mover {
-    constructor(x, y, width, height, color) {
+    constructor(x, y, width, height, color, hitboxX, hitboxY) {
         super(x, y, width, height, color)
         
+        this.hitboxX = hitboxX
+        this.hitboxY = hitboxY
         this.floatArray = [-4, -3, -2, -2, -1, -1, -1, 0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4]
         this.floatIndex = 0
         this.sprite = document.getElementById("madge")
@@ -40,7 +42,7 @@ class Hero extends Mover {
             if (this.floatIndex === this.floatArray.length) {
                 this.floatIndex = 0
             }
-            ctx.drawImage(this.sprite, this.x - 25, this.y - 25 + this.floatArray[this.floatIndex])
+            ctx.drawImage(this.sprite, this.x + this.hitboxX, this.y + this.hitboxY + this.floatArray[this.floatIndex])
         }
     }
 }
@@ -329,8 +331,6 @@ function generateRoomContent(room) {
     // Each room must contain a door and a chest, so they're generated here
     let door = new Door(570, 50, 60, 0, 'black')
     let chest = new Chest(280, 320, 40, 40, 'hotpink')
-    let enemy = new Period(randomRange(100, game.width-100), randomRange(100, game.height-300), 120, 120, 'grey')
-    array.push(enemy)
     
     // End the function pre-emptively if the player is still in the tutorial rooms
     if (roomIndex <= 2) {
